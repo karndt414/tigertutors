@@ -18,3 +18,18 @@ h1 {
   max-width: 1200px;
   margin: 20px auto;
 }
+
+footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+}
+
+.admin-login-button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.9em;
+  text-decoration: underline;
+}
