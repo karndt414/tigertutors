@@ -103,15 +103,6 @@
     box-shadow: none;
 }
 
-/* ... (all your existing .tutor-manage-item styles) ... */
-
-.tutor-manage-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* ... (other styles) ... */
-}
-
 .tutor-manage-buttons {
     display: flex;
     gap: 10px;

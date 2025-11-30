@@ -7,7 +7,6 @@ function EditModal({ tutor, onClose, onUpdated }) {
     const [name, setName] = useState('');
     const [subjects, setSubjects] = useState('');
     const [photoUrl, setPhotoUrl] = useState('');
-    const [bookingLink, setBookingLink] = useState('');
     const [loading, setLoading] = useState(false);
 
     // 2. This 'effect' runs when the 'tutor' prop changes.
@@ -17,7 +16,6 @@ function EditModal({ tutor, onClose, onUpdated }) {
             setName(tutor.name || '');
             setSubjects(tutor.subjects || '');
             setPhotoUrl(tutor.photo || '');
-            setBookingLink(tutor.bookingLink || '');
         }
     }, [tutor]); // Dependency: run this when 'tutor' changes
 
@@ -32,7 +30,6 @@ function EditModal({ tutor, onClose, onUpdated }) {
                 name: name,
                 subjects: subjects,
                 photo: photoUrl,
-                bookingLink: bookingLink
             })
             .eq('id', tutor.id); // This is the key: update ONLY the tutor with this ID
 
@@ -78,13 +75,6 @@ function EditModal({ tutor, onClose, onUpdated }) {
                         type="text"
                         value={photoUrl}
                         onChange={(e) => setPhotoUrl(e.target.value)}
-                    />
-
-                    <label>Booking Link (Optional)</label>
-                    <input
-                        type="text"
-                        value={bookingLink}
-                        onChange={(e) => setBookingLink(e.target.value)}
                     />
 
                     <button type="submit" disabled={loading} style={{ width: '100%', marginTop: '10px' }}>
