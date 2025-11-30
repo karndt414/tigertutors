@@ -12,7 +12,27 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
     // ... (your existing handleSubmit function is fine)
     const handleSubmit = async (e) => {
-        // ...
+        e.preventDefault();
+        setLoading(true);
+
+        const { error } = await supabase
+            .from('tutors')
+            .insert([{ name, subjects, photo, bookingLink }]);
+
+        if (error) {
+            // This line is now fixed (it's a '+' not a '(')
+            alert('Error adding tutor: ' + error.message);
+        } else {
+            alert('Tutor added!');
+            // Clear the form
+            setName('');
+            setSubjects('');
+            setPhoto('');
+            setBookingLink('');
+            // Trigger a re-fetch of the tutor list in App.jsx
+            onTutorAdded();
+        }
+        setLoading(false);
     };
 
     // 2. Add the new handleDelete function
