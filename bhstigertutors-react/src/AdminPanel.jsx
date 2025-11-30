@@ -15,7 +15,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
         const { error } = await supabase
             .from('tutors')
-            .insert([{ name, subjects, photo, bookingLink }]);
+            .insert([{ name, subjects, photo}]);
 
         if (error) {
             alert('Error adding tutor: ' + error.message);
