@@ -8,11 +8,10 @@ function ContactPage() {
                 Have questions about tutoring? Want to learn more about joining Mu Alpha Theta?
             </p>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', marginTop: '1em' }}>
-                Please reach out to our faculty sponsor or the student officers.
+                Please reach out to our tutoring lead!
             </p>
             <ul style={{ lineHeight: 1.7, fontSize: '1.1em', margin: '20px 0 0 20px' }}>
-                <li><strong>Faculty Sponsor:</strong> [Sponsor Name] at [sponsor@email.com]</li>
-                <li><strong>President:</strong> [Your Name] at [your@email.com]</li>
+                <li><strong>Tutoring Coordinator:</strong> Meg Wolfka at [mwolfka@bentonvillek12.org]</li>
             </ul>
         </div>
     );
