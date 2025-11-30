@@ -1,21 +1,31 @@
 import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
+import ImageUpload from './ImageUpload'; // 1. Import the new component
 import './AdminPanel.css';
 
-// 1. Accept 'tutors' as a prop
 function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [name, setName] = useState('');
     const [subjects, setSubjects] = useState('');
-    const [photo, setPhoto] = useState('');
+    // 2. We'll use this to store the URL from the ImageUpload component
+    const [photoUrl, setPhotoUrl] = useState('');
+    const [bookingLink, setBookingLink] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // 4. Add a check to make sure photo is uploaded
+        if (!photoUrl) {
+            alert('Please upload a photo for the tutor.');
+            return;
+        }
+
         setLoading(true);
 
+        // 5. Use 'photoUrl' in your insert object
         const { error } = await supabase
             .from('tutors')
-            .insert([{ name, subjects, photo}]);
+            .insert([{ name, subjects, photo: photoUrl, bookingLink }]);
 
         if (error) {
             alert('Error adding tutor: ' + error.message);
@@ -24,9 +34,11 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             // Clear the form
             setName('');
             setSubjects('');
-            setPhoto('');
-            // Trigger a re-fetch of the tutor list in App.jsx
-            onTutorAdded();
+            setPhotoUrl(''); // Clear the photo URL
+            setBookingLink('');
+            onTutorAdded(); // Refreshes the lists
+            // We can't easily clear the preview in the child,
+            // but it will be gone if the user reloads. This is fine for now.
         }
         setLoading(false);
     };
@@ -59,33 +71,23 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
             <h3>Add New Tutor</h3>
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
+                <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+                <input type="text" placeholder="Subjects (e.g., Calc AB, Physics)" value={subjects} onChange={(e) => setSubjects(e.target.value)} required />
+
+                {/* 3. Replace the old photo input with your new component */}
+                <ImageUpload
+                    onUpload={(url) => setPhotoUrl(url)}
                 />
-                <input
-                    type="text"
-                    placeholder="Subjects (e.g., Calc AB, Physics)"
-                    value={subjects}
-                    onChange={(e) => setSubjects(e.target.value)}
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Photo URL"
-                    value={photo}
-                    onChange={(e) => setPhoto(e.target.value)}
-                />
+
+                <input type="text" placeholder="Calendly Booking Link (Optional)" value={bookingLink} onChange={(e) => setBookingLink(e.targe.value)} />
+
                 <button type="submit" disabled={loading}>
                     {loading ? 'Adding...' : 'Add Tutor'}
                 </button>
             </form>
 
-            {/* --- ADD THIS NEW SECTION --- */}
             <hr />
+
             <h3>Manage Tutors</h3>
             <div className="tutor-manage-list">
                 {tutors.map(tutor => (
@@ -100,8 +102,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                     </div>
                 ))}
             </div>
-            {/* --- END OF NEW SECTION --- */}
-
         </div>
     );
 }

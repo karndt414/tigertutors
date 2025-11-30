@@ -11,7 +11,7 @@ function ContactPage() {
                 Please reach out to our tutoring lead!
             </p>
             <ul style={{ lineHeight: 1.7, fontSize: '1.1em', margin: '20px 0 0 20px' }}>
-                <li><strong>Tutoring Coordinator:</strong> Meg Wolfka at [mwolfka@bentonvillek12.org]</li>
+                <li><strong>Tutoring Coordinator:</strong> Meg Wolfka at mwolfka@bentonvillek12.org</li>
             </ul>
         </div>
     );

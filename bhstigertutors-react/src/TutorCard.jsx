@@ -8,9 +8,6 @@ function TutorCard({ name, subjects, photo, bookingLink }) {
             <img src={photo} alt={`Profile of ${name}`} />
             <h3>{name}</h3>
             <p>{subjects}</p>
-            <a href={bookingLink} target="_blank" rel="noopener noreferrer" className="book-button">
-                Book a Session
-            </a>
         </div>
     );
 }
