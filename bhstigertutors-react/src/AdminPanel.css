@@ -47,3 +47,52 @@
     padding: 12px;
     font-size: 1.1em;
 }
+
+.admin-panel hr {
+    margin: 30px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+.admin-panel h3 {
+    margin-top: 0;
+    /* Fix spacing after the hr */
+}
+
+.tutor-manage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tutor-manage-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+.tutor-manage-item span {
+    font-weight: 500;
+    color: #333;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    /* Red */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+    /* Darker red */
+}

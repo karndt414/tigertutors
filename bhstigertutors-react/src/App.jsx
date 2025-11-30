@@ -42,6 +42,7 @@ function App() {
       {/* Show Admin Panel if logged in */}
       {session && (
         <AdminPanel
+          tutors={tutors}
           onTutorAdded={fetchTutors}  // Pass the fetch function
           onSignOut={handleSignOut}
         />
