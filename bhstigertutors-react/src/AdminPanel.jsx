@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
-import ImageUpload from './ImageUpload'; // 1. Import the new component
+import ImageUpload from './ImageUpload'; 
+import EditModal from './EditModal';
 import './AdminPanel.css';
 
 function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [name, setName] = useState('');
     const [subjects, setSubjects] = useState('');
-    // 2. We'll use this to store the URL from the ImageUpload component
     const [photoUrl, setPhotoUrl] = useState('');
     const [loading, setLoading] = useState(false);
+    const [editingTutor, setEditingTutor] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -76,7 +77,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                 <ImageUpload
                     onUpload={(url) => setPhotoUrl(url)}
                 />
-                
+
                 <button type="submit" disabled={loading}>
                     {loading ? 'Adding...' : 'Add Tutor'}
                 </button>
@@ -89,15 +90,31 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                 {tutors.map(tutor => (
                     <div key={tutor.id} className="tutor-manage-item">
                         <span>{tutor.name}</span>
-                        <button
-                            onClick={() => handleDelete(tutor.id)}
-                            className="delete-button"
-                        >
-                            Delete
-                        </button>
+                        <div className="tutor-manage-buttons"> {/* 4. Add a wrapper div */}
+                            <button
+                                onClick={() => setEditingTutor(tutor)} // 5. Set the tutor to edit
+                                className="edit-button"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => handleDelete(tutor.id)}
+                                className="delete-button"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
+
+            {/* --- RENDER THE MODAL (it's hidden by default) --- */}
+            {/* 6. Add the modal component here */}
+            <EditModal
+                tutor={editingTutor}
+                onClose={() => setEditingTutor(null)}
+                onUpdated={onTutorAdded} // This re-fetches the tutor list
+            />
         </div>
     );
 }
