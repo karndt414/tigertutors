@@ -102,3 +102,40 @@
     background-color: var(--accent-danger-hover);
     box-shadow: none;
 }
+
+/* ... (all your existing .tutor-manage-item styles) ... */
+
+.tutor-manage-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* ... (other styles) ... */
+}
+
+.tutor-manage-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-button {
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.edit-button:hover {
+    background-color: var(--accent-primary-hover);
+}
+
+/* Also add this to LoginModal.css to style the labels in the edit form */
+.modal-content label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    display: block;
+}
