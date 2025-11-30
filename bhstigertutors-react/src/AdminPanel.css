@@ -1,29 +1,37 @@
 .admin-panel {
+    width: 100%;
     max-width: 1200px;
-    margin: 30px auto;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    margin: 0 auto 20px auto;
+    /* Sits between header and main */
+    padding: 25px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .admin-panel h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bg-tertiary);
+    padding-bottom: 15px;
+    font-size: 1.8em;
+}
+
+.admin-panel h3 {
+    font-size: 1.5em;
+    margin-top: 20px;
 }
 
 .admin-panel .signout-button {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
+    background: var(--accent-danger);
     font-size: 0.8em;
+    padding: 8px 12px;
+}
+
+.admin-panel .signout-button:hover {
+    background: var(--accent-danger-hover);
+    box-shadow: none;
 }
 
 .admin-panel form {
@@ -33,30 +41,33 @@
     margin-top: 20px;
 }
 
-/* Make inputs span both columns */
+/* Dark mode input fields */
 .admin-panel form input[type="text"] {
     grid-column: 1 / -1;
-    padding: 10px;
+    padding: 12px;
     font-size: 1em;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    border-radius: 6px;
+    border: 1px solid var(--bg-tertiary);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+}
+
+.admin-panel form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
 .admin-panel form button {
     grid-column: 1 / -1;
-    padding: 12px;
     font-size: 1.1em;
 }
 
 .admin-panel hr {
     margin: 30px 0;
     border: 0;
-    border-top: 1px solid #eee;
-}
-
-.admin-panel h3 {
-    margin-top: 0;
-    /* Fix spacing after the hr */
+    border-top: 1px solid var(--bg-tertiary);
 }
 
 .tutor-manage-list {
@@ -69,30 +80,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    border: 1px solid #eee;
+    padding: 12px 15px;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--bg-tertiary);
 }
 
 .tutor-manage-item span {
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary);
 }
 
 .delete-button {
-    background-color: #dc3545;
-    /* Red */
+    background-color: var(--accent-danger);
     color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
     font-size: 0.9em;
-    transition: background-color 0.2s ease;
+    padding: 5px 10px;
 }
 
 .delete-button:hover {
-    background-color: #c82333;
-    /* Darker red */
+    background-color: var(--accent-danger-hover);
+    box-shadow: none;
 }

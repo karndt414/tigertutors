@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import TutorCard from './TutorCard';
-import LoginModal from './LoginModal';   // Import the modal
-import AdminPanel from './AdminPanel';   // Import the admin panel
-import './App.css';
+import LoginModal from './LoginModal';
+import AdminPanel from './AdminPanel';
+import './App.css'; // Your new styles
 
 function App() {
   const [tutors, setTutors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Auth state
   const [session, setSession] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
 
-  // This is the function we'll pass to the AdminPanel
   async function fetchTutors() {
     setLoading(true);
     const { data, error } = await supabase.from('tutors').select('*');
@@ -22,14 +20,12 @@ function App() {
     setLoading(false);
   }
 
-  // Check for existing session on page load
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
-
     fetchTutors();
-  }, []); // Runs once on load
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -39,41 +35,48 @@ function App() {
   return (
     <div className="App">
 
-      {/* Show Admin Panel if logged in */}
+      <header>
+        <h1>BHS Tiger Tutors</h1>
+      </header>
+
+      {/* Admin Panel now appears in its own section */}
       {session && (
         <AdminPanel
           tutors={tutors}
-          onTutorAdded={fetchTutors}  // Pass the fetch function
+          onTutorAdded={fetchTutors}
           onSignOut={handleSignOut}
         />
       )}
 
-      <h1>Meet the Tutors</h1>
+      <main>
+        {/* Changed this to an h2 for better structure */}
+        <h2>Meet the Tutors</h2>
 
-      {loading && <p style={{ textAlign: 'center' }}>Loading Tutors...</p>}
+        {loading && <p style={{ textAlign: 'center' }}>Loading Tutors...</p>}
 
-      <div className="tutor-grid">
-        {tutors.map(tutor => (
-          <TutorCard
-            key={tutor.id}
-            name={tutor.name}
-            subjects={tutor.subjects}
-            photo={tutor.photo}
-            bookingLink={tutor.bookingLink}
-          />
-        ))}
-      </div>
+        <div className="tutor-grid">
+          {tutors.map(tutor => (
+            <TutorCard
+              key={tutor.id}
+              name={tutor.name}
+              subjects={tutor.subjects}
+              photo={tutor.photo}
+              bookingLink={tutor.bookingLink}
+            />
+          ))}
+        </div>
+      </main>
 
       <footer>
-        {/* Show "Admin" button if NOT logged in, otherwise null */}
+        <p>&copy; {new Date().getFullYear()} BHS Mu Alpha Theta</p>
         {!session ? (
           <button className="admin-login-button" onClick={() => setShowLogin(true)}>
-            Admin
+            Admin Login
           </button>
         ) : null}
       </footer>
 
-      {/* Show Login Modal if showLogin is true */}
+      {/* Login Modal remains the same */}
       {showLogin && (
         <LoginModal
           onLoginSuccess={(session) => {
