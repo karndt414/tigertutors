@@ -8,7 +8,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [subjects, setSubjects] = useState('');
     // 2. We'll use this to store the URL from the ImageUpload component
     const [photoUrl, setPhotoUrl] = useState('');
-    const [bookingLink, setBookingLink] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -25,7 +24,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         // 5. Use 'photoUrl' in your insert object
         const { error } = await supabase
             .from('tutors')
-            .insert([{ name, subjects, photo: photoUrl, bookingLink }]);
+            .insert([{ name, subjects, photo: photoUrl}]);
 
         if (error) {
             alert('Error adding tutor: ' + error.message);
@@ -35,7 +34,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             setName('');
             setSubjects('');
             setPhotoUrl(''); // Clear the photo URL
-            setBookingLink('');
             onTutorAdded(); // Refreshes the lists
             // We can't easily clear the preview in the child,
             // but it will be gone if the user reloads. This is fine for now.
@@ -78,9 +76,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                 <ImageUpload
                     onUpload={(url) => setPhotoUrl(url)}
                 />
-
-                <input type="text" placeholder="Calendly Booking Link (Optional)" value={bookingLink} onChange={(e) => setBookingLink(e.targe.value)} />
-
+                
                 <button type="submit" disabled={loading}>
                     {loading ? 'Adding...' : 'Add Tutor'}
                 </button>
