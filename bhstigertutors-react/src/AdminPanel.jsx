@@ -4,13 +4,12 @@ import './AdminPanel.css';
 
 // 1. Accept 'tutors' as a prop
 function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
-
-    // ... (all your existing useState hooks for the form are fine)
     const [name, setName] = useState('');
-    // ...
+    const [subjects, setSubjects] = useState('');
+    const [photo, setPhoto] = useState('');
+    const [bookingLink, setBookingLink] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // ... (your existing handleSubmit function is fine)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -20,7 +19,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             .insert([{ name, subjects, photo, bookingLink }]);
 
         if (error) {
-            // This line is now fixed (it's a '+' not a '(')
             alert('Error adding tutor: ' + error.message);
         } else {
             alert('Tutor added!');
@@ -63,7 +61,33 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
             <h3>Add New Tutor</h3>
             <form onSubmit={handleSubmit}>
-                {/* ... (all your form inputs) ... */}
+                <input
+                    type="text"
+                    placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Subjects (e.g., Calc AB, Physics)"
+                    value={subjects}
+                    onChange={(e) => setSubjects(e.target.value)}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="Photo URL"
+                    value={photo}
+                    onChange={(e) => setPhoto(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Calendly Booking Link"
+                    value={bookingLink}
+                    onChange={(e) => setBookingLink(e.target.value)}
+                    required
+                />
                 <button type="submit" disabled={loading}>
                     {loading ? 'Adding...' : 'Add Tutor'}
                 </button>
