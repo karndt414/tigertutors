@@ -8,6 +8,7 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import GroupTutoring from './pages/GroupTutoring';
 import LoginModal from './LoginModal'; // Import your Modal
+import './App.css';
 
 function App() {
     // 1. The "Master Switch" for the modal
