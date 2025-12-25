@@ -44,6 +44,9 @@ function Layout() {
             <Link to="/group-tutoring">Group Tutoring</Link>
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
+            {session && (
+              <Link to="/edit-profile">My Profile</Link>
+            )}
           </nav>
         </div>
       </header>
