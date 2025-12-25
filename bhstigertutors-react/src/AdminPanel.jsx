@@ -63,6 +63,28 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
+    const handleGroupSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        const { error } = await supabase
+            .from('group_sessions')
+            .insert([{
+                subject: formData.get('subject'),
+                tutor_id: formData.get('tutor_id'),
+                session_date: formData.get('session_date'),
+                zoom_link: formData.get('zoom_link'),
+                max_capacity: 10 // or add an input for this
+            }]);
+
+        if (error) {
+            alert("Error: " + error.message);
+        } else {
+            alert("Group session scheduled!");
+            e.target.reset();
+        }
+    };
+
     // 3. Update the JSX to render the list
     return (
         <div className="admin-panel">
