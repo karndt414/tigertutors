@@ -44,8 +44,15 @@ function Layout() {
             <Link to="/group-tutoring">Group Tutoring</Link>
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
-            {session && (
-              <Link to="/edit-profile">My Profile</Link>
+            {!session ? (
+              <button onClick={() => setIsLoginModalOpen(true)} className="nav-login-btn">
+                Tutor Portal
+              </button>
+            ) : (
+              <>
+                <Link to="/edit-profile">My Profile</Link>
+                <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+              </>
             )}
           </nav>
         </div>
