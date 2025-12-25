@@ -6,6 +6,7 @@ import FindTutorPage from './pages/FindTutorPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import GroupTutoring from './pages/GroupTutoring';
+import EditProfile from './pages/EditProfile';
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path="about" element={<AboutPage />} />
                 <Route path="contact" element={<ContactPage />} />
                 <Route path="group-tutoring" element={<GroupTutoring />} />
+                <Route path="edit-profile" element={<EditProfile />} />
             </Route>
         </Routes>
     );
