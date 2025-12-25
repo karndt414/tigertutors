@@ -85,6 +85,23 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
             <hr />
 
+            <h3>Schedule Group Session</h3>
+            <form onSubmit={handleGroupSubmit}>
+                <input type="text" placeholder="Session Subject" name="subject" required />
+
+                <select name="tutor_id" required>
+                    <option value="">Select a Tutor</option>
+                    {tutors.map(t => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                </select>
+
+                <input type="datetime-local" name="session_date" required />
+                <input type="text" placeholder="Meeting Link (Zoom/Teams)" name="zoom_link" />
+
+                <button type="submit">Schedule Session</button>
+            </form>
+
             <h3>Manage Tutors</h3>
             <div className="tutor-manage-list">
                 {tutors.map(tutor => (
