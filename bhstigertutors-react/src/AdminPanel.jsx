@@ -85,6 +85,19 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
+    const handleApprove = async (tutorId) => {
+        const { error } = await supabase
+            .from('tutors')
+            .update({ is_approved: true })
+            .eq('id', tutorId);
+
+        if (error) alert(error.message);
+        else {
+            alert("Tutor approved!");
+            onTutorAdded(); // Refresh the list
+        }
+    };
+
     // 3. Update the JSX to render the list
     return (
         <div className="admin-panel">
@@ -143,6 +156,22 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                 Delete
                             </button>
                         </div>
+                    </div>
+                ))}
+            </div>
+
+            <h3>Pending Approvals</h3>
+            <div className="vetting-list">
+                {tutors.filter(t => !t.is_approved).map(tutor => (
+                    <div key={tutor.id} className="tutor-manage-item">
+                        <span>{tutor.name} ({tutor.subjects})</span>
+                        <button
+                            onClick={() => handleApprove(tutor.id)}
+                            className="edit-button"
+                            style={{ backgroundColor: '#28a745' }}
+                        >
+                            Approve
+                        </button>
                     </div>
                 ))}
             </div>

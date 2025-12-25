@@ -41,6 +41,7 @@ function Layout() {
           <nav>
             <Link to="/">Home</Link>
             <Link to="/tutors">Find a Tutor</Link>
+            <Link to="/group-tutoring">Group Tutoring</Link>
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
           </nav>
