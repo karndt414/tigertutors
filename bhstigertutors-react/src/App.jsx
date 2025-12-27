@@ -16,6 +16,7 @@ function App() {
     const [tutors, setTutors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+    const [authLoading, setAuthLoading] = useState(true);
 
     // Fetch tutors from Supabase
     useEffect(() => {
@@ -31,8 +32,32 @@ function App() {
     }
 
     async function checkUser() {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        } catch (error) {
+            console.error('Error checking user:', error);
+        } finally {
+            setAuthLoading(false);
+        }
+    }
+
+    // Listen for auth changes
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            setUser(session?.user || null);
+        });
+
+        return () => subscription?.unsubscribe();
+    }, []);
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+    };
+
+    if (authLoading) {
+        return <p style={{ textAlign: 'center', padding: '50px' }}>Loading...</p>;
     }
 
     return (
@@ -44,7 +69,7 @@ function App() {
                     <Route path="about" element={<AboutPage />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />
-                    {user && <Route path="admin" element={<AdminPanel tutors={tutors} onTutorAdded={fetchTutors} onSignOut={() => { supabase.auth.signOut(); setUser(null); }} />} />}
+                    {user && <Route path="admin" element={<AdminPanel tutors={tutors} onTutorAdded={fetchTutors} onSignOut={handleSignOut} />} />}
                 </Route>
             </Routes>
 
