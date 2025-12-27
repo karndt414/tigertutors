@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import './ImageUpload.css'; // We'll create this
+import './ImageUpload.css';
 
 function ImageUpload({ onUpload }) {
     const [uploading, setUploading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
+    const [error, setError] = useState(null);
 
     const handleUpload = async (event) => {
         try {
+            setError(null);
             setUploading(true);
 
             if (!event.target.files || event.target.files.length === 0) {
@@ -23,28 +25,37 @@ function ImageUpload({ onUpload }) {
             setImagePreview(URL.createObjectURL(file));
 
             // Upload file to Supabase
-            const { error: uploadError } = await supabase.storage
+            const { error: uploadError, data } = await supabase.storage
                 .from('tutor-photos')
-                .upload(filePath, file);
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
 
             if (uploadError) {
+                console.error('Upload error:', uploadError);
                 throw uploadError;
             }
 
+            console.log('File uploaded successfully:', data);
+
             // Get the public URL
-            const { data } = supabase.storage
+            const { data: publicUrlData } = supabase.storage
                 .from('tutor-photos')
                 .getPublicUrl(filePath);
 
-            if (!data.publicUrl) {
+            if (!publicUrlData || !publicUrlData.publicUrl) {
                 throw new Error('Could not get public URL.');
             }
 
-            // Pass the URL up to the parent component (AdminPanel)
-            onUpload(data.publicUrl);
+            console.log('Public URL:', publicUrlData.publicUrl);
 
-        } catch (error) {
-            alert('Error uploading image: ' + error.message);
+            // Pass the URL up to the parent component (AdminPanel)
+            onUpload(publicUrlData.publicUrl);
+
+        } catch (err) {
+            console.error('Error in handleUpload:', err);
+            setError('Error uploading image: ' + err.message);
             setImagePreview(null);
         } finally {
             setUploading(false);
@@ -58,6 +69,8 @@ function ImageUpload({ onUpload }) {
             ) : (
                 <div className="image-placeholder">No Photo</div>
             )}
+
+            {error && <div style={{ color: 'var(--accent-danger)', fontSize: '0.9em' }}>{error}</div>}
 
             <label htmlFor="file-upload" className="file-upload-button">
                 {uploading ? 'Uploading...' : 'Upload Photo'}
