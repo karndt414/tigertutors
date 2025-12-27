@@ -1,5 +1,5 @@
 import React from 'react';
-import './TutorCard.css'; // We'll create this CSS file next
+import './TutorCard.css';
 
 // This component takes 'props' (properties) and displays them.
 function TutorCard({ name, subjects, photo, bookingLink }) {
@@ -8,6 +8,9 @@ function TutorCard({ name, subjects, photo, bookingLink }) {
             <img src={photo} alt={`Profile of ${name}`} />
             <h3>{name}</h3>
             <p>{subjects}</p>
+            <a href={bookingLink} className="book-button" target="_blank" rel="noopener noreferrer">
+                Book a Session
+            </a>
         </div>
     );
 }
