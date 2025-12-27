@@ -6,7 +6,7 @@ function LoginModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
-    const [role, setRole] = useState('learner'); // learner, tutor, admin
+    const [role, setRole] = useState('learner');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -19,7 +19,6 @@ function LoginModal({ isOpen, onClose }) {
 
         try {
             if (isSignUp) {
-                // Sign up
                 const { data, error: signUpError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -28,7 +27,6 @@ function LoginModal({ isOpen, onClose }) {
                 if (signUpError) {
                     setError(signUpError.message);
                 } else {
-                    // Create user profile in database
                     const { error: profileError } = await supabase.from('users').insert({
                         id: data.user.id,
                         email,
@@ -50,7 +48,6 @@ function LoginModal({ isOpen, onClose }) {
                     }
                 }
             } else {
-                // Sign in
                 const { data, error: signInError } = await supabase.auth.signInWithPassword({
                     email,
                     password,
@@ -74,13 +71,12 @@ function LoginModal({ isOpen, onClose }) {
         }
     };
 
-    // If the modal isn't open, don't render anything
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-backdrop" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close" onClick={onClose}>×</button>
+                <button className="close-button" onClick={onClose}>&times;</button>
                 
                 <h2>{isSignUp ? 'Create Account' : 'Login'}</h2>
 
