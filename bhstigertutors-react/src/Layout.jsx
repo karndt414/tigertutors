@@ -3,7 +3,7 @@ import { Outlet, Link } from 'react-router-dom';
 
 function Layout({ openLogin }) {
   return (
-    <div className="App"> {/* Changed to 'App' to match most standard CSS setups */}
+    <div className="App">
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="logo">Tiger Tutors</Link>
@@ -11,7 +11,8 @@ function Layout({ openLogin }) {
             <Link to="/">Home</Link>
             <Link to="/about">About</Link>
             <Link to="/tutors">Tutors</Link>
-            <Link to="/sessions">Sessions</Link>
+            <Link to="/group-tutoring">Sessions</Link>
+            <Link to="/contact">Contact</Link>
           </div>
           <button onClick={openLogin} className="login-button">Login</button>
         </div>
