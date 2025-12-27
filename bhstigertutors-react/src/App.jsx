@@ -17,6 +17,7 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
+    const [userRole, setUserRole] = useState(null);
 
     // Fetch tutors from Supabase
     useEffect(() => {
@@ -51,9 +52,25 @@ function App() {
         return () => subscription?.unsubscribe();
     }, []);
 
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            if (user) {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (data) setUserRole(data.role);
+            }
+        };
+        fetchUserRole();
+    }, [user]);
+
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         setUser(null);
+        setUserRole(null);
     };
 
     if (authLoading) {
@@ -69,7 +86,7 @@ function App() {
                     <Route path="about" element={<AboutPage />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />
-                    {user && <Route path="admin" element={<AdminPanel tutors={tutors} onTutorAdded={fetchTutors} onSignOut={handleSignOut} />} />}
+                    {user && userRole === 'admin' && <Route path="admin" element={<AdminPanel tutors={tutors} onTutorAdded={fetchTutors} onSignOut={handleSignOut} />} />}
                 </Route>
             </Routes>
 
