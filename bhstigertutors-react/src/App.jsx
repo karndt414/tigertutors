@@ -38,9 +38,9 @@ function App() {
     return (
         <>
             <Routes>
-                <Route path="/" element={<Layout openLogin={() => setIsLoginModalOpen(true)} />}>
+                <Route path="/" element={<Layout openLogin={() => setIsLoginModalOpen(true)} tutors={tutors} loading={loading} />}>
                     <Route index element={<HomePage />} />
-                    <Route path="tutors" element={<FindTutorPage />} />
+                    <Route path="tutors" element={<FindTutorPage tutors={tutors} loading={loading} />} />
                     <Route path="about" element={<AboutPage />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />

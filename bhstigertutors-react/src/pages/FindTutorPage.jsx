@@ -1,11 +1,7 @@
 import React from 'react';
-import { useOutletContext } from 'react-router-dom';
-import TutorCard from '../TutorCard'; // Go up one directory
+import TutorCard from '../TutorCard';
 
-function FindTutorPage() {
-    // This hook gets the 'context' (props) from the <Outlet> in Layout.jsx
-    const { tutors, loading } = useOutletContext();
-
+function FindTutorPage({ tutors, loading }) {
     if (loading) {
         return <p style={{ textAlign: 'center' }}>Loading Tutors...</p>;
     }
@@ -14,15 +10,19 @@ function FindTutorPage() {
         <div>
             <h2>Meet the Tutors</h2>
             <div className="tutor-grid">
-                {tutors.map(tutor => (
-                    <TutorCard
-                        key={tutor.id}
-                        name={tutor.name}
-                        subjects={tutor.subjects}
-                        photo={tutor.photo}
-                        bookingLink={tutor.bookingLink}
-                    />
-                ))}
+                {tutors && tutors.length > 0 ? (
+                    tutors.map(tutor => (
+                        <TutorCard
+                            key={tutor.id}
+                            name={tutor.name}
+                            subjects={tutor.subjects}
+                            photo={tutor.photo}
+                            bookingLink={tutor.bookingLink}
+                        />
+                    ))
+                ) : (
+                    <p>No tutors available at the moment.</p>
+                )}
             </div>
         </div>
     );
