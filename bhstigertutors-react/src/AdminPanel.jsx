@@ -12,10 +12,18 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [editingTutor, setEditingTutor] = useState(null);
     const [sessions, setSessions] = useState([]);
     const [registrations, setRegistrations] = useState([]);
+    const [allowedRoles, setAllowedRoles] = useState([]);
+    const [newEmail, setNewEmail] = useState('');
+    const [newRole, setNewRole] = useState('tutor');
+    const [setupCodes, setSetupCodes] = useState([]);
+    const [codeRole, setCodeRole] = useState('tutor');
+    const [codeExpireDays, setCodeExpireDays] = useState('7');
 
     useEffect(() => {
         fetchSessions();
         fetchRegistrations();
+        fetchAllowedRoles();
+        fetchSetupCodes();
     }, []);
 
     const handleSubmit = async (e) => {
@@ -128,6 +136,26 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         else setRegistrations(data || []);
     };
 
+    const fetchAllowedRoles = async () => {
+        const { data, error } = await supabase
+            .from('allowed_roles')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) console.error(error);
+        else setAllowedRoles(data || []);
+    };
+
+    const fetchSetupCodes = async () => {
+        const { data, error } = await supabase
+            .from('admin_setup_codes')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) console.error(error);
+        else setSetupCodes(data || []);
+    };
+
     const handleDeleteRegistration = async (registrationId) => {
         if (!window.confirm('Remove this registration?')) return;
 
@@ -141,6 +169,89 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         } else {
             alert('Registration removed');
             fetchRegistrations();
+        }
+    };
+
+    const handleAddAllowedRole = async (e) => {
+        e.preventDefault();
+        
+        const { error } = await supabase
+            .from('allowed_roles')
+            .insert({
+                email: newEmail,
+                role: newRole,
+                approved_by: user?.email || 'admin'
+            });
+
+        if (error) {
+            if (error.code === '23505') {
+                alert('This email is already approved');
+            } else {
+                alert('Error: ' + error.message);
+            }
+        } else {
+            alert(`${newEmail} approved as ${newRole}!`);
+            setNewEmail('');
+            setNewRole('tutor');
+            fetchAllowedRoles();
+        }
+    };
+
+    const handleRemoveAllowedRole = async (allowedRoleId) => {
+        if (!window.confirm('Remove this approval?')) return;
+
+        const { error } = await supabase
+            .from('allowed_roles')
+            .delete()
+            .eq('id', allowedRoleId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Approval removed');
+            fetchAllowedRoles();
+        }
+    };
+
+    const generateSetupCode = async () => {
+        // Generate a random code
+        const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+        
+        // Calculate expiry date
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + parseInt(codeExpireDays));
+
+        const { error } = await supabase
+            .from('admin_setup_codes')
+            .insert({
+                code,
+                role: codeRole,
+                expires_at: expiresAt,
+            });
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert(`Setup code generated: ${code}`);
+            setCodeRole('tutor');
+            setCodeExpireDays('7');
+            fetchSetupCodes();
+        }
+    };
+
+    const deleteSetupCode = async (codeId) => {
+        if (!window.confirm('Delete this setup code?')) return;
+
+        const { error } = await supabase
+            .from('admin_setup_codes')
+            .delete()
+            .eq('id', codeId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Code deleted');
+            fetchSetupCodes();
         }
     };
 
@@ -281,6 +392,113 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                 onClose={() => setEditingTutor(null)}
                 onUpdated={onTutorAdded}
             />
+
+            <hr />
+
+            <h3>Manage Approved Roles</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                Add emails here to allow them to register as Admin or Tutor. Everyone else defaults to Learner.
+            </p>
+
+            <form onSubmit={handleAddAllowedRole} style={{ marginBottom: '20px' }}>
+                <input
+                    type="email"
+                    placeholder="Email to approve"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    required
+                />
+
+                <select
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    required
+                >
+                    <option value="tutor">Tutor</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button type="submit">Approve Email</button>
+            </form>
+
+            <div className="tutor-manage-list">
+                {allowedRoles.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No approved roles yet</p>
+                ) : (
+                    allowedRoles.map(ar => (
+                        <div key={ar.id} className="tutor-manage-item">
+                            <div>
+                                <strong>{ar.email}</strong>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                    Role: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{ar.role}</span>
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => handleRemoveAllowedRole(ar.id)}
+                                className="delete-button"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            <hr />
+
+            <h3>Generate Setup Codes</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                Generate one-time setup codes for new tutors and admins.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <select
+                    value={codeRole}
+                    onChange={(e) => setCodeRole(e.target.value)}
+                    required
+                >
+                    <option value="tutor">Tutor</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <input
+                    type="number"
+                    placeholder="Expires in (days)"
+                    value={codeExpireDays}
+                    onChange={(e) => setCodeExpireDays(e.target.value)}
+                    min="1"
+                />
+
+                <button onClick={generateSetupCode} style={{ gridColumn: '3' }}>
+                    Generate Code
+                </button>
+            </div>
+
+            <div className="tutor-manage-list">
+                <h4 style={{ marginBottom: '10px' }}>Active Codes</h4>
+                {setupCodes.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No setup codes yet</p>
+                ) : (
+                    setupCodes.map(code => (
+                        <div key={code.id} className="tutor-manage-item" style={{ padding: '12px 15px' }}>
+                            <div>
+                                <strong style={{ fontFamily: 'monospace', fontSize: '1.1em' }}>{code.code}</strong>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                    Role: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{code.role}</span>
+                                    {code.used_by && ` • Used by: ${code.used_by}`}
+                                    {!code.used_by && code.expires_at && ` • Expires: ${new Date(code.expires_at).toLocaleDateString()}`}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => deleteSetupCode(code.id)}
+                                className="delete-button"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 }

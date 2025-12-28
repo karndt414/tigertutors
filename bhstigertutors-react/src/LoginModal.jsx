@@ -6,6 +6,7 @@ function LoginModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
+    const [setupCode, setSetupCode] = useState('');
     const [role, setRole] = useState('learner');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -19,6 +20,54 @@ function LoginModal({ isOpen, onClose }) {
 
         try {
             if (isSignUp) {
+                let finalRole = 'learner';
+
+                // Check setup code if registering as admin/tutor
+                if (role !== 'learner') {
+                    if (!setupCode.trim()) {
+                        setError(`Setup code required to register as ${role}`);
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Verify the setup code
+                    const { data: codeData, error: codeError } = await supabase
+                        .from('admin_setup_codes')
+                        .select('*')
+                        .eq('code', setupCode.toUpperCase())
+                        .single();
+
+                    if (codeError || !codeData) {
+                        setError('Invalid setup code');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Check if code is expired
+                    if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+                        setError('Setup code has expired');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Check if code already used
+                    if (codeData.used_by) {
+                        setError('This setup code has already been used');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Check if code role matches requested role
+                    if (codeData.role !== role) {
+                        setError(`This code is for ${codeData.role} registration only`);
+                        setLoading(false);
+                        return;
+                    }
+
+                    finalRole = role;
+                }
+
+                // Sign up with Supabase Auth
                 const { data, error: signUpError } = await supabase.auth.signUp({
                     email,
                     password,
@@ -26,27 +75,44 @@ function LoginModal({ isOpen, onClose }) {
 
                 if (signUpError) {
                     setError(signUpError.message);
-                } else {
-                    const { error: profileError } = await supabase.from('users').insert({
-                        id: data.user.id,
-                        email,
-                        role,
-                        created_at: new Date(),
-                    });
-
-                    if (profileError) {
-                        setError(profileError.message);
-                    } else {
-                        setSuccess('Account created! Check your email to confirm.');
-                        setTimeout(() => {
-                            setEmail('');
-                            setPassword('');
-                            setRole('learner');
-                            setIsSignUp(false);
-                            onClose();
-                        }, 2000);
-                    }
+                    setLoading(false);
+                    return;
                 }
+
+                // Create user profile
+                const { error: profileError } = await supabase.from('users').insert({
+                    id: data.user.id,
+                    email,
+                    role: finalRole,
+                    created_at: new Date(),
+                });
+
+                if (profileError) {
+                    setError(profileError.message);
+                    setLoading(false);
+                    return;
+                }
+
+                // Mark setup code as used
+                if (setupCode.trim()) {
+                    await supabase
+                        .from('admin_setup_codes')
+                        .update({
+                            used_by: email,
+                            used_at: new Date(),
+                        })
+                        .eq('code', setupCode.toUpperCase());
+                }
+
+                setSuccess(`Account created as ${finalRole}! Check your email to confirm.`);
+                setTimeout(() => {
+                    setEmail('');
+                    setPassword('');
+                    setSetupCode('');
+                    setRole('learner');
+                    setIsSignUp(false);
+                    onClose();
+                }, 2000);
             } else {
                 const { data, error: signInError } = await supabase.auth.signInWithPassword({
                     email,
@@ -100,15 +166,31 @@ function LoginModal({ isOpen, onClose }) {
                     />
 
                     {isSignUp && (
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            required
-                        >
-                            <option value="learner">Learner</option>
-                            <option value="tutor">Tutor</option>
-                            <option value="admin">Admin</option>
-                        </select>
+                        <>
+                            <select
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                required
+                            >
+                                <option value="learner">Learner</option>
+                                <option value="tutor">Tutor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+
+                            {role !== 'learner' && (
+                                <input
+                                    type="text"
+                                    placeholder="Setup Code"
+                                    value={setupCode}
+                                    onChange={(e) => setSetupCode(e.target.value.toUpperCase())}
+                                    required
+                                />
+                            )}
+
+                            <p style={{ fontSize: '0.8em', color: 'var(--text-secondary)', margin: '0' }}>
+                                Learners don't need a code. Tutors and Admins need a setup code.
+                            </p>
+                        </>
                     )}
 
                     <button type="submit" disabled={loading}>
@@ -124,6 +206,7 @@ function LoginModal({ isOpen, onClose }) {
                             setIsSignUp(!isSignUp);
                             setError('');
                             setSuccess('');
+                            setSetupCode('');
                         }}
                     >
                         {isSignUp ? 'Login' : 'Sign Up'}
