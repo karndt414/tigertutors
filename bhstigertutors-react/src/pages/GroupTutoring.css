@@ -235,3 +235,24 @@
         grid-template-columns: 1fr;
     }
 }
+
+.participant-count {
+    background-color: var(--accent-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.session-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.session-modal button,
+.session-card button {
+    flex: 1;
+    min-width: 100px;
+}

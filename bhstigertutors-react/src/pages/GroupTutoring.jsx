@@ -6,10 +6,19 @@ function GroupTutoring() {
     const [sessions, setSessions] = useState([]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedSession, setSelectedSession] = useState(null);
+    const [user, setUser] = useState(null);
+    const [registeredSessions, setRegisteredSessions] = useState([]);
 
     useEffect(() => {
+        checkUser();
         fetchSessions();
     }, []);
+
+    const checkUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        if (user) fetchRegistrations(user.id);
+    };
 
     async function fetchSessions() {
         const { data, error } = await supabase
@@ -21,8 +30,60 @@ function GroupTutoring() {
             .order('session_date', { ascending: true });
 
         if (error) console.error(error);
-        else setSessions(data);
+        else setSessions(data || []);
     }
+
+    const fetchRegistrations = async (userId) => {
+        const { data } = await supabase
+            .from('registrations')
+            .select('session_id')
+            .eq('user_id', userId);
+        
+        setRegisteredSessions(data ? data.map(r => r.session_id) : []);
+    };
+
+    const handleRegister = async (sessionId) => {
+        if (!user) {
+            alert('Please login to register for a session');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('registrations')
+            .insert({
+                session_id: sessionId,
+                user_id: user.id,
+                user_email: user.email,
+            });
+
+        if (error) {
+            if (error.code === '23505') {
+                alert('You are already registered for this session');
+            } else {
+                alert('Error registering: ' + error.message);
+            }
+        } else {
+            alert('Registered successfully!');
+            fetchSessions();
+            fetchRegistrations(user.id);
+        }
+    };
+
+    const handleUnregister = async (sessionId) => {
+        const { error } = await supabase
+            .from('registrations')
+            .delete()
+            .eq('session_id', sessionId)
+            .eq('user_id', user.id);
+
+        if (error) {
+            alert('Error unregistering: ' + error.message);
+        } else {
+            alert('Unregistered successfully!');
+            fetchSessions();
+            fetchRegistrations(user.id);
+        }
+    };
 
     // Get days in month
     const getDaysInMonth = (date) => {
@@ -121,40 +182,70 @@ function GroupTutoring() {
                         <button className="close-button" onClick={() => setSelectedSession(null)}>×</button>
                         <h3>Sessions on {selectedSession.day}</h3>
                         <div className="session-list">
-                            {selectedSession.sessions.map(session => (
-                                <div key={session.id} className="session-detail">
-                                    <h4>{session.subject}</h4>
-                                    <p><strong>Tutor:</strong> {session.tutors?.name}</p>
-                                    <p><strong>Time:</strong> {new Date(session.session_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                    <p><strong>Spots:</strong> {session.current_count} / {session.max_capacity}</p>
-                                    {session.current_count >= session.max_capacity ? (
-                                        <button className="book-button disabled" disabled>Session Full</button>
-                                    ) : (
-                                        <a href={session.zoom_link} target="_blank" rel="noopener noreferrer" className="book-button">Join Session</a>
-                                    )}
-                                </div>
-                            ))}
+                            {selectedSession.sessions.map(session => {
+                                const isRegistered = registeredSessions.includes(session.id);
+                                return (
+                                    <div key={session.id} className="session-detail">
+                                        <h4>{session.subject}</h4>
+                                        <p><strong>Tutor:</strong> {session.tutors?.name}</p>
+                                        <p><strong>Time:</strong> {new Date(session.session_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        <p><strong>Registered:</strong> <span className="participant-count">{session.current_count}</span></p>
+                                        <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                                            {isRegistered ? (
+                                                <button 
+                                                    onClick={() => handleUnregister(session.id)}
+                                                    style={{ backgroundColor: 'var(--accent-danger)' }}
+                                                >
+                                                    Unregister
+                                                </button>
+                                            ) : (
+                                                <button onClick={() => handleRegister(session.id)}>
+                                                    Register
+                                                </button>
+                                            )}
+                                            <a href={session.zoom_link} target="_blank" rel="noopener noreferrer" className="book-button">
+                                                Join Session
+                                            </a>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Upcoming sessions list (optional) */}
+            {/* Upcoming sessions list */}
             <h3 style={{ marginTop: '40px' }}>Upcoming Sessions</h3>
             <div className="session-grid">
-                {sessions.slice(0, 6).map(session => (
-                    <div key={session.id} className="session-card">
-                        <h4>{session.subject}</h4>
-                        <p><strong>Tutor:</strong> {session.tutors?.name}</p>
-                        <p><strong>When:</strong> {new Date(session.session_date).toLocaleString()}</p>
-                        <p><strong>Spots:</strong> {session.current_count} / {session.max_capacity}</p>
-                        {session.current_count >= session.max_capacity ? (
-                            <button className="book-button disabled" disabled>Session Full</button>
-                        ) : (
-                            <a href={session.zoom_link} target="_blank" rel="noopener noreferrer" className="book-button">Join Session</a>
-                        )}
-                    </div>
-                ))}
+                {sessions.slice(0, 6).map(session => {
+                    const isRegistered = registeredSessions.includes(session.id);
+                    return (
+                        <div key={session.id} className="session-card">
+                            <h4>{session.subject}</h4>
+                            <p><strong>Tutor:</strong> {session.tutors?.name}</p>
+                            <p><strong>When:</strong> {new Date(session.session_date).toLocaleString()}</p>
+                            <p><strong>Registered:</strong> <span className="participant-count">{session.current_count}</span></p>
+                            <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                                {isRegistered ? (
+                                    <button 
+                                        onClick={() => handleUnregister(session.id)}
+                                        style={{ backgroundColor: 'var(--accent-danger)' }}
+                                    >
+                                        Unregister
+                                    </button>
+                                ) : (
+                                    <button onClick={() => handleRegister(session.id)}>
+                                        Register
+                                    </button>
+                                )}
+                                <a href={session.zoom_link} target="_blank" rel="noopener noreferrer" className="book-button">
+                                    Join Session
+                                </a>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
