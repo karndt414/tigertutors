@@ -15,21 +15,23 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [allowedRoles, setAllowedRoles] = useState([]);
     const [newEmail, setNewEmail] = useState('');
     const [newRole, setNewRole] = useState('tutor');
-    const [setupCodes, setSetupCodes] = useState([]);
-    const [codeRole, setCodeRole] = useState('tutor');
-    const [codeExpireDays, setCodeExpireDays] = useState('7');
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
+        checkUser();
         fetchSessions();
         fetchRegistrations();
         fetchAllowedRoles();
-        fetchSetupCodes();
     }, []);
+
+    const checkUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // 4. Add a check to make sure photo is uploaded
         if (!photoUrl) {
             alert('Please upload a photo for the tutor.');
             return;
@@ -37,7 +39,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
         setLoading(true);
 
-        // 5. Use 'photoUrl' in your insert object
         const { error } = await supabase
             .from('tutors')
             .insert([{ name, subjects, photo: photoUrl}]);
@@ -46,35 +47,29 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             alert('Error adding tutor: ' + error.message);
         } else {
             alert('Tutor added!');
-            // Clear the form
             setName('');
             setSubjects('');
-            setPhotoUrl(''); // Clear the photo URL
-            onTutorAdded(); // Refreshes the lists
-            // We can't easily clear the preview in the child,
-            // but it will be gone if the user reloads. This is fine for now.
+            setPhotoUrl('');
+            onTutorAdded();
         }
         setLoading(false);
     };
 
-    // 2. Add the new handleDelete function
     const handleDelete = async (tutorId) => {
-        // Add a simple confirmation
         if (!window.confirm('Are you sure you want to delete this tutor?')) {
-            return; // Stop if the user clicks "Cancel"
+            return;
         }
 
-        // This will only work because you're authenticated
         const { error } = await supabase
             .from('tutors')
             .delete()
-            .eq('id', tutorId); // .eq means "where id equals tutorId"
+            .eq('id', tutorId);
 
         if (error) {
             alert('Error deleting tutor: ' + error.message);
         } else {
             alert('Tutor deleted.');
-            onTutorAdded(); // This is your fetchTutors function, so it refreshes the list
+            onTutorAdded();
         }
     };
 
@@ -89,7 +84,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                 tutor_id: formData.get('tutor_id'),
                 session_date: formData.get('session_date'),
                 zoom_link: formData.get('zoom_link'),
-                max_capacity: 10 // or add an input for this
+                max_capacity: 10
             }]);
 
         if (error) {
@@ -97,6 +92,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         } else {
             alert("Group session scheduled!");
             e.target.reset();
+            fetchSessions();
         }
     };
 
@@ -109,7 +105,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         if (error) alert(error.message);
         else {
             alert("Tutor approved!");
-            onTutorAdded(); // Refresh the list
+            onTutorAdded();
         }
     };
 
@@ -146,16 +142,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         else setAllowedRoles(data || []);
     };
 
-    const fetchSetupCodes = async () => {
-        const { data, error } = await supabase
-            .from('admin_setup_codes')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) console.error(error);
-        else setSetupCodes(data || []);
-    };
-
     const handleDeleteRegistration = async (registrationId) => {
         if (!window.confirm('Remove this registration?')) return;
 
@@ -175,10 +161,15 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const handleAddAllowedRole = async (e) => {
         e.preventDefault();
         
+        if (!newEmail.trim()) {
+            alert('Please enter an email');
+            return;
+        }
+
         const { error } = await supabase
             .from('allowed_roles')
             .insert({
-                email: newEmail,
+                email: newEmail.toLowerCase(),
                 role: newRole,
                 approved_by: user?.email || 'admin'
             });
@@ -213,49 +204,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
-    const generateSetupCode = async () => {
-        // Generate a random code
-        const code = Math.random().toString(36).substring(2, 10).toUpperCase();
-        
-        // Calculate expiry date
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + parseInt(codeExpireDays));
-
-        const { error } = await supabase
-            .from('admin_setup_codes')
-            .insert({
-                code,
-                role: codeRole,
-                expires_at: expiresAt,
-            });
-
-        if (error) {
-            alert('Error: ' + error.message);
-        } else {
-            alert(`Setup code generated: ${code}`);
-            setCodeRole('tutor');
-            setCodeExpireDays('7');
-            fetchSetupCodes();
-        }
-    };
-
-    const deleteSetupCode = async (codeId) => {
-        if (!window.confirm('Delete this setup code?')) return;
-
-        const { error } = await supabase
-            .from('admin_setup_codes')
-            .delete()
-            .eq('id', codeId);
-
-        if (error) {
-            alert('Error: ' + error.message);
-        } else {
-            alert('Code deleted');
-            fetchSetupCodes();
-        }
-    };
-
-    // 3. Update the JSX to render the list
     return (
         <div className="admin-panel">
             <h2>Admin Panel <button onClick={onSignOut} className="signout-button">Log Out</button></h2>
@@ -438,62 +386,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                 className="delete-button"
                             >
                                 Remove
-                            </button>
-                        </div>
-                    ))
-                )}
-            </div>
-
-            <hr />
-
-            <h3>Generate Setup Codes</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                Generate one-time setup codes for new tutors and admins.
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-                <select
-                    value={codeRole}
-                    onChange={(e) => setCodeRole(e.target.value)}
-                    required
-                >
-                    <option value="tutor">Tutor</option>
-                    <option value="admin">Admin</option>
-                </select>
-
-                <input
-                    type="number"
-                    placeholder="Expires in (days)"
-                    value={codeExpireDays}
-                    onChange={(e) => setCodeExpireDays(e.target.value)}
-                    min="1"
-                />
-
-                <button onClick={generateSetupCode} style={{ gridColumn: '3' }}>
-                    Generate Code
-                </button>
-            </div>
-
-            <div className="tutor-manage-list">
-                <h4 style={{ marginBottom: '10px' }}>Active Codes</h4>
-                {setupCodes.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)' }}>No setup codes yet</p>
-                ) : (
-                    setupCodes.map(code => (
-                        <div key={code.id} className="tutor-manage-item" style={{ padding: '12px 15px' }}>
-                            <div>
-                                <strong style={{ fontFamily: 'monospace', fontSize: '1.1em' }}>{code.code}</strong>
-                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                                    Role: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{code.role}</span>
-                                    {code.used_by && ` • Used by: ${code.used_by}`}
-                                    {!code.used_by && code.expires_at && ` • Expires: ${new Date(code.expires_at).toLocaleDateString()}`}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => deleteSetupCode(code.id)}
-                                className="delete-button"
-                            >
-                                Delete
                             </button>
                         </div>
                     ))
