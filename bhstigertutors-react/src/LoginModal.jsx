@@ -6,7 +6,6 @@ function LoginModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
-    const [setupCode, setSetupCode] = useState('');
     const [role, setRole] = useState('learner');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -22,44 +21,22 @@ function LoginModal({ isOpen, onClose }) {
             if (isSignUp) {
                 let finalRole = 'learner';
 
-                // Check setup code if registering as admin/tutor
+                // Check if email is approved for admin/tutor role
                 if (role !== 'learner') {
-                    if (!setupCode.trim()) {
-                        setError(`Setup code required to register as ${role}`);
-                        setLoading(false);
-                        return;
-                    }
-
-                    // Verify the setup code
-                    const { data: codeData, error: codeError } = await supabase
-                        .from('admin_setup_codes')
-                        .select('*')
-                        .eq('code', setupCode.toUpperCase())
+                    const { data: allowedRole } = await supabase
+                        .from('allowed_roles')
+                        .select('role')
+                        .eq('email', email)
                         .single();
 
-                    if (codeError || !codeData) {
-                        setError('Invalid setup code');
+                    if (!allowedRole) {
+                        setError(`This email hasn't been approved to register as ${role}. You can register as a learner instead.`);
                         setLoading(false);
                         return;
                     }
 
-                    // Check if code is expired
-                    if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
-                        setError('Setup code has expired');
-                        setLoading(false);
-                        return;
-                    }
-
-                    // Check if code already used
-                    if (codeData.used_by) {
-                        setError('This setup code has already been used');
-                        setLoading(false);
-                        return;
-                    }
-
-                    // Check if code role matches requested role
-                    if (codeData.role !== role) {
-                        setError(`This code is for ${codeData.role} registration only`);
+                    if (allowedRole.role !== role) {
+                        setError(`This email is approved as ${allowedRole.role}, not ${role}`);
                         setLoading(false);
                         return;
                     }
@@ -79,7 +56,7 @@ function LoginModal({ isOpen, onClose }) {
                     return;
                 }
 
-                // Create user profile
+                // Create user profile with validated role
                 const { error: profileError } = await supabase.from('users').insert({
                     id: data.user.id,
                     email,
@@ -93,22 +70,10 @@ function LoginModal({ isOpen, onClose }) {
                     return;
                 }
 
-                // Mark setup code as used
-                if (setupCode.trim()) {
-                    await supabase
-                        .from('admin_setup_codes')
-                        .update({
-                            used_by: email,
-                            used_at: new Date(),
-                        })
-                        .eq('code', setupCode.toUpperCase());
-                }
-
                 setSuccess(`Account created as ${finalRole}! Check your email to confirm.`);
                 setTimeout(() => {
                     setEmail('');
                     setPassword('');
-                    setSetupCode('');
                     setRole('learner');
                     setIsSignUp(false);
                     onClose();
@@ -176,19 +141,8 @@ function LoginModal({ isOpen, onClose }) {
                                 <option value="tutor">Tutor</option>
                                 <option value="admin">Admin</option>
                             </select>
-
-                            {role !== 'learner' && (
-                                <input
-                                    type="text"
-                                    placeholder="Setup Code"
-                                    value={setupCode}
-                                    onChange={(e) => setSetupCode(e.target.value.toUpperCase())}
-                                    required
-                                />
-                            )}
-
                             <p style={{ fontSize: '0.8em', color: 'var(--text-secondary)', margin: '0' }}>
-                                Learners don't need a code. Tutors and Admins need a setup code.
+                                Tutors and Admins must be pre-approved by an administrator.
                             </p>
                         </>
                     )}
@@ -206,7 +160,6 @@ function LoginModal({ isOpen, onClose }) {
                             setIsSignUp(!isSignUp);
                             setError('');
                             setSuccess('');
-                            setSetupCode('');
                         }}
                     >
                         {isSignUp ? 'Login' : 'Sign Up'}
