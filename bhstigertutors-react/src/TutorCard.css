@@ -29,29 +29,29 @@
 }
 
 .tutor-info {
-    padding: 1.25rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
 .tutor-info h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2em;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1em;
     color: var(--text-primary);
 }
 
 .tutor-info p {
-    margin: 0 0 1rem 0;
-    font-size: 0.9em;
+    margin: 0 0 0.75rem 0;
+    font-size: 0.85em;
     color: var(--text-secondary);
     flex-grow: 1;
 }
 
 .tutor-info .book-button {
     align-self: flex-start;
-    font-size: 0.9em;
-    padding: 0.6rem 1.2rem;
+    font-size: 0.85em;
+    padding: 0.5rem 1rem;
     margin-top: auto;
 }
 
