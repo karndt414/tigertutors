@@ -1,48 +1,76 @@
 .group-tutoring {
     width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
-/* Calendar Container */
+.group-tutoring-description {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.group-tutoring-description p {
+    margin: 1rem 0;
+    font-size: 1em;
+    line-height: 1.7;
+}
+
+.group-tutoring-description p:last-child {
+    margin-bottom: 0;
+}
+
+.register-instruction {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-top: 2rem;
+    color: var(--text-primary);
+}
+
+/* Calendar */
 .calendar-container {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 20px;
-    margin: 20px 0;
+    padding: 2rem;
+    margin: 2rem 0;
 }
 
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 2rem;
 }
 
 .calendar-header h3 {
-    font-size: 1.5em;
     margin: 0;
+    font-size: 1.5em;
 }
 
 .nav-button {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    border: 1px solid var(--bg-tertiary);
-    padding: 8px 12px;
-    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .nav-button:hover {
     background-color: var(--bg-tertiary);
+    box-shadow: var(--shadow-sm);
 }
 
-/* Calendar Grid */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 12px;
 }
 
 .day-label {
@@ -55,33 +83,18 @@
 
 .calendar-day {
     background-color: var(--bg-primary);
-    border: 1px solid var(--bg-tertiary);
-    border-radius: 6px;
-    padding: 12px 8px;
-    min-height: 80px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    cursor: default;
-    transition: all 0.2s ease;
+    gap: 8px;
 }
 
 .calendar-day.empty {
     background-color: transparent;
     border: none;
-    cursor: default;
-}
-
-.calendar-day.has-session {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
-    border-color: var(--accent-primary);
-    cursor: pointer;
-}
-
-.calendar-day.has-session:hover {
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
-    transform: translateY(-2px);
 }
 
 .day-number {
@@ -90,169 +103,248 @@
     color: var(--text-primary);
 }
 
-.session-indicator {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 5px;
-}
-
-.dot {
-    width: 6px;
-    height: 6px;
-    background-color: var(--accent-primary);
-    border-radius: 50%;
-}
-
-.session-count {
-    font-size: 0.75em;
-    color: var(--accent-primary);
-    font-weight: 600;
-}
-
-/* Session Modal */
-.session-modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.session-modal {
-    background: var(--bg-secondary);
-    padding: 25px;
-    border-radius: 8px;
-    border: 1px solid var(--bg-tertiary);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-.session-modal h3 {
-    margin-top: 0;
-    color: var(--text-primary);
-}
-
-.close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.8em;
-    cursor: pointer;
-    color: var(--text-secondary);
-    padding: 0;
-}
-
-.close-button:hover {
-    color: var(--text-primary);
-}
-
-.session-list {
+.sessions-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-top: 15px;
+    gap: 6px;
+    flex-grow: 1;
 }
 
-.session-detail {
-    background-color: var(--bg-primary);
-    border: 1px solid var(--bg-tertiary);
+.session-button {
+    padding: 8px 10px;
     border-radius: 6px;
-    padding: 15px;
+    border: none;
+    font-size: 0.75em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    line-height: 1.3;
+    color: white;
 }
 
-.session-detail h4 {
-    margin: 0 0 10px 0;
-    color: var(--text-primary);
+/* Subject colors */
+.session-button.subject-pre-ap-geometry {
+    background-color: #f59e0b;
 }
 
-.session-detail p {
-    margin: 5px 0;
-    font-size: 0.95em;
+.session-button.subject-pre-ap-geometry:hover {
+    background-color: #d97706;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-/* Session Grid (Upcoming Sessions) */
-.session-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+.session-button.subject-geometry {
+    background-color: #f97316;
 }
 
-.session-card {
+.session-button.subject-geometry:hover {
+    background-color: #ea580c;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.session-button.subject-advanced-algebra-2 {
+    background-color: #3b82f6;
+}
+
+.session-button.subject-advanced-algebra-2:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.session-button.subject-algebra-2 {
+    background-color: #60a5fa;
+}
+
+.session-button.subject-algebra-2:hover {
+    background-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.session-button.subject-ap-precalculus {
+    background-color: #8b5cf6;
+}
+
+.session-button.subject-ap-precalculus:hover {
+    background-color: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Registration Form */
+.registration-form {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--bg-tertiary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 20px;
-    text-align: left;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 2rem auto;
 }
 
-.session-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
-.session-card h4 {
-    margin: 0 0 10px 0;
+.form-group label {
+    display: block;
+    font-weight: 500;
     color: var(--text-primary);
-    font-size: 1.2em;
+    margin-bottom: 0.5rem;
 }
 
-.session-card p {
-    margin: 8px 0;
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1em;
+    font-family: var(--font-body);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.radio-group,
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.radio-label,
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 400;
     color: var(--text-secondary);
+}
+
+.radio-label input[type="radio"],
+.checkbox-label input[type="checkbox"] {
+    margin-top: 4px;
+    cursor: pointer;
+    accent-color: var(--accent-primary);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 2rem;
+    justify-content: center;
+}
+
+.submit-button,
+.cancel-button {
+    padding: 0.75rem 2rem;
+    font-size: 1em;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.submit-button {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.submit-button:hover {
+    background-color: var(--accent-primary-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.cancel-button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.cancel-button:hover {
+    background-color: var(--border-color);
+}
+
+/* Confirmation */
+.confirmation-container {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+    max-width: 600px;
+    margin: 3rem auto;
+}
+
+.confirmation-box {
+    background-color: var(--bg-primary);
+    border-left: 4px solid var(--accent-primary);
+    padding: 2rem;
+    margin: 2rem 0;
+    border-radius: 6px;
+}
+
+.confirmation-room {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin: 0;
+}
+
+.confirmation-detail {
+    font-size: 1.1em;
+    color: var(--text-primary);
+    margin: 1rem 0;
+}
+
+.confirmation-action {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 1rem 0 0 0;
+}
+
+.confirmation-container p {
+    margin: 1rem 0;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .calendar-grid {
-        gap: 4px;
+        gap: 8px;
     }
 
     .calendar-day {
-        min-height: 60px;
-        padding: 8px 4px;
-        font-size: 0.9em;
+        min-height: 100px;
+        padding: 8px;
     }
 
-    .day-number {
-        font-size: 0.95em;
+    .session-button {
+        font-size: 0.7em;
+        padding: 6px 8px;
     }
 
-    .session-grid {
-        grid-template-columns: 1fr;
+    .registration-form {
+        padding: 1.5rem;
     }
-}
 
-.participant-count {
-    background-color: var(--accent-primary);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 0.9em;
-}
+    .confirmation-container {
+        padding: 2rem;
+    }
 
-.session-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.session-modal button,
-.session-card button {
-    flex: 1;
-    min-width: 100px;
+    .confirmation-room {
+        font-size: 1.5em;
+    }
 }
