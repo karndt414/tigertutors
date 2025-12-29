@@ -374,6 +374,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                             <th>Subject</th>
                             <th>Help Level</th>
                             <th>Previous Programs</th>
+                            <th>Flex Period</th>
                             <th>Room Assignment</th>
                             <th>Registered</th>
                         </tr>
@@ -381,7 +382,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                     <tbody>
                         {groupTutoringRegistrations.length === 0 ? (
                             <tr>
-                                <td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                <td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                                     No registrations yet
                                 </td>
                             </tr>
@@ -401,6 +402,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                             ? reg.previous_programs.join(', ') 
                                             : 'None'}
                                     </td>
+                                    <td><strong>{reg.session_time}</strong></td>
                                     <td><strong>{reg.room_assignment}</strong></td>
                                     <td>{new Date(reg.registered_at).toLocaleDateString()}</td>
                                 </tr>
@@ -431,22 +433,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                 Delete
                             </button>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            <h3>Pending Approvals</h3>
-            <div className="vetting-list">
-                {tutors.filter(t => !t.is_approved).map(tutor => (
-                    <div key={tutor.id} className="tutor-manage-item">
-                        <span>{tutor.name} ({tutor.subjects})</span>
-                        <button
-                            onClick={() => handleApprove(tutor.id)}
-                            className="edit-button"
-                            style={{ backgroundColor: '#28a745' }}
-                        >
-                            Approve
-                        </button>
                     </div>
                 ))}
             </div>
