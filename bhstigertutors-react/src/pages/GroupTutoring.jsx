@@ -556,7 +556,7 @@ function GroupTutoring() {
         </div>
     );
 
-    return userRole === 'tutor' ? monthCalendar : learnerForm;
+    return userRole === 'tutor' || userRole === 'admin' ? monthCalendar : learnerForm;
 }
 
 export default GroupTutoring;
