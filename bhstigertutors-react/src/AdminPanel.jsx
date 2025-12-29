@@ -19,7 +19,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [newGroupSession, setNewGroupSession] = useState({
         sessionDate: '',
         sessionTime: '',
-        subject: '',
+        subjects: [], // Changed to array
         roomAssignment: '',
         teacherName: ''
     });
@@ -184,8 +184,8 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const handleAddGroupSession = async (e) => {
         e.preventDefault();
 
-        if (!newGroupSession.sessionDate || !newGroupSession.sessionTime || !newGroupSession.subject || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
-            alert('Please fill in all fields');
+        if (!newGroupSession.sessionDate || !newGroupSession.sessionTime || newGroupSession.subjects.length === 0 || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
+            alert('Please fill in all fields and select at least one subject');
             return;
         }
 
@@ -194,7 +194,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             .insert({
                 session_date: newGroupSession.sessionDate,
                 session_time: newGroupSession.sessionTime,
-                subject: newGroupSession.subject,
+                subjects: newGroupSession.subjects, // Now an array
                 room_assignment: newGroupSession.roomAssignment,
                 teacher_name: newGroupSession.teacherName
             });
@@ -206,7 +206,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             setNewGroupSession({
                 sessionDate: '',
                 sessionTime: '',
-                subject: '',
+                subjects: [],
                 roomAssignment: '',
                 teacherName: ''
             });
@@ -237,7 +237,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             <h3>Add New Tutor</h3>
             <form onSubmit={handleSubmit}>
                 <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-                <input type="text" placeholder="Subjects (e.g., Calc AB, Physics)" value={subjects} onChange={(e) => setSubjects(e.target.value)} required />
+                <input type="text" placeholder="Subjects (e.g., Calc AB, Geometry)" value={subjects} onChange={(e) => setSubjects(e.target.value)} required />
 
                 <ImageUpload
                     onUpload={(url) => setPhotoUrl(url)}
@@ -275,26 +275,38 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Subject</label>
-                        <select
-                            value={newGroupSession.subject}
-                            onChange={(e) => setNewGroupSession({ ...newGroupSession, subject: e.target.value })}
-                            required
-                        >
-                            <option value="">Select subject</option>
-                            <option value="Pre-AP Geometry">Pre-AP Geometry</option>
-                            <option value="Geometry">Geometry</option>
-                            <option value="Advanced Algebra 2">Advanced Algebra 2</option>
-                            <option value="Algebra 2">Algebra 2</option>
-                            <option value="AP Precalculus">AP Precalculus</option>
-                        </select>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Subjects (select multiple)</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '10px', backgroundColor: 'var(--bg-primary)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                            {['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'].map(subject => (
+                                <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9em' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={newGroupSession.subjects.includes(subject)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setNewGroupSession({
+                                                    ...newGroupSession,
+                                                    subjects: [...newGroupSession.subjects, subject]
+                                            });
+                                            } else {
+                                                setNewGroupSession({
+                                                    ...newGroupSession,
+                                                    subjects: newGroupSession.subjects.filter(s => s !== subject)
+                                            });
+                                            }
+                                        }}
+                                    />
+                                    {subject}
+                                </label>
+                            ))}
+                        </div>
                     </div>
 
                     <div>
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Room Assignment</label>
                         <input
                             type="text"
-                            placeholder="e.g., Mr. McKean's Room"
+                            placeholder="e.g., N318"
                             value={newGroupSession.roomAssignment}
                             onChange={(e) => setNewGroupSession({ ...newGroupSession, roomAssignment: e.target.value })}
                             required
@@ -324,9 +336,12 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                     groupSessions.map(session => (
                         <div key={session.id} className="tutor-manage-item">
                             <div>
-                                <strong>{session.subject}</strong>
+                                <strong>{session.session_time}</strong>
                                 <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                                    {new Date(session.session_date).toLocaleDateString()}, {session.session_time} • {session.room_assignment}
+                                    {new Date(session.session_date).toLocaleDateString()} • {session.room_assignment}
+                                </p>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                    Subjects: {session.subjects && session.subjects.length > 0 ? session.subjects.join(', ') : 'None'}
                                 </p>
                             </div>
                             <button

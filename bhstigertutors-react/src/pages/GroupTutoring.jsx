@@ -72,10 +72,7 @@ function GroupTutoring() {
 
     const handleSessionClick = (session) => {
         setSelectedSession(session);
-        setFormData(prev => ({
-            ...prev,
-            subject: session.subject
-        }));
+        // Don't auto-fill subject since there are multiple
         setShowRegistrationForm(true);
     };
 
@@ -229,7 +226,7 @@ function GroupTutoring() {
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Group Tutoring Registration</h2>
                 <form onSubmit={handleFormSubmit} className="registration-form">
                     <div className="form-group">
-                        <label>Session</label>
+                        <label>Session *</label>
                         <select 
                             value={selectedSession?.id || ''} 
                             onChange={(e) => {
@@ -241,7 +238,7 @@ function GroupTutoring() {
                             <option value="">Select a session</option>
                             {sessions.map(session => (
                                 <option key={session.id} value={session.id}>
-                                    {new Date(session.session_date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}, {session.session_time} {session.subject}
+                                    {new Date(session.session_date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}, {session.session_time}
                                 </option>
                             ))}
                         </select>
@@ -429,20 +426,16 @@ function GroupTutoring() {
                                 {day && <div className="day-number">{day}</div>}
                                 {daySessions.length > 0 && (
                                     <div className="sessions-container">
-                                        {daySessions
-                                            .sort((a, b) => {
-                                                const subjectOrder = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
-                                                return subjectOrder.indexOf(a.subject) - subjectOrder.indexOf(b.subject);
-                                            })
-                                            .map(session => (
-                                                <button
-                                                    key={session.id}
-                                                    className={`session-button subject-${session.subject.toLowerCase().replace(/\s+/g, '-')}`}
-                                                    onClick={() => handleSessionClick(session)}
-                                                >
-                                                    {session.session_time}: {session.subject}
-                                                </button>
-                                            ))}
+                                        {daySessions.map(session => (
+                                            <button
+                                                key={session.id}
+                                                className="session-button"
+                                                onClick={() => handleSessionClick(session)}
+                                                style={{ fontSize: '0.7em', padding: '6px 8px' }}
+                                            >
+                                                {session.session_time}
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
                             </div>
