@@ -55,6 +55,8 @@ function TutorProfilePage() {
 
     // Add this function to fetch tutor's sessions
     const fetchTutorSessions = async (userId) => {
+        if (!user?.email) return;
+        
         const { data, error } = await supabase
             .from('group_tutoring_registrations')
             .select(`
@@ -67,7 +69,7 @@ function TutorProfilePage() {
                     teacher_name
                 )
             `)
-            .eq('school_email', user?.email)
+            .eq('school_email', user.email)
             .order('registered_at', { ascending: false });
         
         if (error) console.error(error);
@@ -76,6 +78,8 @@ function TutorProfilePage() {
 
     // Add this function to calculate stats
     const fetchTutorStats = async () => {
+        if (!user?.email) return;
+        
         const { data, error } = await supabase
             .from('group_tutoring_registrations')
             .select(`
@@ -84,7 +88,7 @@ function TutorProfilePage() {
                     session_date
                 )
             `)
-            .eq('school_email', user?.email);
+            .eq('school_email', user.email);
         
         if (data) {
             const now = new Date();
@@ -113,10 +117,10 @@ function TutorProfilePage() {
             setSubjects(data.subjects || '');
             setPhotoUrl(data.photo || '');
             setPhotoPreview(data.photo || '');
-            fetchTutorSessions(userId);
-            fetchTutorStats();  // Add this
+            // Call these after setting the profile
+            await fetchTutorSessions(userId);
+            await fetchTutorStats();
         } else if (error?.code === 'PGRST116') {
-            // No profile yet - that's ok, they can create one
             setIsEditing(true);
         }
     };
