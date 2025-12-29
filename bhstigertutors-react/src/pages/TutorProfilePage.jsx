@@ -16,6 +16,9 @@ function TutorProfilePage() {
     const [photoUrl, setPhotoUrl] = useState('');
     const [photoPreview, setPhotoPreview] = useState('');
 
+    // Add this state
+    const [registeredSessions, setRegisteredSessions] = useState([]);
+
     useEffect(() => {
         checkUser();
     }, []);
@@ -43,6 +46,27 @@ function TutorProfilePage() {
         }
     };
 
+    // Add this function to fetch tutor's sessions
+    const fetchTutorSessions = async (userId) => {
+        const { data, error } = await supabase
+            .from('group_tutoring_registrations')
+            .select(`
+                *,
+                group_tutoring_sessions (
+                    id,
+                    session_date,
+                    session_time,
+                    room_assignment,
+                    teacher_name
+                )
+            `)
+            .eq('school_email', user?.email)
+            .order('registered_at', { ascending: false });
+        
+        if (error) console.error(error);
+        else setRegisteredSessions(data || []);
+    };
+
     const fetchTutorProfile = async (userId) => {
         const { data, error } = await supabase
             .from('tutors')
@@ -56,6 +80,7 @@ function TutorProfilePage() {
             setSubjects(data.subjects || '');
             setPhotoUrl(data.photo || '');
             setPhotoPreview(data.photo || '');
+            fetchTutorSessions(userId);  // Add this
         } else if (error?.code === 'PGRST116') {
             // No profile yet - that's ok, they can create one
             setIsEditing(true);
@@ -180,6 +205,36 @@ function TutorProfilePage() {
                         Edit Profile
                     </button>
                 </div>
+
+                {/* Add this section to display registered sessions */}
+                {userRole === 'tutor' && registeredSessions.length > 0 && (
+                    <div style={{ marginTop: '2rem' }}>
+                        <h3>Registered Sessions</h3>
+                        <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', padding: '1rem' }}>
+                            {registeredSessions.map(reg => (
+                                <div key={reg.id} style={{ 
+                                    padding: '1rem', 
+                                    borderBottom: '1px solid var(--border-color)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600 }}>
+                                            {reg.group_tutoring_sessions?.session_time}
+                                        </p>
+                                        <p style={{ margin: '0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                            {new Date(reg.group_tutoring_sessions?.session_date).toLocaleDateString()}
+                                        </p>
+                                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                            Room: {reg.group_tutoring_sessions?.room_assignment}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }

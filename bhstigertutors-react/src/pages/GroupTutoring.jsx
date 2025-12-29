@@ -18,6 +18,7 @@ function GroupTutoring() {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [confirmationData, setConfirmationData] = useState(null);
     const [user, setUser] = useState(null);
+    const [userRole, setUserRole] = useState(null);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -40,11 +41,23 @@ function GroupTutoring() {
     const checkUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
+        
         if (user) {
             setFormData(prev => ({
                 ...prev,
                 schoolEmail: user.email || ''
             }));
+
+            // Get user role
+            const { data: userData } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+            
+            if (userData) {
+                setUserRole(userData.role);
+            }
         }
     };
 
@@ -393,7 +406,93 @@ function GroupTutoring() {
         );
     }
 
-    return (
+    // Calendar section
+    const handleTutorSessionClick = async (session) => {
+        if (!user) {
+            alert('Please log in first');
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('group_tutoring_registrations')
+                .insert({
+                    session_id: session.id,
+                    full_name: user.email,
+                    school_email: user.email,
+                    subject: 'Tutor',
+                    help_needed: 'N/A',
+                    previous_programs: [],
+                    registered_at: new Date().toISOString(),
+                    room_assignment: session.room_assignment
+                });
+
+            if (error) {
+                if (error.code === '23505') {
+                    alert('You\'re already registered for this session');
+                } else {
+                    alert('Error registering: ' + error.message);
+                }
+            } else {
+                alert('Registered for session!');
+                fetchSessions();
+            }
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    };
+
+    const monthCalendar = (
+        <div className="group-tutoring">
+            <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Group Tutoring Sessions</h2>
+            <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Click to register for sessions</p>
+            
+            <div className="calendar-container">
+                <div className="calendar-header">
+                    <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="nav-button">← Previous</button>
+                    <h3>{monthName}</h3>
+                    <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="nav-button">Next →</button>
+                </div>
+
+                <div className="calendar-grid">
+                    <div className="day-label">Sun</div>
+                    <div className="day-label">Mon</div>
+                    <div className="day-label">Tue</div>
+                    <div className="day-label">Wed</div>
+                    <div className="day-label">Thu</div>
+                    <div className="day-label">Fri</div>
+                    <div className="day-label">Sat</div>
+
+                    {calendarDays.map((day, index) => {
+                        const date = day ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day) : null;
+                        const daySessions = date ? getSessionsForDate(date) : [];
+
+                        return (
+                            <div key={index} className={`calendar-day ${!day ? 'empty' : ''}`}>
+                                {day && <div className="day-number">{day}</div>}
+                                {daySessions.length > 0 && (
+                                    <div className="sessions-container">
+                                        {daySessions.map(session => (
+                                            <button
+                                                key={session.id}
+                                                className="session-button"
+                                                onClick={() => handleTutorSessionClick(session)}
+                                                style={{ fontSize: '0.7em', padding: '6px 8px' }}
+                                            >
+                                                {session.session_time}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+
+    const learnerForm = (
         <div className="group-tutoring">
             <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Group Tutoring</h2>
             
@@ -456,6 +555,8 @@ function GroupTutoring() {
             </div>
         </div>
     );
+
+    return userRole === 'tutor' ? monthCalendar : learnerForm;
 }
 
 export default GroupTutoring;
