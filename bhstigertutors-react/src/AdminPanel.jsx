@@ -286,14 +286,14 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                     let dayOfWeek = date.getDay();
                                     dayOfWeek = (dayOfWeek + 1) % 7;
                                     
-                                    if (dayOfWeek === 1) return <option key="6.2" value="6.2">6.2</option>;
-                                    if (dayOfWeek === 3) return (
+                                    if (dayOfWeek === 3) return <option key="6.2" value="6.2">6.2</option>;
+                                    if (dayOfWeek === 5) return (
                                         <>
                                             <option key="6.3" value="6.3">6.3</option>
                                             <option key="6.4" value="6.4">6.4</option>
                                         </>
                                     );
-                                    if (dayOfWeek === 4) return (
+                                    if (dayOfWeek === 6) return (
                                         <>
                                             <option key="6.5" value="6.5">6.5</option>
                                             <option key="6.6" value="6.6">6.6</option>
