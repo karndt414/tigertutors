@@ -160,7 +160,9 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     };
 
     const getFlexPeriodFromDate = (dateString) => {
-        const date = new Date(dateString);
+        // Parse date in local timezone (not UTC)
+        const [year, month, day] = dateString.split('-');
+        const date = new Date(year, month - 1, day);
         const dayOfWeek = date.getDay();
         
         switch(dayOfWeek) {
@@ -179,7 +181,9 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             return;
         }
 
-        const sessionDate = new Date(newGroupSession.sessionDate);
+        // Parse date in local timezone (not UTC)
+        const [year, month, day] = newGroupSession.sessionDate.split('-');
+        const sessionDate = new Date(year, month - 1, day);
         const dayOfWeek = sessionDate.getDay();
         
         // Only allow Tuesday, Thursday, Friday
