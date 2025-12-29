@@ -496,7 +496,7 @@ function GroupTutoring() {
         <div className="group-tutoring">
             <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Group Tutoring</h2>
             
-            <div className="group-tutoring-description">
+            <div className="group-tutoring-description" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
                 <p>
                     Group tutoring brings students and tutors together in a math classroom during flex. Once they arrive, students are assigned to a tutor who can help them with their current math class. Either one or two students are assigned to each tutor. Throughout the session, tutors explain concepts, work examples, and help with homework questions. Group tutoring is great for students who are struggling with a specific concept or want a convenient way to ask questions as they work on homework. All math students working on the listed subject are welcome, including those needing significant, consistent help or wanting to see if MATh tutoring is a good fit for them.
                 </p>

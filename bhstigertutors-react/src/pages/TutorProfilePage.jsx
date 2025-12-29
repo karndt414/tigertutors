@@ -268,7 +268,7 @@ function TutorProfilePage() {
                     </button>
                 </div>
 
-                {/* Add this section to display registered sessions */}
+                {/* Registered Sessions Section */}
                 {(userRole === 'tutor' || userRole === 'admin') && registeredSessions.length > 0 && (
                     <div style={{ marginTop: '2rem' }}>
                         <h3>Registered Sessions</h3>
