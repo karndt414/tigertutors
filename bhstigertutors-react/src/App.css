@@ -342,22 +342,34 @@ select:focus {
 /* Responsive */
 @media (max-width: 768px) {
   .nav-container {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 1rem;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 1.2em;
+    flex-shrink: 0;
   }
 
   .nav-links {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
-    width: 100%;
-    justify-content: flex-start;
+    width: auto;
+    justify-content: flex-end;
+    flex-wrap: wrap;
   }
 
   .nav-links a {
-    padding: 0.5rem 0;
-    font-size: 0.9em;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8em;
+  }
+
+  .login-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8em;
   }
 
   .main-content {
@@ -382,11 +394,6 @@ select:focus {
     gap: 1rem;
   }
 
-  .login-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.85em;
-  }
-
   button, .book-button {
     padding: 0.6rem 1.2rem;
     font-size: 0.9em;
@@ -395,25 +402,30 @@ select:focus {
 
 @media (max-width: 480px) {
   .navbar {
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
   }
 
   .nav-container {
-    padding: 0.75rem;
-    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    gap: 0.25rem;
   }
 
   .logo {
-    font-size: 1.2em;
+    font-size: 1em;
   }
 
   .nav-links {
-    gap: 0.3rem;
+    gap: 0.25rem;
   }
 
   .nav-links a {
-    font-size: 0.85em;
-    padding: 0.4rem 0;
+    font-size: 0.75em;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .login-button {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75em;
   }
 
   .main-content {
@@ -434,6 +446,6 @@ select:focus {
   input[type="password"],
   textarea,
   select {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
   }
 }
