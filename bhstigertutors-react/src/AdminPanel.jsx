@@ -274,7 +274,11 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                             <option value="">Select flex period</option>
                             {newGroupSession.sessionDate && (
                                 (() => {
-                                    const dayOfWeek = new Date(newGroupSession.sessionDate).getDay();
+                                    // Parse date in local timezone (not UTC)
+                                    const [year, month, day] = newGroupSession.sessionDate.split('-');
+                                    const date = new Date(year, month - 1, day);
+                                    const dayOfWeek = date.getDay();
+                                    
                                     if (dayOfWeek === 2) return <option key="6.2" value="6.2">6.2</option>;
                                     if (dayOfWeek === 4) return (
                                         <>
