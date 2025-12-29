@@ -380,8 +380,8 @@ select:focus {
   }
 
   .nav-links {
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 60px;
     left: 0;
     right: 0;
     background-color: var(--bg-secondary);
@@ -390,8 +390,10 @@ select:focus {
     flex-direction: column;
     gap: 0;
     padding: 0;
-    margin-top: -1px;
-    z-index: 100;
+    margin: 0;
+    z-index: 99;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
   }
 
   .nav-links.open {
