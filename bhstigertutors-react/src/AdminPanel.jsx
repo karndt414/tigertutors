@@ -17,6 +17,14 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [newRole, setNewRole] = useState('tutor');
     const [user, setUser] = useState(null);
     const [allUsers, setAllUsers] = useState([]);
+    const [groupSessions, setGroupSessions] = useState([]);
+    const [newGroupSession, setNewGroupSession] = useState({
+        sessionDate: '',
+        sessionTime: '',
+        subject: '',
+        roomAssignment: '',
+        teacherName: ''
+    });
 
     useEffect(() => {
         checkUser();
@@ -24,6 +32,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         fetchRegistrations();
         fetchAllowedRoles();
         fetchAllUsers();
+        fetchGroupSessions();
     }, []);
 
     const checkUser = async () => {
@@ -154,6 +163,16 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         else setAllUsers(data || []);
     };
 
+    const fetchGroupSessions = async () => {
+        const { data, error } = await supabase
+            .from('group_tutoring_sessions')
+            .select('*')
+            .order('session_date', { ascending: true });
+        
+        if (error) console.error(error);
+        else setGroupSessions(data || []);
+    };
+
     const handleDeleteRegistration = async (registrationId) => {
         if (!window.confirm('Remove this registration?')) return;
 
@@ -216,6 +235,55 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
+    const handleAddGroupSession = async (e) => {
+        e.preventDefault();
+
+        if (!newGroupSession.sessionDate || !newGroupSession.sessionTime || !newGroupSession.subject || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('group_tutoring_sessions')
+            .insert({
+                session_date: newGroupSession.sessionDate,
+                session_time: newGroupSession.sessionTime,
+                subject: newGroupSession.subject,
+                room_assignment: newGroupSession.roomAssignment,
+                teacher_name: newGroupSession.teacherName
+            });
+
+        if (error) {
+            alert('Error adding session: ' + error.message);
+        } else {
+            alert('Group tutoring session added!');
+            setNewGroupSession({
+                sessionDate: '',
+                sessionTime: '',
+                subject: '',
+                roomAssignment: '',
+                teacherName: ''
+            });
+            fetchGroupSessions();
+        }
+    };
+
+    const handleDeleteGroupSession = async (sessionId) => {
+        if (!window.confirm('Delete this group tutoring session?')) return;
+
+        const { error } = await supabase
+            .from('group_tutoring_sessions')
+            .delete()
+            .eq('id', sessionId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Session deleted');
+            fetchGroupSessions();
+        }
+    };
+
     return (
         <div className="admin-panel">
             <h2>Admin Panel <button onClick={onSignOut} className="signout-button">Log Out</button></h2>
@@ -252,6 +320,98 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
                 <button type="submit">Schedule Session</button>
             </form>
+
+            <hr />
+
+            <h3>Create Group Tutoring Sessions</h3>
+            <form onSubmit={handleAddGroupSession} style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Session Date</label>
+                        <input
+                            type="datetime-local"
+                            value={newGroupSession.sessionDate}
+                            onChange={(e) => setNewGroupSession({ ...newGroupSession, sessionDate: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Session Time (e.g., 6.2, 6.3)</label>
+                        <input
+                            type="text"
+                            placeholder="6.2"
+                            value={newGroupSession.sessionTime}
+                            onChange={(e) => setNewGroupSession({ ...newGroupSession, sessionTime: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Subject</label>
+                        <select
+                            value={newGroupSession.subject}
+                            onChange={(e) => setNewGroupSession({ ...newGroupSession, subject: e.target.value })}
+                            required
+                        >
+                            <option value="">Select subject</option>
+                            <option value="Pre-AP Geometry">Pre-AP Geometry</option>
+                            <option value="Geometry">Geometry</option>
+                            <option value="Advanced Algebra 2">Advanced Algebra 2</option>
+                            <option value="Algebra 2">Algebra 2</option>
+                            <option value="AP Precalculus">AP Precalculus</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Room Assignment</label>
+                        <input
+                            type="text"
+                            placeholder="e.g., Mr. McKean's Room"
+                            value={newGroupSession.roomAssignment}
+                            onChange={(e) => setNewGroupSession({ ...newGroupSession, roomAssignment: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Teacher Name</label>
+                        <input
+                            type="text"
+                            placeholder="Teacher name"
+                            value={newGroupSession.teacherName}
+                            onChange={(e) => setNewGroupSession({ ...newGroupSession, teacherName: e.target.value })}
+                            required
+                        />
+                    </div>
+                </div>
+
+                <button type="submit" style={{ gridColumn: '1 / -1', marginTop: '15px' }}>Add Group Tutoring Session</button>
+            </form>
+
+            <h3>Manage Group Tutoring Sessions</h3>
+            <div className="tutor-manage-list">
+                {groupSessions.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No group tutoring sessions yet</p>
+                ) : (
+                    groupSessions.map(session => (
+                        <div key={session.id} className="tutor-manage-item">
+                            <div>
+                                <strong>{session.subject}</strong>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                    {new Date(session.session_date).toLocaleDateString()}, {session.session_time} • {session.room_assignment}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => handleDeleteGroupSession(session.id)}
+                                className="delete-button"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    ))
+                )}
+            </div>
 
             <hr />
 
