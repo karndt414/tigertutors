@@ -163,7 +163,8 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         // Parse date in local timezone (not UTC)
         const [year, month, day] = dateString.split('-');
         const date = new Date(year, month - 1, day);
-        const dayOfWeek = date.getDay();
+        let dayOfWeek = date.getDay();
+        dayOfWeek = (dayOfWeek + 1) % 7;  // Add 1 to shift all days
         
         switch(dayOfWeek) {
             case 2: return '6.2';  // Tuesday
@@ -184,7 +185,8 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         // Parse date in local timezone (not UTC)
         const [year, month, day] = newGroupSession.sessionDate.split('-');
         const sessionDate = new Date(year, month - 1, day);
-        const dayOfWeek = sessionDate.getDay();
+        let dayOfWeek = sessionDate.getDay();
+        dayOfWeek = (dayOfWeek + 1) % 7;  // Add 1 to shift all days
         
         // Only allow Tuesday, Thursday, Friday
         if (![2, 4, 5].includes(dayOfWeek)) {
@@ -278,6 +280,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                     const [year, month, day] = newGroupSession.sessionDate.split('-');
                                     const date = new Date(year, month - 1, day);
                                     const dayOfWeek = date.getDay();
+                                    dayOfWeek = (dayOfWeek + 1) % 7;
                                     
                                     if (dayOfWeek === 2) return <option key="6.2" value="6.2">6.2</option>;
                                     if (dayOfWeek === 4) return (
