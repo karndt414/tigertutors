@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import './GroupTutoring.css';
 
+const FLEX_SCHEDULE = {
+    '6.2': 2,  // Tuesday (0=Sun, 1=Mon, 2=Tue, etc.)
+    '6.3': 4,  // Thursday
+    '6.4': 4,  // Thursday
+    '6.5': 5,  // Friday
+    '6.6': 5   // Friday
+};
+
 function GroupTutoring() {
     const [sessions, setSessions] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -54,11 +62,19 @@ function GroupTutoring() {
     const getSessionsForDate = (date) => {
         return sessions.filter(session => {
             const sessionDate = new Date(session.session_date);
-            return (
-                sessionDate.getDate() === date.getDate() &&
-                sessionDate.getMonth() === date.getMonth() &&
-                sessionDate.getFullYear() === date.getFullYear()
-            );
+            const dayOfWeek = sessionDate.getDay();
+            
+            // Check if date matches
+            const dateMatches = 
+              sessionDate.getDate() === date.getDate() &&
+              sessionDate.getMonth() === date.getMonth() &&
+              sessionDate.getFullYear() === date.getFullYear();
+
+            if (!dateMatches) return false;
+
+            // Check if flex period is allowed on this day
+            const allowedDay = FLEX_SCHEDULE[session.session_time];
+            return allowedDay === dayOfWeek;
         });
     };
 
@@ -72,7 +88,6 @@ function GroupTutoring() {
 
     const handleSessionClick = (session) => {
         setSelectedSession(session);
-        // Don't auto-fill subject since there are multiple
         setShowRegistrationForm(true);
     };
 
@@ -225,23 +240,19 @@ function GroupTutoring() {
             <div className="group-tutoring">
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Group Tutoring Registration</h2>
                 <form onSubmit={handleFormSubmit} className="registration-form">
+                    {/* Hidden session input - no selection needed */}
+                    <input type="hidden" value={selectedSession?.id || ''} />
+
                     <div className="form-group">
                         <label>Session *</label>
-                        <select 
-                            value={selectedSession?.id || ''} 
-                            onChange={(e) => {
-                                const session = sessions.find(s => s.id === parseInt(e.target.value));
-                                if (session) handleSessionClick(session);
-                            }}
-                            required
-                        >
-                            <option value="">Select a session</option>
-                            {sessions.map(session => (
-                                <option key={session.id} value={session.id}>
-                                    {new Date(session.session_date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}, {session.session_time}
-                                </option>
-                            ))}
-                        </select>
+                        <div style={{ 
+                            padding: '0.75rem', 
+                            backgroundColor: 'var(--bg-primary)',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-color)'
+                        }}>
+                            <strong>{selectedSession?.session_time}</strong> - {new Date(selectedSession?.session_date).toLocaleDateString()}
+                        </div>
                     </div>
 
                     <div className="form-group">
