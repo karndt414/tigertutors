@@ -1,0 +1,165 @@
+.tutor-profile-page {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.tutor-profile-page h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Profile Card (View Mode) */
+.profile-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info h3 {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1.5em;
+}
+
+.profile-info .subjects {
+    margin: 1rem 0;
+    color: var(--text-secondary);
+    font-size: 1em;
+}
+
+.profile-info .status {
+    margin: 1rem 0;
+    color: var(--text-secondary);
+    font-size: 1em;
+}
+
+.edit-profile-button {
+    margin-top: 1.5rem;
+    padding: 0.75rem 2rem;
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.edit-profile-button:hover {
+    background-color: var(--accent-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Form (Edit Mode) */
+.profile-form {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1em;
+    font-family: var(--font-body);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.submit-button,
+.cancel-button {
+    padding: 0.75rem 2rem;
+    font-size: 1em;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.submit-button {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: var(--accent-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.cancel-button:hover {
+    background-color: var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .tutor-profile-page {
+        padding: 15px;
+    }
+
+    .profile-card,
+    .profile-form {
+        padding: 1.5rem;
+    }
+
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+    }
+}

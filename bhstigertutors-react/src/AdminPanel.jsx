@@ -5,10 +5,6 @@ import EditModal from './EditModal';
 import './AdminPanel.css';
 
 function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
-    const [name, setName] = useState('');
-    const [subjects, setSubjects] = useState('');
-    const [photoUrl, setPhotoUrl] = useState('');
-    const [loading, setLoading] = useState(false);
     const [editingTutor, setEditingTutor] = useState(null);
     const [allowedRoles, setAllowedRoles] = useState([]);
     const [newEmail, setNewEmail] = useState('');
@@ -36,32 +32,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const checkUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!photoUrl) {
-            alert('Please upload a photo for the tutor.');
-            return;
-        }
-
-        setLoading(true);
-
-        const { error } = await supabase
-            .from('tutors')
-            .insert([{ name, subjects, photo: photoUrl}]);
-
-        if (error) {
-            alert('Error adding tutor: ' + error.message);
-        } else {
-            alert('Tutor added!');
-            setName('');
-            setSubjects('');
-            setPhotoUrl('');
-            onTutorAdded();
-        }
-        setLoading(false);
     };
 
     const handleDelete = async (tutorId) => {
@@ -233,20 +203,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     return (
         <div className="admin-panel">
             <h2>Admin Panel <button onClick={onSignOut} className="signout-button">Log Out</button></h2>
-
-            <h3>Add New Tutor</h3>
-            <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-                <input type="text" placeholder="Subjects (e.g., Calc AB, Geometry)" value={subjects} onChange={(e) => setSubjects(e.target.value)} required />
-
-                <ImageUpload
-                    onUpload={(url) => setPhotoUrl(url)}
-                />
-
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Adding...' : 'Add Tutor'}
-                </button>
-            </form>
 
             <hr />
 
