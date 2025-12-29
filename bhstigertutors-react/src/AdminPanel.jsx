@@ -106,7 +106,13 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const fetchGroupTutoringRegistrations = async () => {
         const { data, error } = await supabase
             .from('group_tutoring_registrations')
-            .select('*')
+            .select(`
+                *,
+                group_tutoring_sessions (
+                    session_date,
+                    room_assignment
+                )
+            `)
             .order('registered_at', { ascending: false });
         
         if (error) console.error(error);
@@ -404,7 +410,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                     </td>
                                     <td><strong>{reg.session_time}</strong></td>
                                     <td><strong>{reg.room_assignment}</strong></td>
-                                    <td>{new Date(reg.registered_at).toLocaleDateString()}</td>
+                                    <td>{reg.group_tutoring_sessions?.session_date ? new Date(reg.group_tutoring_sessions.session_date).toLocaleDateString() : 'N/A'}</td>
                                 </tr>
                             ))
                         )}
