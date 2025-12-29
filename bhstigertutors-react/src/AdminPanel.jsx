@@ -173,9 +173,9 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         dayOfWeek = (dayOfWeek + 1) % 7;  // Add 1 to shift all days
         
         switch(dayOfWeek) {
-            case 2: return '6.2';  // Tuesday
-            case 4: return '6.3';  // Thursday (default to 6.3, user can pick 6.4)
-            case 5: return '6.5';  // Friday (default to 6.5, user can pick 6.6)
+            case 3: return '6.2';  // Tuesday
+            case 5: return '6.3';  // Thursday (default to 6.3, user can pick 6.4)
+            case 6: return '6.5';  // Friday (default to 6.5, user can pick 6.6)
             default: return '';
         }
     };
