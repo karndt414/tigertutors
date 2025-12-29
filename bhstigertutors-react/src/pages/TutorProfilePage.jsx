@@ -19,6 +19,13 @@ function TutorProfilePage() {
     // Add this state
     const [registeredSessions, setRegisteredSessions] = useState([]);
 
+    // Add this state for stats
+    const [tutorStats, setTutorStats] = useState({
+        totalSessions: 0,
+        totalStudents: 0,
+        upcomingSessions: 0
+    });
+
     useEffect(() => {
         checkUser();
     }, []);
@@ -67,6 +74,32 @@ function TutorProfilePage() {
         else setRegisteredSessions(data || []);
     };
 
+    // Add this function to calculate stats
+    const fetchTutorStats = async () => {
+        const { data, error } = await supabase
+            .from('group_tutoring_registrations')
+            .select(`
+                *,
+                group_tutoring_sessions (
+                    session_date
+                )
+            `)
+            .eq('school_email', user?.email);
+        
+        if (data) {
+            const now = new Date();
+            const upcoming = data.filter(reg => 
+                new Date(reg.group_tutoring_sessions?.session_date) > now
+            ).length;
+            
+            setTutorStats({
+                totalSessions: data.length,
+                totalStudents: new Set(data.map(d => d.full_name)).size,
+                upcomingSessions: upcoming
+            });
+        }
+    };
+
     const fetchTutorProfile = async (userId) => {
         const { data, error } = await supabase
             .from('tutors')
@@ -80,7 +113,8 @@ function TutorProfilePage() {
             setSubjects(data.subjects || '');
             setPhotoUrl(data.photo || '');
             setPhotoPreview(data.photo || '');
-            fetchTutorSessions(userId);  // Add this
+            fetchTutorSessions(userId);
+            fetchTutorStats();  // Add this
         } else if (error?.code === 'PGRST116') {
             // No profile yet - that's ok, they can create one
             setIsEditing(true);
@@ -189,16 +223,44 @@ function TutorProfilePage() {
                     <div className="profile-info">
                         <h3>{name}</h3>
                         <p className="subjects"><strong>Subjects:</strong> {subjects}</p>
-                        <p className="status">
-                            <strong>Approval Status:</strong>{' '}
-                            <span style={{
-                                textTransform: 'capitalize',
-                                fontWeight: 600,
-                                color: tutorProfile.is_approved ? 'var(--accent-success)' : 'var(--text-secondary)'
-                            }}>
-                                {tutorProfile.is_approved ? '✓ Approved' : 'Pending Review'}
-                            </span>
-                        </p>
+                    </div>
+
+                    {/* Add this statistics section */}
+                    <div className="profile-stats" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '1rem',
+                        marginTop: '1.5rem',
+                        padding: '1rem',
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderRadius: '8px'
+                    }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ margin: '0', fontSize: '1.8em', fontWeight: 700, color: 'var(--accent-primary)' }}>
+                                {tutorStats.totalSessions}
+                            </p>
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                Total Sessions
+                            </p>
+                        </div>
+                        
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ margin: '0', fontSize: '1.8em', fontWeight: 700, color: 'var(--accent-primary)' }}>
+                                {tutorStats.upcomingSessions}
+                            </p>
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                Upcoming Sessions
+                            </p>
+                        </div>
+                        
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ margin: '0', fontSize: '1.8em', fontWeight: 700, color: 'var(--accent-primary)' }}>
+                                {tutorStats.totalStudents}
+                            </p>
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                Unique Students
+                            </p>
+                        </div>
                     </div>
 
                     <button onClick={() => setIsEditing(true)} className="edit-profile-button">
