@@ -5,11 +5,11 @@ import EditModal from './EditModal';
 import './AdminPanel.css';
 
 const FLEX_SCHEDULE = {
-  '6.2': 2,  // Tuesday
-  '6.3': 4,  // Thursday
-  '6.4': 4,  // Thursday
-  '6.5': 5,  // Friday
-  '6.6': 5   // Friday
+  '6.2': 3,  // Tuesday
+  '6.3': 5,  // Thursday
+  '6.4': 5,  // Thursday
+  '6.5': 6,  // Friday
+  '6.6': 6   // Friday
 };
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
