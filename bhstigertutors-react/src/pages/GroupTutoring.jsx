@@ -436,6 +436,8 @@ function GroupTutoring() {
             } else {
                 alert('Registered for session!');
                 fetchSessions();
+                // Add this to refresh the profile page if they navigate there
+                window.dispatchEvent(new Event('sessionRegistered'));
             }
         } catch (err) {
             console.error('Error:', err);

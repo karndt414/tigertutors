@@ -28,7 +28,18 @@ function TutorProfilePage() {
 
     useEffect(() => {
         checkUser();
-    }, []);
+        
+        // Listen for registration updates
+        const handleSessionRegistered = () => {
+            if (user) {
+                fetchTutorSessions(user.id);
+                fetchTutorStats();
+            }
+        };
+        
+        window.addEventListener('sessionRegistered', handleSessionRegistered);
+        return () => window.removeEventListener('sessionRegistered', handleSessionRegistered);
+    }, [user]);
 
     const checkUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
