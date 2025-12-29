@@ -261,7 +261,11 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                         />
                         {newGroupSession.sessionDate && (
                             <p style={{ margin: '10px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                                Selected: {new Date(newGroupSession.sessionDate).toLocaleDateString('en-US', { weekday: 'long' })}
+                                Selected: {(() => {
+                                    const [year, month, day] = newGroupSession.sessionDate.split('-');
+                                    const date = new Date(year, month - 1, day);
+                                    return date.toLocaleDateString('en-US', { weekday: 'long' });
+                                })()}
                             </p>
                         )}
                     </div>
