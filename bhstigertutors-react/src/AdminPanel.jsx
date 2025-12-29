@@ -15,7 +15,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [newGroupSession, setNewGroupSession] = useState({
         sessionDate: '',
         sessionTime: '',
-        subjects: [], // Changed to array
         roomAssignment: '',
         teacherName: ''
     });
@@ -154,17 +153,19 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const handleAddGroupSession = async (e) => {
         e.preventDefault();
 
-        if (!newGroupSession.sessionDate || !newGroupSession.sessionTime || newGroupSession.subjects.length === 0 || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
-            alert('Please fill in all fields and select at least one subject');
+        if (!newGroupSession.sessionDate || !newGroupSession.sessionTime || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
+            alert('Please fill in all fields');
             return;
         }
+
+        const allSubjects = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
 
         const { error } = await supabase
             .from('group_tutoring_sessions')
             .insert({
                 session_date: newGroupSession.sessionDate,
                 session_time: newGroupSession.sessionTime,
-                subjects: newGroupSession.subjects, // Now an array
+                subjects: allSubjects, // All subjects always included
                 room_assignment: newGroupSession.roomAssignment,
                 teacher_name: newGroupSession.teacherName
             });
@@ -176,7 +177,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             setNewGroupSession({
                 sessionDate: '',
                 sessionTime: '',
-                subjects: [],
                 roomAssignment: '',
                 teacherName: ''
             });
@@ -231,38 +231,10 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Subjects (select multiple)</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '10px', backgroundColor: 'var(--bg-primary)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-                            {['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'].map(subject => (
-                                <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9em' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={newGroupSession.subjects.includes(subject)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setNewGroupSession({
-                                                    ...newGroupSession,
-                                                    subjects: [...newGroupSession.subjects, subject]
-                                            });
-                                            } else {
-                                                setNewGroupSession({
-                                                    ...newGroupSession,
-                                                    subjects: newGroupSession.subjects.filter(s => s !== subject)
-                                            });
-                                            }
-                                        }}
-                                    />
-                                    {subject}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Room Assignment</label>
                         <input
                             type="text"
-                            placeholder="e.g., N318"
+                            placeholder="e.g., Mr. McKean's Room"
                             value={newGroupSession.roomAssignment}
                             onChange={(e) => setNewGroupSession({ ...newGroupSession, roomAssignment: e.target.value })}
                             required
