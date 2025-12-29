@@ -109,7 +109,9 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             .select(`
                 *,
                 group_tutoring_sessions (
+                    id,
                     session_date,
+                    session_time,
                     room_assignment
                 )
             `)
@@ -408,8 +410,8 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                             ? reg.previous_programs.join(', ') 
                                             : 'None'}
                                     </td>
-                                    <td><strong>{reg.session_time}</strong></td>
-                                    <td><strong>{reg.room_assignment}</strong></td>
+                                    <td><strong>{reg.group_tutoring_sessions?.session_time || reg.session_time}</strong></td>
+                                    <td><strong>{reg.group_tutoring_sessions?.room_assignment || reg.room_assignment}</strong></td>
                                     <td>{reg.group_tutoring_sessions?.session_date ? new Date(reg.group_tutoring_sessions.session_date).toLocaleDateString() : 'N/A'}</td>
                                 </tr>
                             ))
