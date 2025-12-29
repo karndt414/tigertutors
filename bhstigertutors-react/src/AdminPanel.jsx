@@ -10,8 +10,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [photoUrl, setPhotoUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [editingTutor, setEditingTutor] = useState(null);
-    const [sessions, setSessions] = useState([]);
-    const [registrations, setRegistrations] = useState([]);
     const [allowedRoles, setAllowedRoles] = useState([]);
     const [newEmail, setNewEmail] = useState('');
     const [newRole, setNewRole] = useState('tutor');
@@ -25,14 +23,14 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         roomAssignment: '',
         teacherName: ''
     });
+    const [groupTutoringRegistrations, setGroupTutoringRegistrations] = useState([]);
 
     useEffect(() => {
         checkUser();
-        fetchSessions();
-        fetchRegistrations();
         fetchAllowedRoles();
         fetchAllUsers();
         fetchGroupSessions();
+        fetchGroupTutoringRegistrations();
     }, []);
 
     const checkUser = async () => {
@@ -84,29 +82,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
-    const handleGroupSubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-
-        const { error } = await supabase
-            .from('group_sessions')
-            .insert([{
-                subject: formData.get('subject'),
-                tutor_id: formData.get('tutor_id'),
-                session_date: formData.get('session_date'),
-                zoom_link: formData.get('zoom_link'),
-                max_capacity: 10
-            }]);
-
-        if (error) {
-            alert("Error: " + error.message);
-        } else {
-            alert("Group session scheduled!");
-            e.target.reset();
-            fetchSessions();
-        }
-    };
-
     const handleApprove = async (tutorId) => {
         const { error } = await supabase
             .from('tutors')
@@ -120,27 +95,14 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
-    const fetchSessions = async () => {
+    const fetchGroupSessions = async () => {
         const { data, error } = await supabase
-            .from('group_sessions')
+            .from('group_tutoring_sessions')
             .select('*')
             .order('session_date', { ascending: true });
         
         if (error) console.error(error);
-        else setSessions(data || []);
-    };
-
-    const fetchRegistrations = async () => {
-        const { data, error } = await supabase
-            .from('registrations')
-            .select(`
-                *,
-                group_sessions ( subject, session_date, tutors ( name ) )
-            `)
-            .order('registered_at', { ascending: false });
-        
-        if (error) console.error(error);
-        else setRegistrations(data || []);
+        else setGroupSessions(data || []);
     };
 
     const fetchAllowedRoles = async () => {
@@ -163,30 +125,14 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         else setAllUsers(data || []);
     };
 
-    const fetchGroupSessions = async () => {
+    const fetchGroupTutoringRegistrations = async () => {
         const { data, error } = await supabase
-            .from('group_tutoring_sessions')
+            .from('group_tutoring_registrations')
             .select('*')
-            .order('session_date', { ascending: true });
+            .order('registered_at', { ascending: false });
         
         if (error) console.error(error);
-        else setGroupSessions(data || []);
-    };
-
-    const handleDeleteRegistration = async (registrationId) => {
-        if (!window.confirm('Remove this registration?')) return;
-
-        const { error } = await supabase
-            .from('registrations')
-            .delete()
-            .eq('id', registrationId);
-
-        if (error) {
-            alert('Error: ' + error.message);
-        } else {
-            alert('Registration removed');
-            fetchRegistrations();
-        }
+        else setGroupTutoringRegistrations(data || []);
     };
 
     const handleAddAllowedRole = async (e) => {
@@ -396,55 +342,54 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
             <hr />
 
-            <h3>Session Registrations</h3>
-            <div className="registrations-container">
-                {sessions.length === 0 ? (
-                    <p>No sessions scheduled yet.</p>
-                ) : (
-                    sessions.map(session => {
-                        const sessionRegs = registrations.filter(r => r.session_id === session.id);
-                        return (
-                            <div key={session.id} className="session-registration-card">
-                                <h4>{session.subject}</h4>
-                                <p><strong>When:</strong> {new Date(session.session_date).toLocaleString()}</p>
-                                <p><strong>Total Registered:</strong> <span className="reg-count">{sessionRegs.length}</span></p>
-                                
-                                {sessionRegs.length > 0 ? (
-                                    <div className="registrations-list">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Email</th>
-                                                    <th>Registered</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {sessionRegs.map(reg => (
-                                                    <tr key={reg.id}>
-                                                        <td>{reg.user_email}</td>
-                                                        <td>{new Date(reg.registered_at).toLocaleDateString()}</td>
-                                                        <td>
-                                                            <button 
-                                                                onClick={() => handleDeleteRegistration(reg.id)}
-                                                                className="delete-button"
-                                                                style={{ fontSize: '0.8em', padding: '4px 8px' }}
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ) : (
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>No registrations yet</p>
-                                )}
-                            </div>
-                        );
-                    })
-                )}
+            <h3>Group Tutoring Registrations</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                View all student registrations for group tutoring sessions
+            </p>
+
+            <div className="registrations-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Help Level</th>
+                            <th>Previous Programs</th>
+                            <th>Room Assignment</th>
+                            <th>Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {groupTutoringRegistrations.length === 0 ? (
+                            <tr>
+                                <td colSpan="7" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                    No registrations yet
+                                </td>
+                            </tr>
+                        ) : (
+                            groupTutoringRegistrations.map(reg => (
+                                <tr key={reg.id}>
+                                    <td>{reg.full_name}</td>
+                                    <td>{reg.school_email}</td>
+                                    <td>{reg.subject}</td>
+                                    <td style={{ fontSize: '0.85em' }}>
+                                        {reg.help_needed === "A lot! I don't understand at all." ? 'A lot' :
+                                         reg.help_needed === "Some. I understand some concepts, but I get stuck on lots of problems." ? 'Some' :
+                                         'Not much'}
+                                    </td>
+                                    <td style={{ fontSize: '0.85em' }}>
+                                        {reg.previous_programs && reg.previous_programs.length > 0 
+                                            ? reg.previous_programs.join(', ') 
+                                            : 'None'}
+                                    </td>
+                                    <td><strong>{reg.room_assignment}</strong></td>
+                                    <td>{new Date(reg.registered_at).toLocaleDateString()}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
 
             <hr />
