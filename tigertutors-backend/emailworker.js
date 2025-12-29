@@ -1,27 +1,16 @@
-const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-// Connect to your Supabase project
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// Set up Gmail to send emails
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
-
 // This function runs every 30 seconds to check for unsent emails
 async function processEmailQueue() {
   console.log('Checking for emails to send...');
 
-  // Get all pending emails from Supabase
+  // Get pending emails from queue
   const { data: emails, error } = await supabase
     .from('email_queue')
     .select('*')
@@ -39,17 +28,22 @@ async function processEmailQueue() {
     return;
   }
 
-  // Send each email one by one
+  // Send each email using Supabase's email function
   for (const email of emails) {
     try {
-      await transporter.sendMail({
-        from: process.env.GMAIL_USER,
-        to: email.to_email,
-        subject: email.subject,
-        html: email.body,
+      const { error: sendError } = await supabase.functions.invoke('send-email', {
+        body: {
+          to: email.to_email,
+          subject: email.subject,
+          html: email.body,
+        },
       });
 
-      // Mark as sent in Supabase
+      if (sendError) {
+        throw sendError;
+      }
+
+      // Mark as sent
       await supabase
         .from('email_queue')
         .update({
@@ -71,10 +65,8 @@ async function processEmailQueue() {
   }
 }
 
-// Run every 30 seconds forever
+// Run every 30 seconds
 setInterval(processEmailQueue, 30000);
-
-// Run once immediately
 processEmailQueue();
 
 console.log('Email worker started. Processing emails every 30 seconds...');
