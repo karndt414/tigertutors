@@ -24,7 +24,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [groupSessions, setGroupSessions] = useState([]);
     const [newGroupSession, setNewGroupSession] = useState({
         sessionDate: '',
-        sessionTime: '',
         roomAssignment: '',
         teacherName: ''
     });
@@ -160,28 +159,32 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
+    const getFlexPeriodFromDate = (dateString) => {
+        const date = new Date(dateString);
+        const dayOfWeek = date.getDay();
+        
+        switch(dayOfWeek) {
+            case 2: return '6.2';  // Tuesday
+            case 4: return '6.3';  // Thursday (default to 6.3, user can pick 6.4)
+            case 5: return '6.5';  // Friday (default to 6.5, user can pick 6.6)
+            default: return '';
+        }
+    };
+
     const handleAddGroupSession = async (e) => {
         e.preventDefault();
 
-        if (!newGroupSession.sessionDate || !newGroupSession.sessionTime || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
+        if (!newGroupSession.sessionDate || !newGroupSession.roomAssignment || !newGroupSession.teacherName) {
             alert('Please fill in all fields');
             return;
         }
 
-        // Validate flex period matches day of week
         const sessionDate = new Date(newGroupSession.sessionDate);
         const dayOfWeek = sessionDate.getDay();
-        const allowedDay = FLEX_SCHEDULE[newGroupSession.sessionTime];
-
-        if (allowedDay === undefined) {
-            alert('Invalid flex period. Please use 6.2, 6.3, 6.4, 6.5, or 6.6');
-            return;
-        }
-
-        if (dayOfWeek !== allowedDay) {
-            const expectedDay = DAY_NAMES[allowedDay];
-            const selectedDay = DAY_NAMES[dayOfWeek];
-            alert(`Flex period ${newGroupSession.sessionTime} must be on a ${expectedDay}, not ${selectedDay}`);
+        
+        // Only allow Tuesday, Thursday, Friday
+        if (![2, 4, 5].includes(dayOfWeek)) {
+            alert('Group tutoring sessions can only be on Tuesday, Thursday, or Friday');
             return;
         }
 
@@ -203,7 +206,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             alert('Group tutoring session added!');
             setNewGroupSession({
                 sessionDate: '',
-                sessionTime: '',
                 roomAssignment: '',
                 teacherName: ''
             });
@@ -239,22 +241,53 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                     <div>
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Session Date</label>
                         <input
-                            type="datetime-local"
+                            type="date"
                             value={newGroupSession.sessionDate}
-                            onChange={(e) => setNewGroupSession({ ...newGroupSession, sessionDate: e.target.value })}
+                            onChange={(e) => {
+                                const flexPeriod = getFlexPeriodFromDate(e.target.value);
+                                setNewGroupSession({ 
+                                    ...newGroupSession, 
+                                    sessionDate: e.target.value,
+                                    sessionTime: flexPeriod
+                                });
+                            }}
                             required
                         />
+                        {newGroupSession.sessionDate && (
+                            <p style={{ margin: '10px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                Selected: {new Date(newGroupSession.sessionDate).toLocaleDateString('en-US', { weekday: 'long' })}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Session Time (e.g., 6.2, 6.3)</label>
-                        <input
-                            type="text"
-                            placeholder="6.2"
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Flex Period</label>
+                        <select
                             value={newGroupSession.sessionTime}
                             onChange={(e) => setNewGroupSession({ ...newGroupSession, sessionTime: e.target.value })}
                             required
-                        />
+                        >
+                            <option value="">Select flex period</option>
+                            {newGroupSession.sessionDate && (
+                                (() => {
+                                    const dayOfWeek = new Date(newGroupSession.sessionDate).getDay();
+                                    if (dayOfWeek === 2) return <option key="6.2" value="6.2">6.2</option>;
+                                    if (dayOfWeek === 4) return (
+                                        <>
+                                            <option key="6.3" value="6.3">6.3</option>
+                                            <option key="6.4" value="6.4">6.4</option>
+                                        </>
+                                    );
+                                    if (dayOfWeek === 5) return (
+                                        <>
+                                            <option key="6.5" value="6.5">6.5</option>
+                                            <option key="6.6" value="6.6">6.6</option>
+                                        </>
+                                    );
+                                    return <option disabled>Invalid day</option>;
+                                })()
+                            )}
+                        </select>
                     </div>
 
                     <div>
