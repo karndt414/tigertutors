@@ -322,29 +322,87 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .group-tutoring {
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+
+    .group-tutoring-description {
+        padding: 1.5rem 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .group-tutoring-description p {
+        font-size: 0.95em;
+        margin: 0.75rem 0;
+    }
+
+    .calendar-container {
+        padding: 1.5rem 1rem;
+        margin: 1.5rem 0;
+    }
+
     .calendar-grid {
-        gap: 8px;
+        gap: 4px;
     }
 
     .calendar-day {
-        min-height: 100px;
-        padding: 8px;
+        min-height: 80px;
+        padding: 6px;
+    }
+
+    .day-number {
+        font-size: 0.85em;
     }
 
     .session-button {
-        font-size: 0.7em;
-        padding: 6px 8px;
+        font-size: 0.65em;
+        padding: 4px 6px;
     }
 
     .registration-form {
-        padding: 1.5rem;
+        padding: 1rem;
     }
 
-    .confirmation-container {
-        padding: 2rem;
+    .form-group {
+        margin-bottom: 1rem;
     }
 
-    .confirmation-room {
-        font-size: 1.5em;
+    .form-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .submit-button,
+    .cancel-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .group-tutoring-description {
+        padding: 1rem;
+    }
+
+    .calendar-container {
+        padding: 1rem;
+    }
+
+    .calendar-day {
+        min-height: 70px;
+        padding: 4px;
+    }
+
+    .day-label {
+        font-size: 0.8em;
+    }
+
+    .day-number {
+        font-size: 0.8em;
+    }
+
+    .session-button {
+        font-size: 0.6em;
+        padding: 3px 5px;
     }
 }
