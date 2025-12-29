@@ -72,6 +72,7 @@ function App() {
         await supabase.auth.signOut();
         setUser(null);
         setUserRole(null);
+        navigate('/'); 
     };
 
     if (authLoading) {
