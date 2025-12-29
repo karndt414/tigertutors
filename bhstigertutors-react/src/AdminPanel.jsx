@@ -4,6 +4,16 @@ import ImageUpload from './ImageUpload';
 import EditModal from './EditModal';
 import './AdminPanel.css';
 
+const FLEX_SCHEDULE = {
+  '6.2': 2,  // Tuesday
+  '6.3': 4,  // Thursday
+  '6.4': 4,  // Thursday
+  '6.5': 5,  // Friday
+  '6.6': 5   // Friday
+};
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
     const [editingTutor, setEditingTutor] = useState(null);
     const [allowedRoles, setAllowedRoles] = useState([]);
@@ -158,6 +168,23 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             return;
         }
 
+        // Validate flex period matches day of week
+        const sessionDate = new Date(newGroupSession.sessionDate);
+        const dayOfWeek = sessionDate.getDay();
+        const allowedDay = FLEX_SCHEDULE[newGroupSession.sessionTime];
+
+        if (allowedDay === undefined) {
+            alert('Invalid flex period. Please use 6.2, 6.3, 6.4, 6.5, or 6.6');
+            return;
+        }
+
+        if (dayOfWeek !== allowedDay) {
+            const expectedDay = DAY_NAMES[allowedDay];
+            const selectedDay = DAY_NAMES[dayOfWeek];
+            alert(`Flex period ${newGroupSession.sessionTime} must be on a ${expectedDay}, not ${selectedDay}`);
+            return;
+        }
+
         const allSubjects = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
 
         const { error } = await supabase
@@ -165,7 +192,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
             .insert({
                 session_date: newGroupSession.sessionDate,
                 session_time: newGroupSession.sessionTime,
-                subjects: allSubjects, // All subjects always included
+                subjects: allSubjects,
                 room_assignment: newGroupSession.roomAssignment,
                 teacher_name: newGroupSession.teacherName
             });
@@ -234,7 +261,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Room Assignment</label>
                         <input
                             type="text"
-                            placeholder="e.g., Mr. McKean's Room"
+                            placeholder="e.g., N318"
                             value={newGroupSession.roomAssignment}
                             onChange={(e) => setNewGroupSession({ ...newGroupSession, roomAssignment: e.target.value })}
                             required
