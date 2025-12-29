@@ -195,7 +195,7 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         dayOfWeek = (dayOfWeek + 1) % 7;  // Add 1 to shift all days
         
         // Only allow Tuesday, Thursday, Friday
-        if (![2, 4, 5].includes(dayOfWeek)) {
+        if (![3, 5, 6].includes(dayOfWeek)) {
             alert('Group tutoring sessions can only be on Tuesday, Thursday, or Friday');
             return;
         }
