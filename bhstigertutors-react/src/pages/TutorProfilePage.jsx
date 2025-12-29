@@ -96,11 +96,23 @@ function TutorProfilePage() {
                 new Date(reg.group_tutoring_sessions?.session_date) > now
             ).length;
             
-            setTutorStats({
+            const stats = {
                 totalSessions: data.length,
                 totalStudents: new Set(data.map(d => d.full_name)).size,
                 upcomingSessions: upcoming
-            });
+            };
+            
+            setTutorStats(stats);
+            
+            // Save stats to users table
+            await supabase
+                .from('users')
+                .update({
+                    total_sessions: stats.totalSessions,
+                    upcoming_sessions: stats.upcomingSessions,
+                    total_students: stats.totalStudents
+                })
+                .eq('id', user.id);
         }
     };
 
@@ -213,6 +225,11 @@ function TutorProfilePage() {
 
     // View mode (profile exists and not editing)
     if (tutorProfile && !isEditing) {
+        // Add this to show upcoming sessions separately
+        const upcomingSessions = registeredSessions.filter(reg => 
+            new Date(reg.group_tutoring_sessions?.session_date) > new Date()
+        );
+
         return (
             <div className="tutor-profile-page">
                 <h2>Tutor Profile</h2>
@@ -272,10 +289,40 @@ function TutorProfilePage() {
                     </button>
                 </div>
 
-                {/* Registered Sessions Section */}
-                {(userRole === 'tutor' || userRole === 'admin') && registeredSessions.length > 0 && (
+                {/* Upcoming Sessions Section */}
+                {upcomingSessions.length > 0 && (
                     <div style={{ marginTop: '2rem' }}>
-                        <h3>Registered Sessions</h3>
+                        <h3>Upcoming Sessions</h3>
+                        <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', padding: '1rem' }}>
+                            {upcomingSessions.map(reg => (
+                                <div key={reg.id} style={{ 
+                                    padding: '1rem', 
+                                    borderBottom: '1px solid var(--border-color)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600 }}>
+                                            {reg.group_tutoring_sessions?.session_time}
+                                        </p>
+                                        <p style={{ margin: '0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                            {new Date(reg.group_tutoring_sessions?.session_date).toLocaleDateString()}
+                                        </p>
+                                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                                            Room: {reg.group_tutoring_sessions?.room_assignment}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Registered Sessions Section (all sessions) */}
+                {registeredSessions.length > 0 && (
+                    <div style={{ marginTop: '2rem' }}>
+                        <h3>All Registered Sessions</h3>
                         <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', padding: '1rem' }}>
                             {registeredSessions.map(reg => (
                                 <div key={reg.id} style={{ 
