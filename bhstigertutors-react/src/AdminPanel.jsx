@@ -249,17 +249,31 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
 
         try {
-            const { error } = await supabase
+            // Delete from users table
+            const { error: userError } = await supabase
                 .from('users')
                 .delete()
                 .eq('id', userId);
 
-            if (error) {
-                alert('Error deleting user: ' + error.message);
-            } else {
-                alert('User deleted successfully');
-                fetchAllUsers();
+            if (userError) {
+                alert('Error deleting user: ' + userError.message);
+                return;
             }
+
+            // Delete from auth via API
+            const authResponse = await fetch('/api/delete-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+
+            if (authResponse.ok) {
+                alert('User deleted successfully');
+            } else {
+                alert('User deleted from database, but auth deletion failed');
+            }
+
+            fetchAllUsers();
         } catch (err) {
             console.error('Delete error:', err);
             alert('Error deleting user');
