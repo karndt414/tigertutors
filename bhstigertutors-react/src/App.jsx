@@ -85,7 +85,7 @@ function App() {
     return (
         <>
             <Routes>
-                <Route path="/" element={<Layout openLogin={() => setIsLoginModalOpen(true)} tutors={tutors} loading={loading} />}>
+                <Route path="/" element={<Layout openLogin={() => setIsLoginModalOpen(true)} tutors={tutors} loading={loading} onSignOut={handleSignOut} user={user} userRole={userRole} />}>
                     <Route index element={<HomePage />} />
                     <Route path="tutors" element={<FindTutorPage tutors={tutors} loading={loading} />} />
                     <Route path="about" element={<AboutPage />} />
