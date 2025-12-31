@@ -9,6 +9,7 @@ import GroupTutoring from './pages/GroupTutoring';
 import LoginModal from './LoginModal';
 import AdminPanel from './AdminPanel';
 import TutorProfilePage from './pages/TutorProfilePage';
+import LearnerProfilePage from './pages/LearnerProfilePage';
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -90,6 +91,7 @@ function App() {
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />
                     <Route path="tutor-profile" element={<TutorProfilePage />} />
+                    <Route path="/learner-profile" element={<LearnerProfilePage />} />
                     {user && userRole === 'admin' && <Route path="admin" element={<AdminPanel tutors={tutors} onTutorAdded={fetchTutors} onSignOut={handleSignOut} />} />}
                 </Route>
             </Routes>

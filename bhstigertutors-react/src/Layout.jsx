@@ -57,6 +57,7 @@ function Layout({ openLogin }) {
             <Link to="/group-tutoring">Sessions</Link>
             <Link to="/contact">Contact</Link>
             <Link to="/tutor-profile">Tutor Profile</Link>
+            <Link to="/learner-profile">My Profile</Link>
             {user && userRole === 'admin' && <Link to="/admin">Admin</Link>}
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
