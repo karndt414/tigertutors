@@ -98,28 +98,6 @@ function App() {
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
             />
-
-            <nav className="navbar">
-                <div className="nav-container">
-                    <h1 className="logo">Tiger Tutors</h1>
-                    
-                    <div className="nav-links">
-                        <a href="/">Home</a>
-                        {userRole && <a href="/group-tutoring">Group Tutoring</a>}
-                        {(userRole === 'tutor' || userRole === 'admin') && <a href="/tutor-profile">Profile</a>}
-                        {userRole === 'admin' && <a href="/admin">Admin Panel</a>}
-                        {userRole === 'learner' && <a href="/learner-dashboard">Dashboard</a>}
-                        {user ? (
-                            <>
-                                <span className="user-email">{user.email}</span>
-                                <button onClick={handleSignOut} className="login-button">Sign Out</button>
-                            </>
-                        ) : (
-                            <button onClick={() => setShowLoginModal(true)} className="login-button">Sign In</button>
-                        )}
-                    </div>
-                </div>
-            </nav>
         </>
     );
 }
