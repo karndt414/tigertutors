@@ -243,6 +243,29 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
         }
     };
 
+    const handleDeleteUser = async (userId, userEmail) => {
+        if (!window.confirm(`Are you sure you want to delete ${userEmail}? This cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('users')
+                .delete()
+                .eq('id', userId);
+
+            if (error) {
+                alert('Error deleting user: ' + error.message);
+            } else {
+                alert('User deleted successfully');
+                fetchAllUsers();
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('Error deleting user');
+        }
+    };
+
     return (
         <div className="admin-panel">
             <h2>Admin Panel <button onClick={onSignOut} className="signout-button">Log Out</button></h2>
@@ -516,12 +539,13 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                             <th>Email</th>
                             <th>Role</th>
                             <th>Joined</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {allUsers.length === 0 ? (
                             <tr>
-                                <td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                <td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                                     No users yet
                                 </td>
                             </tr>
@@ -546,6 +570,14 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
                                         </span>
                                     </td>
                                     <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <button
+                                            onClick={() => handleDeleteUser(user.id, user.email)}
+                                            className="delete-button"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}
