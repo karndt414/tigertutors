@@ -311,10 +311,6 @@ function ContactPage() {
             <ul style={{ lineHeight: 1.7, fontSize: '1.1em', margin: '40px 0 0 20px' }}>
                 <li><strong>Tutoring Lead:</strong> Megan Wolfka</li>
                 <li><strong>Student President:</strong> Koree Arndt</li>
-                <li>
-                    <strong>Contact Email:</strong>
-                    <a href={mailtoLink}> {contactEmail}</a>
-                </li>
             </ul>
         </div>
     );
