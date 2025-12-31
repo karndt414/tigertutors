@@ -10,6 +10,7 @@ import LoginModal from './LoginModal';
 import AdminPanel from './AdminPanel';
 import TutorProfilePage from './pages/TutorProfilePage';
 import LearnerProfilePage from './pages/LearnerProfilePage';
+import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -91,7 +92,11 @@ function App() {
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />
                     <Route path="tutor-profile" element={<TutorProfilePage />} />
-                    <Route path="/learner-profile" element={<LearnerProfilePage />} />
+                    <Route path="/learner-profile" element={
+                        <ProtectedLearnerRoute>
+                            <LearnerProfilePage />
+                        </ProtectedLearnerRoute>
+                    } />
                     {user && userRole === 'admin' && <Route path="admin" element={<AdminPanel tutors={tutors} onTutorAdded={fetchTutors} onSignOut={handleSignOut} />} />}
                 </Route>
             </Routes>
@@ -102,6 +107,38 @@ function App() {
             />
         </>
     );
+}
+
+// Create a protected route component
+function ProtectedLearnerRoute({ children }) {
+    const [userRole, setUserRole] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase
+                    .from('users')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                setUserRole(data?.role);
+            }
+            setLoading(false);
+        };
+
+        checkRole();
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
+    if (userRole !== 'learner') {
+        return <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--accent-danger)' }}>
+            Access denied. This page is for learners only.
+        </p>;
+    }
+
+    return children;
 }
 
 export default App;
