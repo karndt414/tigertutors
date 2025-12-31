@@ -25,6 +25,7 @@ function GroupTutoring() {
         fullName: '',
         schoolEmail: '',
         subject: '',
+        otherSubject: '',
         helpNeeded: '',
         previousPrograms: [],
         acknowledgements: {
@@ -134,6 +135,15 @@ function GroupTutoring() {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
+        let subject = formData.subject;
+        if (formData.subject === 'Other') {
+            if (!formData.otherSubject) {
+                alert('Please specify your subject');
+                return;
+            }
+            subject = formData.otherSubject;
+        }
+
         if (!formData.fullName || !formData.schoolEmail || !formData.subject || !formData.helpNeeded) {
             alert('Please fill in all fields');
             return;
@@ -153,7 +163,7 @@ function GroupTutoring() {
                     session_id: selectedSession.id,
                     full_name: formData.fullName,
                     school_email: formData.schoolEmail,
-                    subject: formData.subject,
+                    subject: subject,
                     help_needed: formData.helpNeeded,
                     previous_programs: formData.previousPrograms,
                     registered_at: new Date().toISOString(),
@@ -232,7 +242,7 @@ function GroupTutoring() {
         calendarDays.push(i);
     }
 
-    const mathSubjects = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
+    const mathSubjects = ['Algebra 1', 'Geometry', 'Algebra 2', 'Precalculus', 'AP Precalculus', 'AP Calculus AB', 'AP Calculus BC', 'AP Statistics', 'Other'];
 
     if (showConfirmation) {
         return (
@@ -325,6 +335,20 @@ function GroupTutoring() {
                             ))}
                         </select>
                     </div>
+
+                    {formData.subject === 'Other' && (
+                        <div className="form-group">
+                            <label>Please specify your subject *</label>
+                            <input
+                                type="text"
+                                name="otherSubject"
+                                placeholder="Enter your subject"
+                                value={formData.otherSubject}
+                                onChange={handleFormChange}
+                                required
+                            />
+                        </div>
+                    )}
 
                     <div className="form-group">
                         <label>How much help do you need? *</label>
