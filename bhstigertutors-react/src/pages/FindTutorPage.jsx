@@ -17,7 +17,6 @@ function FindTutorPage({ tutors, loading }) {
                             name={tutor.name}
                             subjects={tutor.subjects}
                             photo={tutor.photo}
-                            bookingLink={tutor.bookingLink}
                         />
                     ))
                 ) : (

@@ -1,58 +1,59 @@
 .tutor-card {
     background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: all 0.2s ease;
-    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
 .tutor-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px);
+    border-color: var(--accent-primary);
 }
 
 .tutor-photo {
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    background-color: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 .tutor-photo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.tutor-card:hover .tutor-photo img {
+    transform: scale(1.05);
 }
 
 .tutor-info {
-    padding: 1rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    justify-content: space-between;
 }
 
 .tutor-info h3 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.1em;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2em;
     color: var(--text-primary);
+    font-weight: 600;
 }
 
 .tutor-info p {
-    margin: 0 0 0.75rem 0;
-    font-size: 0.85em;
+    margin: 0;
     color: var(--text-secondary);
-    flex-grow: 1;
-}
-
-.tutor-info .book-button {
-    align-self: flex-start;
-    font-size: 0.85em;
-    padding: 0.5rem 1rem;
-    margin-top: auto;
+    font-size: 0.95em;
+    line-height: 1.5;
 }
 
 /* Responsive */
