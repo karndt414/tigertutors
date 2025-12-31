@@ -28,6 +28,7 @@ export default async function handler(req, res) {
             html: `
                 <h2>Registration Confirmed!</h2>
                 <p>You've successfully registered for a group tutoring session.</p>
+                <p>Sign up for RTI now!!</p>
                 <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
                     <p><strong>Session Details:</strong></p>
                     <p>📅 Date: ${new Date(sessionDetails.sessionDate).toLocaleDateString()}</p>

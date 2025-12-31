@@ -50,11 +50,10 @@ export default async function handler(req, res) {
                 <p><strong>Name:</strong> ${tutorName}</p>
                 <p><strong>Email:</strong> ${tutorEmail}</p>
                 <p><strong>Subject:</strong> ${subject}</p>
-                <p><strong>Experience:</strong> ${experience}</p>
             </div>
 
             <p>
-                <a href="https://your-site.vercel.app/admin" style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px;">
+                <a href="https://tigertutors.vercel.app/#/admin" style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px;">
                     Review in Admin Panel
                 </a>
             </p>
