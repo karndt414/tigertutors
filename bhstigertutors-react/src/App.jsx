@@ -103,14 +103,7 @@ function App() {
                 <div className="nav-container">
                     <h1 className="logo">Tiger Tutors</h1>
                     
-                    <button 
-                        className="hamburger-menu"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        ☰
-                    </button>
-                    
-                    <div className={`nav-links ${mobileMenuOpen ? 'open' : ''}`}>
+                    <div className="nav-links">
                         <a href="/">Home</a>
                         {userRole && <a href="/group-tutoring">Group Tutoring</a>}
                         {(userRole === 'tutor' || userRole === 'admin') && <a href="/tutor-profile">Profile</a>}
