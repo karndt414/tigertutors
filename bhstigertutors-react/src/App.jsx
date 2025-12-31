@@ -90,7 +90,11 @@ function App() {
                     <Route path="about" element={<AboutPage />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />
-                    <Route path="tutor-profile" element={<TutorProfilePage />} />
+                    <Route path="tutor-profile" element={
+                        <ProtectedTutorRoute>
+                            <TutorProfilePage />
+                        </ProtectedTutorRoute>
+                    } />
                     <Route path="/learner-profile" element={
                         <ProtectedLearnerRoute>
                             <LearnerProfilePage />
@@ -108,7 +112,39 @@ function App() {
     );
 }
 
-// Create a protected route component
+// Create a protected route component for tutors (and admins)
+function ProtectedTutorRoute({ children }) {
+    const [userRole, setUserRole] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkRole = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase
+                    .from('users')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                setUserRole(data?.role);
+            }
+            setLoading(false);
+        };
+
+        checkRole();
+    }, []);
+
+    if (loading) return <p>Loading...</p>;
+    if (userRole !== 'tutor' && userRole !== 'admin') {
+        return <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--accent-danger)' }}>
+            Access denied. This page is for tutors only.
+        </p>;
+    }
+
+    return children;
+}
+
+// Create a protected route component for learners
 function ProtectedLearnerRoute({ children }) {
     const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
