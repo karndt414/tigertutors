@@ -202,6 +202,18 @@ function TutorProfilePage() {
                     fetchTutorProfile(user.id);
                 }
             }
+
+            // Send notification email to admins
+            await fetch('/api/send-tutor-registration-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tutorName: name,
+                    tutorEmail: user.email,
+                    subject: subjects,
+                    experience: '' // Add experience field if available
+                })
+            });
         } catch (err) {
             console.error('Error:', err);
             alert('An error occurred. Please try again.');
