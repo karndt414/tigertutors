@@ -11,6 +11,7 @@ const transporter = nodemailer.createTransport({
 export default async function handler(req, res) {
     console.log('API Key present:', !!process.env.RESEND_API_KEY);
     console.log('Request received:', req.method);
+    console.log('Gmail email:', process.env.GMAIL_EMAIL);
     
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -20,8 +21,8 @@ export default async function handler(req, res) {
     console.log('Sending email to:', email);
     
     try {
-        await transporter.sendMail({
-            from: 'Tiger Tutors <' + process.env.GMAIL_EMAIL + '>',
+        const info = await transporter.sendMail({
+            from: `Tiger Tutors <${process.env.GMAIL_EMAIL}>`,
             to: email,
             subject: 'Session Registration Confirmed',
             html: `
@@ -39,9 +40,10 @@ export default async function handler(req, res) {
             `
         });
         
-        res.status(200).json({ success: true });
+        console.log('Email sent:', info.messageId);
+        res.status(200).json({ success: true, messageId: info.messageId });
     } catch (error) {
         console.error('Email error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 }
