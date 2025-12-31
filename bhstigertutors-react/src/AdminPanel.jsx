@@ -14,7 +14,7 @@ const FLEX_SCHEDULE = {
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
+function AdminPanel({ tutors, onTutorAdded }) {
     const [editingTutor, setEditingTutor] = useState(null);
     const [allowedRoles, setAllowedRoles] = useState([]);
     const [newEmail, setNewEmail] = useState('');
@@ -282,7 +282,6 @@ function AdminPanel({ tutors, onTutorAdded, onSignOut }) {
 
     return (
         <div className="admin-panel">
-            <h2>Admin Panel <button onClick={onSignOut} className="signout-button">Log Out</button></h2>
 
             <hr />
 
