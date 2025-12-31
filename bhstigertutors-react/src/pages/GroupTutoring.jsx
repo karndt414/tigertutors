@@ -165,6 +165,25 @@ function GroupTutoring() {
                 return;
             }
 
+            // Send confirmation email
+            try {
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: formData.schoolEmail,
+                        sessionDetails: {
+                            sessionDate: selectedSession.session_date,
+                            sessionTime: selectedSession.session_time,
+                            roomAssignment: selectedSession.room_assignment,
+                            teacherName: selectedSession.teacher_name
+                        }
+                    })
+                });
+            } catch (emailErr) {
+                console.error('Email send error:', emailErr);
+            }
+
             // Show confirmation with room assignment
             setConfirmationData({
                 room: selectedSession.room_assignment,
@@ -179,9 +198,6 @@ function GroupTutoring() {
 
             setShowRegistrationForm(false);
             setShowConfirmation(true);
-
-            // Send confirmation email
-            await sendConfirmationEmail(formData.schoolEmail, confirmationData);
 
         } catch (err) {
             console.error('Registration error:', err);
@@ -434,9 +450,27 @@ function GroupTutoring() {
                     alert('Error registering: ' + error.message);
                 }
             } else {
+                // Send confirmation email to tutor
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: user.email,
+                            sessionDetails: {
+                                sessionDate: session.session_date,
+                                sessionTime: session.session_time,
+                                roomAssignment: session.room_assignment,
+                                teacherName: session.teacher_name
+                            }
+                        })
+                    });
+                } catch (emailErr) {
+                    console.error('Email send error:', emailErr);
+                }
+
                 alert('Registered for session!');
                 fetchSessions();
-                // Add this to refresh the profile page if they navigate there
                 window.dispatchEvent(new Event('sessionRegistered'));
             }
         } catch (err) {
