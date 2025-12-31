@@ -134,9 +134,8 @@ function GroupTutoring() {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (!formData.fullName || !formData.schoolEmail || !formData.subject || !formData.helpNeeded) {
-            alert('Please fill in all required fields');
+            alert('Please fill in all fields');
             return;
         }
 
@@ -146,7 +145,8 @@ function GroupTutoring() {
         }
 
         try {
-            // Save registration to database
+            console.log('Submitting registration...');
+            
             const { data, error } = await supabase
                 .from('group_tutoring_registrations')
                 .insert({
@@ -161,13 +161,16 @@ function GroupTutoring() {
                 });
 
             if (error) {
+                console.error('Supabase error:', error);
                 alert('Error registering: ' + error.message);
                 return;
             }
 
+            console.log('Registration saved, sending email...');
+
             // Send confirmation email
             try {
-                await fetch('/api/send-email', {
+                const emailResponse = await fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -180,11 +183,12 @@ function GroupTutoring() {
                         }
                     })
                 });
+
+                console.log('Email response:', emailResponse.status, await emailResponse.json());
             } catch (emailErr) {
-                console.error('Email send error:', emailErr);
+                console.error('Email fetch error:', emailErr);
             }
 
-            // Show confirmation with room assignment
             setConfirmationData({
                 room: selectedSession.room_assignment,
                 date: new Date(selectedSession.session_date).toLocaleDateString('en-US', { 
