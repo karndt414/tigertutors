@@ -1,6 +1,12 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_EMAIL,
+        pass: process.env.GMAIL_PASSWORD
+    }
+});
 
 export default async function handler(req, res) {
     console.log('API Key present:', !!process.env.RESEND_API_KEY);
@@ -14,8 +20,8 @@ export default async function handler(req, res) {
     console.log('Sending email to:', email);
     
     try {
-        const result = await resend.emails.send({
-            from: 'Tiger Tutors <onboarding@resend.dev>',  // Change this line
+        await transporter.sendMail({
+            from: 'Tiger Tutors <' + process.env.GMAIL_EMAIL + '>',
             to: email,
             subject: 'Session Registration Confirmed',
             html: `
@@ -33,8 +39,7 @@ export default async function handler(req, res) {
             `
         });
         
-        console.log('Email sent successfully:', result);
-        res.status(200).json({ success: true, result });
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('Email error:', error);
         res.status(500).json({ error: error.message });
