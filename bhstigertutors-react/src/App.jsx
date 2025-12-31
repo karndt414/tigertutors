@@ -10,7 +10,6 @@ import LoginModal from './LoginModal';
 import AdminPanel from './AdminPanel';
 import TutorProfilePage from './pages/TutorProfilePage';
 import LearnerProfilePage from './pages/LearnerProfilePage';
-import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import './App.css';
 
