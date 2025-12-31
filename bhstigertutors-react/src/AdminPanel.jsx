@@ -99,8 +99,15 @@ function AdminPanel({ tutors, onTutorAdded }) {
             .select('*')
             .order('created_at', { ascending: false });
         
-        if (error) console.error(error);
-        else setAllUsers(data || []);
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        // Custom sort: admin → tutor → learner
+        const roleOrder = { admin: 0, tutor: 1, learner: 2 };
+        const sorted = (data || []).sort((a, b) => roleOrder[a.role] - roleOrder[b.role]);
+        setAllUsers(sorted);
     };
 
     const fetchGroupTutoringRegistrations = async () => {
