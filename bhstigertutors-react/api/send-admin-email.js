@@ -22,17 +22,23 @@ export default async function handler(req, res) {
     const { type, name, email, userType, subject, message } = req.body;
 
     try {
-        // Fetch all admin emails from database
+        console.log('Fetching admin emails from users table...');
+        
+        // Fetch all admin emails from users table
         const { data: admins, error: adminError } = await supabase
-            .from('allowed_roles')
+            .from('users')
             .select('email')
             .eq('role', 'admin');
 
+        console.log('Admins result:', { admins, adminError });
+
         if (adminError || !admins || admins.length === 0) {
+            console.error('No admins found or error:', adminError);
             return res.status(500).json({ error: 'Could not fetch admin emails' });
         }
 
         const adminEmails = admins.map(admin => admin.email);
+        console.log('Admin emails to send to:', adminEmails);
 
         const emailType = type === 'question' ? '📝 Question' : '⚠️ Complaint';
         const htmlContent = `
@@ -61,6 +67,7 @@ export default async function handler(req, res) {
             html: htmlContent
         });
 
+        console.log('Email sent successfully');
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Email error:', error);
