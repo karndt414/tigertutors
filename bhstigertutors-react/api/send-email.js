@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     
     try {
         const result = await resend.emails.send({
-            from: 'Tiger Tutors <noreply@tigertutors.com>',
+            from: 'Tiger Tutors <onboarding@resend.dev>',  // Change this line
             to: email,
             subject: 'Session Registration Confirmed',
             html: `
