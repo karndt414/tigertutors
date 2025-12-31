@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import HomePage from './pages/HomePage';
 import FindTutorPage from './pages/FindTutorPage';
@@ -14,6 +14,7 @@ import { supabase } from './supabaseClient';
 import './App.css';
 
 function App() {
+    const navigate = useNavigate();
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [tutors, setTutors] = useState([]);
     const [loading, setLoading] = useState(true);
