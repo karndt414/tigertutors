@@ -32,8 +32,19 @@ function TutorProfilePage() {
 
     useEffect(() => {
         checkUser();
-        
-        // Listen for registration updates
+    }, []);
+
+    useEffect(() => {
+        if (user && !isEditing && userRole) {
+            // Only fetch profile when not in edit mode and user is set
+            if (userRole === 'tutor' || userRole === 'admin') {
+                fetchTutorProfile(user.id);
+            }
+        }
+    }, [user, userRole, isEditing]);
+
+    // Keep the session listener separate
+    useEffect(() => {
         const handleSessionRegistered = () => {
             if (user) {
                 fetchTutorSessions(user.id);
