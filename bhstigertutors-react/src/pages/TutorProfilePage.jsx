@@ -207,11 +207,19 @@ function TutorProfilePage() {
 
                 if (error) {
                     alert('Error updating profile: ' + error.message);
+                    setLoading(false);
                 } else {
                     alert('Profile updated!');
+                    // Reset form states
+                    setOtherSubject('');
+                    setSelectedSubjects([]);
+                    setName('');
+                    setPhotoUrl('');
+                    setPhotoPreview('');
+                    setLoading(false);
                     setIsEditing(false);
-                    setOtherSubject(''); // Reset other subject
-                    await fetchTutorProfile(user.id); // Refresh the profile
+                    // Refresh the profile
+                    await fetchTutorProfile(user.id);
                 }
             } else {
                 const { error } = await supabase
