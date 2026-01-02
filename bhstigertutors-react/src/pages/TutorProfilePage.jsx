@@ -168,12 +168,7 @@ function TutorProfilePage() {
         e.preventDefault();
         setLoading(true);
 
-        if (!photoUrl) {
-            alert('Please upload a photo for your profile.');
-            setLoading(false);
-            return;
-        }
-
+        // Remove the photo requirement check
         if (selectedSubjects.length === 0) {
             alert('Please select at least one subject.');
             setLoading(false);
@@ -199,7 +194,7 @@ function TutorProfilePage() {
                     .update({
                         name,
                         subjects: subjectsString,
-                        photo: photoUrl
+                        photo: photoUrl || null
                     })
                     .eq('id', tutorProfile.id);
 
@@ -217,7 +212,7 @@ function TutorProfilePage() {
                         id: user.id,
                         name,
                         subjects: subjectsString,
-                        photo: photoUrl,
+                        photo: photoUrl || null,
                         is_approved: false
                     });
 
@@ -474,7 +469,7 @@ function TutorProfilePage() {
                 )}
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo *</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo (Optional)</label>
                     <ImageUpload onUpload={handlePhotoUpload} />
                 </div>
 
