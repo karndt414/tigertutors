@@ -60,7 +60,7 @@ function LearnerProfilePage() {
                     teacher_name
                 )
             `)
-            .eq('user_id', user.id)
+            .eq('school_email', user.email)
             .order('registered_at', { ascending: false });
 
         if (data) {
