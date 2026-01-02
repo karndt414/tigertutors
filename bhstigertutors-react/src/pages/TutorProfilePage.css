@@ -148,6 +148,34 @@
     background-color: var(--border-color);
 }
 
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.subject-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.subject-label input[type="checkbox"] {
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: var(--accent-primary);
+}
+
+.subject-label span {
+    font-size: 0.95em;
+}
+
 @media (max-width: 768px) {
     .tutor-profile-page {
         padding: 1.5rem;

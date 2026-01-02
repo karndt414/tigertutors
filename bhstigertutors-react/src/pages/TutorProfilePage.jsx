@@ -436,24 +436,15 @@ function TutorProfilePage() {
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 500 }}>Subjects You Can Tutor *</label>
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                        gap: '0.75rem',
-                        padding: '1rem',
-                        backgroundColor: 'var(--bg-primary)',
-                        borderRadius: '6px',
-                        border: '1px solid var(--border-color)'
-                    }}>
+                    <div className="subjects-grid">
                         {mathSubjects.map(subject => (
-                            <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                            <label key={subject} className="subject-label">
                                 <input
                                     type="checkbox"
                                     checked={selectedSubjects.includes(subject)}
                                     onChange={() => handleSubjectChange(subject)}
-                                    style={{ cursor: 'pointer', flexShrink: 0 }}
                                 />
-                                <span style={{ fontSize: '0.95em' }}>{subject}</span>
+                                <span>{subject}</span>
                             </label>
                         ))}
                     </div>
