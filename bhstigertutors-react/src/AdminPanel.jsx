@@ -421,15 +421,9 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             ? [...new Set(session.group_tutoring_registrations.map(reg => reg.subject))]
                             : [];
                         
-                        // Count learners: registered users who are NOT tutors or admins
-                        const learnerCount = session.group_tutoring_registrations?.filter(reg => {
-                            return reg.userRole && reg.userRole !== 'tutor' && reg.userRole !== 'admin';
-                        }).length || 0;
-                        
-                        // Count tutors: registered users who ARE tutors or admins
-                        const tutorCount = session.group_tutoring_registrations?.filter(reg => {
-                            return reg.userRole && (reg.userRole === 'tutor' || reg.userRole === 'admin');
-                        }).length || 0;
+                        // Count learners and tutors based on subject field
+                        const learnerCount = session.group_tutoring_registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
+                        const tutorCount = session.group_tutoring_registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
                         
                         return (
                             <div key={session.id} className="tutor-manage-item">
