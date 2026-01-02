@@ -29,6 +29,19 @@ function AdminPanel({ tutors, onTutorAdded }) {
     });
     const [groupTutoringRegistrations, setGroupTutoringRegistrations] = useState([]);
 
+    const checkUser = async () => {
+        try {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error) {
+                console.warn('Auth check skipped (expected in some environments)');
+                return;
+            }
+            setUser(user);
+        } catch (err) {
+            console.warn('Could not check user:', err);
+        }
+    };
+
     useEffect(() => {
         checkUser();
         fetchAllowedRoles();
@@ -36,11 +49,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchGroupSessions();
         fetchGroupTutoringRegistrations();
     }, []);
-
-    const checkUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-    };
 
     const handleDelete = async (tutorId) => {
         if (!window.confirm('Are you sure you want to delete this tutor?')) {
@@ -147,7 +155,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
             .insert({
                 email: newEmail.toLowerCase(),
                 role: newRole,
-                approved_by: user?.email || 'admin'
+                approved_by: user?.email || 'admin@system'
             });
 
         if (error) {
