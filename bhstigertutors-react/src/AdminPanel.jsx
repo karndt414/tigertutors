@@ -316,6 +316,22 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }
     };
 
+    const handleDeleteRegistration = async (registrationId) => {
+        if (!window.confirm('Delete this registration?')) return;
+
+        const { error } = await supabase
+            .from('group_tutoring_registrations')
+            .delete()
+            .eq('id', registrationId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Registration deleted');
+            fetchGroupTutoringRegistrations();
+        }
+    };
+
     return (
         <div className="admin-panel">
 
@@ -473,12 +489,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <th>Flex Period</th>
                             <th>Room Assignment</th>
                             <th>Registered</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {groupTutoringRegistrations.length === 0 ? (
                             <tr>
-                                <td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                <td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                                     No registrations yet
                                 </td>
                             </tr>
@@ -501,6 +518,15 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     <td><strong>{reg.group_tutoring_sessions?.session_time || reg.session_time}</strong></td>
                                     <td><strong>{reg.group_tutoring_sessions?.room_assignment || reg.room_assignment}</strong></td>
                                     <td>{reg.group_tutoring_sessions?.session_date ? new Date(reg.group_tutoring_sessions.session_date).toLocaleDateString() : 'N/A'}</td>
+                                    <td>
+                                        <button
+                                            onClick={() => handleDeleteRegistration(reg.id)}
+                                            className="delete-button"
+                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85em' }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}
