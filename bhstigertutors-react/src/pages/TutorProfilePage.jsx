@@ -3,8 +3,6 @@ import { supabase } from '../supabaseClient';
 import ImageUpload from '../ImageUpload';
 import './TutorProfilePage.css';
 
-const mathSubjects = ['Algebra 1', 'Geometry', 'Algebra 2', 'Precalculus', 'AP Precalculus', 'AP Calculus AB', 'AP Calculus BC', 'AP Statistics', 'Other'];
-
 function TutorProfilePage() {
     const [user, setUser] = useState(null);
     const [userRole, setUserRole] = useState(null);
@@ -14,8 +12,7 @@ function TutorProfilePage() {
 
     // Form state
     const [name, setName] = useState('');
-    const [subjects, setSubjects] = useState([]);
-    const [otherSubject, setOtherSubject] = useState('');
+    const [subjects, setSubjects] = useState('');
     const [photoUrl, setPhotoUrl] = useState('');
     const [photoPreview, setPhotoPreview] = useState('');
 
@@ -140,15 +137,7 @@ function TutorProfilePage() {
         if (data) {
             setTutorProfile(data);
             setName(data.name || '');
-            if (typeof data.subjects === 'string') {
-                setSubjects(data.subjects.split(', ').filter(s => s !== 'Other'));
-                if (data.subjects.includes('Other') && data.other_subject) {
-                    setOtherSubject(data.other_subject);
-                    setSubjects(prev => [...prev, 'Other']);
-                }
-            } else {
-                setSubjects(data.subjects || []);
-            }
+            setSubjects(data.subjects || '');
             setPhotoUrl(data.photo || '');
             setPhotoPreview(data.photo || '');
             await fetchTutorSessions(userId);
@@ -163,17 +152,6 @@ function TutorProfilePage() {
         setPhotoPreview(url);
     };
 
-    const handleSubjectChange = (subject) => {
-        setSubjects(prev => 
-            prev.includes(subject) 
-                ? prev.filter(s => s !== subject)
-                : [...prev, subject]
-        );
-        if (subject !== 'Other' && !subjects.includes('Other')) {
-            setOtherSubject('');
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -184,36 +162,22 @@ function TutorProfilePage() {
             return;
         }
 
-        if (subjects.length === 0) {
-            alert('Please select at least one subject.');
-            setLoading(false);
-            return;
-        }
-
-        if (subjects.includes('Other') && !otherSubject) {
-            alert('Please specify your other subject.');
+        if (!subjects.trim()) {
+            alert('Please enter your subjects.');
             setLoading(false);
             return;
         }
 
         try {
-            // Create subjects string for display
-            let subjectsString = subjects.filter(s => s !== 'Other').join(', ');
-            if (subjects.includes('Other') && otherSubject) {
-                subjectsString = subjectsString ? subjectsString + ', ' + otherSubject : otherSubject;
-            }
-
             if (tutorProfile) {
-                // Update existing profile
                 const { error } = await supabase
                     .from('tutors')
                     .update({
                         name,
-                        subjects: subjectsString,
-                        other_subject: subjects.includes('Other') ? otherSubject : null,
+                        subjects: subjects,
                         photo: photoUrl
                     })
-                    .eq('user_id', user.id);
+                    .eq('id', tutorProfile.id);
 
                 if (error) {
                     alert('Error updating profile: ' + error.message);
@@ -223,14 +187,12 @@ function TutorProfilePage() {
                     fetchTutorProfile(user.id);
                 }
             } else {
-                // Create new profile with user_id - don't set id
                 const { error } = await supabase
                     .from('tutors')
                     .insert({
-                        user_id: user.id,
+                        id: user.id,
                         name,
-                        subjects: subjectsString,
-                        other_subject: subjects.includes('Other') ? otherSubject : null,
+                        subjects: subjects,
                         photo: photoUrl,
                         is_approved: false
                     });
@@ -243,18 +205,6 @@ function TutorProfilePage() {
                     fetchTutorProfile(user.id);
                 }
             }
-
-            // Send notification email to admins
-            await fetch('/api/send-tutor-registration-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    tutorName: name,
-                    tutorEmail: user.email,
-                    subject: subjectsString,
-                    experience: ''
-                })
-            });
         } catch (err) {
             console.error('Error:', err);
             alert('An error occurred. Please try again.');
@@ -319,7 +269,7 @@ function TutorProfilePage() {
                     
                     <div className="profile-info">
                         <h3>{name}</h3>
-                        <p className="subjects"><strong>Subjects:</strong> {subjects.join(', ')}</p>
+                        <p className="subjects"><strong>Subjects:</strong> {subjects}</p>
                     </div>
 
                     {/* Add this statistics section */}
@@ -461,52 +411,25 @@ function TutorProfilePage() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 500 }}>Subjects You Can Tutor *</label>
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                        gap: '1rem',
-                        padding: '1rem',
-                        backgroundColor: 'var(--bg-primary)',
-                        borderRadius: '6px',
-                        border: '1px solid var(--border-color)'
-                    }}>
-                        {mathSubjects.map(subject => (
-                            <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={subjects.includes(subject)}
-                                    onChange={() => handleSubjectChange(subject)}
-                                    style={{ cursor: 'pointer' }}
-                                />
-                                <span>{subject}</span>
-                            </label>
-                        ))}
-                    </div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Subjects You Can Tutor *</label>
+                    <input
+                        type="text"
+                        placeholder="e.g., Algebra, Geometry, Calculus"
+                        value={subjects}
+                        onChange={(e) => setSubjects(e.target.value)}
+                        required
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            fontSize: '1em',
+                            boxSizing: 'border-box'
+                        }}
+                    />
                 </div>
-
-                {subjects.includes('Other') && (
-                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Please specify your other subject(s) *</label>
-                        <input
-                            type="text"
-                            placeholder="e.g., Physics, Chemistry"
-                            value={otherSubject}
-                            onChange={(e) => setOtherSubject(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '6px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                fontSize: '1em',
-                                boxSizing: 'border-box'
-                            }}
-                        />
-                    </div>
-                )}
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo *</label>
