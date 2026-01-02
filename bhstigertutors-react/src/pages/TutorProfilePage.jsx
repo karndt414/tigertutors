@@ -141,9 +141,16 @@ function TutorProfilePage() {
         if (data) {
             setTutorProfile(data);
             setName(data.name || '');
-            setSubjects(data.subjects || '');
             setPhotoUrl(data.photo || '');
             setPhotoPreview(data.photo || '');
+            
+            // Parse subjects from the stored string
+            if (data.subjects) {
+                const subjectsArray = data.subjects.split(', ');
+                setSelectedSubjects(subjectsArray);
+                setSubjects(data.subjects);
+            }
+            
             await fetchTutorSessions(userId);
             await fetchTutorStats();
         } else if (error?.code === 'PGRST116') {
@@ -203,7 +210,8 @@ function TutorProfilePage() {
                 } else {
                     alert('Profile updated!');
                     setIsEditing(false);
-                    fetchTutorProfile(user.id);
+                    setOtherSubject(''); // Reset other subject
+                    await fetchTutorProfile(user.id); // Refresh the profile
                 }
             } else {
                 const { error } = await supabase
@@ -221,7 +229,9 @@ function TutorProfilePage() {
                 } else {
                     alert('Profile created! Admin will review and approve it.');
                     setIsEditing(false);
-                    fetchTutorProfile(user.id);
+                    setOtherSubject(''); // Reset other subject
+                    setSelectedSubjects([]); // Reset selected subjects
+                    await fetchTutorProfile(user.id);
                 }
             }
         } catch (err) {
