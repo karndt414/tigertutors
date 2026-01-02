@@ -581,57 +581,57 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 Database of all registered users
             </p>
 
-            <div className="registrations-list">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Joined</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {allUsers.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                                    No users yet
-                                </td>
-                            </tr>
-                        ) : (
-                            allUsers.map(user => (
-                                <tr key={user.id}>
-                                    <td>{user.email}</td>
-                                    <td>
-                                        <span style={{
-                                            textTransform: 'capitalize',
-                                            fontWeight: 600,
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            backgroundColor: user.role === 'admin' ? 'rgba(220, 38, 38, 0.1)' : 
-                                                            user.role === 'tutor' ? 'rgba(37, 99, 235, 0.1)' : 
-                                                            'rgba(156, 163, 175, 0.1)',
-                                            color: user.role === 'admin' ? 'var(--accent-danger)' : 
-                                                  user.role === 'tutor' ? 'var(--accent-primary)' : 
-                                                  'var(--text-secondary)'
-                                        }}>
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                                    <td>
-                                        <button
-                                            onClick={() => handleDeleteUser(user.id, user.email)}
-                                            className="delete-button"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+            <div className="table-wrapper">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Joined</th>
+                          <th>Actions</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {allUsers.length === 0 ? (
+                          <tr>
+                              <td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                  No users yet
+                              </td>
+                          </tr>
+                      ) : (
+                          allUsers.map(user => (
+                              <tr key={user.id}>
+                                  <td>{user.email}</td>
+                                  <td>
+                                      <span style={{
+                                          textTransform: 'capitalize',
+                                          fontWeight: 600,
+                                          padding: '4px 8px',
+                                          borderRadius: '4px',
+                                          backgroundColor: user.role === 'admin' ? 'rgba(220, 38, 38, 0.1)' : 
+                                                              user.role === 'tutor' ? 'rgba(37, 99, 235, 0.1)' : 
+                                                              'rgba(156, 163, 175, 0.1)',
+                                          color: user.role === 'admin' ? 'var(--accent-danger)' : 
+                                                user.role === 'tutor' ? 'var(--accent-primary)' : 
+                                                'var(--text-secondary)'
+                                      }}>
+                                          {user.role}
+                                      </span>
+                                  </td>
+                                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                                  <td>
+                                      <button
+                                          onClick={() => handleDeleteUser(user.id, user.email)}
+                                          className="delete-button"
+                                      >
+                                          Delete
+                                      </button>
+                                  </td>
+                              </tr>
+                          ))
+                      )}
+                  </tbody>
+              </table>
             </div>
         </div>
     );

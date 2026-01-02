@@ -167,12 +167,13 @@
 }
 
 .registrations-list {
-    margin-top: 15px;
+    margin: 1.5rem 0;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .registrations-list table {
-    width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
     font-size: 0.9em;
 }
@@ -248,16 +249,17 @@
   .registrations-list {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin: 1rem 0;
   }
 
-  table {
-    font-size: 0.85em;
-    width: 100%;
+  .registrations-list table {
+    min-width: 1000px;
   }
 
   th, td {
-    padding: 0.75rem 0.5rem;
-    word-break: break-word;
+    padding: 0.5rem;
+    font-size: 0.8em;
+    white-space: nowrap;
   }
 
   .tutor-manage-list {
@@ -353,21 +355,21 @@
   }
 
   .registrations-list {
-    margin: 0 -1rem;
-    padding: 0 1rem;
+    margin: 0.5rem 0;
   }
 
-  table {
-    font-size: 0.75em;
-    min-width: 100%;
+  .registrations-list table {
+    min-width: 900px;
+    font-size: 0.7em;
   }
 
   th, td {
-    padding: 0.5rem 0.25rem;
+    padding: 0.35rem;
+    white-space: nowrap;
   }
 
   th {
-    font-size: 0.85em;
+    font-size: 0.75em;
   }
 
   hr {

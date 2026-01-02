@@ -394,10 +394,6 @@ th {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .user-email {
-    display: none !important;
-  }
-
   span[style*="color: var(--text-secondary)"] {
     display: none !important;
   }
@@ -434,13 +430,20 @@ th {
     gap: 1rem;
   }
 
-  th, td {
-    padding: 0.5rem;
-    font-size: 0.85em;
-  }
-
   .table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th,
+  td {
+    padding: 0.5rem;
+    font-size: 0.85em;
+    white-space: nowrap;
+  }
+
+  table {
+    min-width: 800px;
   }
 }
 
@@ -508,6 +511,20 @@ th {
   .footer {
     padding: 1.5rem 0.75rem;
     font-size: 0.85em;
+  }
+
+  th, td {
+    padding: 0.4rem;
+    font-size: 0.75em;
+    white-space: nowrap;
+  }
+
+  table {
+    min-width: 700px;
+  }
+
+  .table-wrapper {
+    margin: 0.5rem 0;
   }
 }
 
