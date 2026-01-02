@@ -368,18 +368,10 @@ select:focus {
   .nav-container {
     padding: 0.75rem 1rem;
     gap: 1rem;
-    justify-content: space-between;
-  }
-
-  .logo {
-    font-size: 1.2em;
-    flex-shrink: 0;
   }
 
   .nav-links {
-    flex-direction: row;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .nav-links a {
@@ -400,29 +392,15 @@ select:focus {
     font-size: 1.8em;
   }
 
-  .main-content p {
-    font-size: 1em;
-  }
-
   .tutor-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
-  }
-
-  .session-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  button, .book-button {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9em;
   }
 }
 
 @media (max-width: 480px) {
   .navbar {
-    padding: 0.25rem 0;
+    padding: 0.5rem 0;
   }
 
   .nav-container {
@@ -436,16 +414,17 @@ select:focus {
 
   .nav-links {
     gap: 0.25rem;
+    flex-wrap: wrap;
   }
 
   .nav-links a {
-    font-size: 0.75em;
-    padding: 0.2rem 0.4rem;
+    font-size: 0.7em;
+    padding: 0.2rem 0.35rem;
   }
 
   .login-button {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.75em;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7em;
   }
 
   .main-content {
@@ -457,8 +436,18 @@ select:focus {
     margin-bottom: 1rem;
   }
 
-  h3 {
-    font-size: 1.2em;
+  .main-content p {
+    font-size: 1em;
+  }
+
+  .tutor-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  button, .book-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85em;
   }
 
   input[type="text"],
@@ -467,6 +456,12 @@ select:focus {
   textarea,
   select {
     font-size: 16px;
+    padding: 0.6rem;
+  }
+
+  .footer {
+    padding: 1.5rem 0.75rem;
+    font-size: 0.85em;
   }
 }
 

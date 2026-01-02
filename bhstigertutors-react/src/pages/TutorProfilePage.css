@@ -211,6 +211,11 @@
     .cancel-button {
         width: 100%;
     }
+
+    .subjects-grid {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -225,15 +230,24 @@
     .profile-photo {
         width: 100px;
         height: 100px;
-        margin-bottom: 1rem;
     }
 
     .profile-info h3 {
         font-size: 1.3em;
     }
 
-    .profile-form {
-        padding: 1rem;
+    .profile-stats {
+        padding: 0.75rem !important;
+    }
+
+    .subjects-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.4rem;
+        padding: 0.75rem;
+    }
+
+    .subject-label span {
+        font-size: 0.9em;
     }
 
     .form-group label {
@@ -243,5 +257,11 @@
     .form-group input {
         padding: 0.6rem;
         font-size: 16px;
+    }
+
+    .submit-button,
+    .cancel-button {
+        padding: 0.6rem 1rem;
+        font-size: 0.95em;
     }
 }
