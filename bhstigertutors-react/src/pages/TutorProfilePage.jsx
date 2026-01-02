@@ -59,7 +59,7 @@ function TutorProfilePage() {
             if (userData) {
                 setUserRole(userData.role);
                 
-                // If tutor or admin, fetch their tutor profile
+                // If tutor or admin, fetch their tutor profile (if it exists)
                 if (userData.role === 'tutor' || userData.role === 'admin') {
                     fetchTutorProfile(user.id);
                 }
@@ -275,13 +275,25 @@ function TutorProfilePage() {
         );
     }
 
-    // Not a tutor or admin
-    if (userRole !== 'tutor' && userRole !== 'admin') {
+    // Allow if they're already a tutor/admin, OR if they're trying to create a profile
+    if (userRole && userRole !== 'tutor' && userRole !== 'admin') {
         return (
             <div className="tutor-profile-page">
                 <h2>Tutor Profile</h2>
                 <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    Only tutors and admins can access this page.
+                    Only tutors and admins can access this page. Contact an admin to become a tutor.
+                </p>
+            </div>
+        );
+    }
+
+    // If userRole is null/loading, show a loading state or allow edit mode
+    if (!userRole) {
+        return (
+            <div className="tutor-profile-page">
+                <h2>Tutor Profile</h2>
+                <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    Loading...
                 </p>
             </div>
         );
