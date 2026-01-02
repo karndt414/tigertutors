@@ -161,6 +161,7 @@
 .subject-label {
     display: flex;
     align-items: center;
+    gap: 0.25rem;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -169,7 +170,6 @@
     cursor: pointer;
     flex-shrink: 0;
     accent-color: var(--accent-primary);
-    margin-right: 0.25rem;
 }
 
 .subject-label span {
