@@ -23,12 +23,14 @@ function TutorProfilePage() {
     // Add this state
     const [registeredSessions, setRegisteredSessions] = useState([]);
 
-    // Add this state for stats
+    // Comment out the stats state
+    /*
     const [tutorStats, setTutorStats] = useState({
         totalSessions: 0,
         totalStudents: 0,
         upcomingSessions: 0
     });
+    */
 
     useEffect(() => {
         checkUser();
@@ -43,12 +45,41 @@ function TutorProfilePage() {
         }
     }, [user, userRole, isEditing]);
 
+    // Comment out the stats call in fetchTutorProfile
+    const fetchTutorProfile = async (userId) => {
+        const { data, error } = await supabase
+            .from('tutors')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (data) {
+            setTutorProfile(data);
+            setName(data.name || '');
+            setPhotoUrl(data.photo || '');
+            setPhotoPreview(data.photo || '');
+            
+            // Parse subjects from the stored string
+            if (data.subjects) {
+                const subjectsArray = data.subjects.split(', ');
+                setSelectedSubjects(subjectsArray);
+                setSubjects(data.subjects);
+            }
+            
+            await fetchTutorSessions(userId);
+            // await fetchTutorStats();
+        } else if (error?.code === 'PGRST116') {
+            setIsEditing(true);
+        }
+    };
+
     // Keep the session listener separate
     useEffect(() => {
         const handleSessionRegistered = () => {
             if (user) {
                 fetchTutorSessions(user.id);
-                fetchTutorStats();
+                // Comment out the stats call
+                // fetchTutorStats();
             }
         };
         
@@ -102,7 +133,8 @@ function TutorProfilePage() {
         else setRegisteredSessions(data || []);
     };
 
-    // Add this function to calculate stats
+    // Comment out the fetchTutorStats function
+    /*
     const fetchTutorStats = async () => {
         if (!user?.email) return;
         
@@ -141,33 +173,7 @@ function TutorProfilePage() {
                 .eq('id', user.id);
         }
     };
-
-    const fetchTutorProfile = async (userId) => {
-        const { data, error } = await supabase
-            .from('tutors')
-            .select('*')
-            .eq('id', userId)
-            .single();
-
-        if (data) {
-            setTutorProfile(data);
-            setName(data.name || '');
-            setPhotoUrl(data.photo || '');
-            setPhotoPreview(data.photo || '');
-            
-            // Parse subjects from the stored string
-            if (data.subjects) {
-                const subjectsArray = data.subjects.split(', ');
-                setSelectedSubjects(subjectsArray);
-                setSubjects(data.subjects);
-            }
-            
-            await fetchTutorSessions(userId);
-            await fetchTutorStats();
-        } else if (error?.code === 'PGRST116') {
-            setIsEditing(true);
-        }
-    };
+    */
 
     const handlePhotoUpload = (url) => {
         setPhotoUrl(url);
@@ -314,7 +320,7 @@ function TutorProfilePage() {
                         <p className="subjects"><strong>Subjects:</strong> {subjects}</p>
                     </div>
 
-                    {/* Add this statistics section */}
+                    {/* Comment out the entire profile-stats div
                     <div className="profile-stats" style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(3, 1fr)',
@@ -351,6 +357,7 @@ function TutorProfilePage() {
                             </p>
                         </div>
                     </div>
+                    */}
 
                     <button onClick={() => setIsEditing(true)} className="edit-profile-button">
                         Edit Profile

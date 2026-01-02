@@ -158,6 +158,7 @@ function LearnerProfilePage() {
                         backgroundColor: 'var(--bg-primary)',
                         borderRadius: '8px'
                     }}>
+                        {/*
                         <div style={{ textAlign: 'center' }}>
                             <p style={{ margin: '0', fontSize: '1.8em', fontWeight: 700, color: 'var(--accent-primary)' }}>
                                 {upcomingSessions.length}
@@ -175,6 +176,7 @@ function LearnerProfilePage() {
                                 Total Sessions
                             </p>
                         </div>
+                        */}
                     </div>
 
                     <button 
