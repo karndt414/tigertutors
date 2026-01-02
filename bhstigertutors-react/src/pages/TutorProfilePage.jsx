@@ -223,7 +223,7 @@ function TutorProfilePage() {
                     fetchTutorProfile(user.id);
                 }
             } else {
-                // Create new profile with user_id
+                // Create new profile with user_id - don't set id
                 const { error } = await supabase
                     .from('tutors')
                     .insert({
