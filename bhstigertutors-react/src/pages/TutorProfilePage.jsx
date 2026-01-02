@@ -134,7 +134,7 @@ function TutorProfilePage() {
         const { data, error } = await supabase
             .from('tutors')
             .select('*')
-            .eq('id', userId)
+            .eq('user_id', userId)
             .single();
 
         if (data) {
