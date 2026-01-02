@@ -134,13 +134,12 @@ function TutorProfilePage() {
         const { data, error } = await supabase
             .from('tutors')
             .select('*')
-            .eq('id', userId)
+            .eq('user_id', userId)
             .single();
 
         if (data) {
             setTutorProfile(data);
             setName(data.name || '');
-            // Parse subjects if it's a string, otherwise use as array
             if (typeof data.subjects === 'string') {
                 setSubjects(data.subjects.split(', ').filter(s => s !== 'Other'));
                 if (data.subjects.includes('Other') && data.other_subject) {
@@ -214,7 +213,7 @@ function TutorProfilePage() {
                         other_subject: subjects.includes('Other') ? otherSubject : null,
                         photo: photoUrl
                     })
-                    .eq('id', user.id);
+                    .eq('user_id', user.id);
 
                 if (error) {
                     alert('Error updating profile: ' + error.message);
@@ -224,11 +223,11 @@ function TutorProfilePage() {
                     fetchTutorProfile(user.id);
                 }
             } else {
-                // Create new profile
+                // Create new profile with user_id
                 const { error } = await supabase
                     .from('tutors')
                     .insert({
-                        id: user.id,
+                        user_id: user.id,
                         name,
                         subjects: subjectsString,
                         other_subject: subjects.includes('Other') ? otherSubject : null,
