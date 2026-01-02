@@ -18,7 +18,7 @@ function TutorProfilePage() {
     const [selectedSubjects, setSelectedSubjects] = useState([]);
     const [otherSubject, setOtherSubject] = useState('');
 
-    const mathSubjects = ['Algebra', 'Geometry', 'Precalculus', 'Calculus', 'Statistics', 'Other'];
+    const mathSubjects = ['Algebra 1', 'Geometry', 'Algebra 2', 'Precalculus', 'Calc AB', 'Calc BC', 'Statistics', 'Other'];
 
     // Add this state
     const [registeredSessions, setRegisteredSessions] = useState([]);
@@ -446,14 +446,14 @@ function TutorProfilePage() {
                         border: '1px solid var(--border-color)'
                     }}>
                         {mathSubjects.map(subject => (
-                            <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                            <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                                 <input
                                     type="checkbox"
                                     checked={selectedSubjects.includes(subject)}
                                     onChange={() => handleSubjectChange(subject)}
-                                    style={{ cursor: 'pointer' }}
+                                    style={{ cursor: 'pointer', flexShrink: 0 }}
                                 />
-                                <span>{subject}</span>
+                                <span style={{ fontSize: '0.95em' }}>{subject}</span>
                             </label>
                         ))}
                     </div>
