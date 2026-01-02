@@ -134,7 +134,7 @@ function TutorProfilePage() {
         const { data, error } = await supabase
             .from('tutors')
             .select('*')
-            .eq('user_id', userId)
+            .eq('id', userId)
             .single();
 
         if (data) {
@@ -214,7 +214,7 @@ function TutorProfilePage() {
                         other_subject: subjects.includes('Other') ? otherSubject : null,
                         photo: photoUrl
                     })
-                    .eq('user_id', user.id);
+                    .eq('id', user.id);
 
                 if (error) {
                     alert('Error updating profile: ' + error.message);
@@ -228,7 +228,7 @@ function TutorProfilePage() {
                 const { error } = await supabase
                     .from('tutors')
                     .insert({
-                        user_id: user.id,
+                        id: user.id,
                         name,
                         subjects: subjectsString,
                         other_subject: subjects.includes('Other') ? otherSubject : null,
