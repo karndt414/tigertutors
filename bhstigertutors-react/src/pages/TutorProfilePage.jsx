@@ -3,6 +3,8 @@ import { supabase } from '../supabaseClient';
 import ImageUpload from '../ImageUpload';
 import './TutorProfilePage.css';
 
+const mathSubjects = ['Algebra 1', 'Geometry', 'Algebra 2', 'Precalculus', 'AP Precalculus', 'AP Calculus AB', 'AP Calculus BC', 'AP Statistics', 'Other'];
+
 function TutorProfilePage() {
     const [user, setUser] = useState(null);
     const [userRole, setUserRole] = useState(null);
@@ -12,7 +14,8 @@ function TutorProfilePage() {
 
     // Form state
     const [name, setName] = useState('');
-    const [subjects, setSubjects] = useState('');
+    const [subjects, setSubjects] = useState([]);
+    const [otherSubject, setOtherSubject] = useState('');
     const [photoUrl, setPhotoUrl] = useState('');
     const [photoPreview, setPhotoPreview] = useState('');
 
@@ -137,10 +140,18 @@ function TutorProfilePage() {
         if (data) {
             setTutorProfile(data);
             setName(data.name || '');
-            setSubjects(data.subjects || '');
+            // Parse subjects if it's a string, otherwise use as array
+            if (typeof data.subjects === 'string') {
+                setSubjects(data.subjects.split(', ').filter(s => s !== 'Other'));
+                if (data.subjects.includes('Other') && data.other_subject) {
+                    setOtherSubject(data.other_subject);
+                    setSubjects(prev => [...prev, 'Other']);
+                }
+            } else {
+                setSubjects(data.subjects || []);
+            }
             setPhotoUrl(data.photo || '');
             setPhotoPreview(data.photo || '');
-            // Call these after setting the profile
             await fetchTutorSessions(userId);
             await fetchTutorStats();
         } else if (error?.code === 'PGRST116') {
@@ -153,6 +164,17 @@ function TutorProfilePage() {
         setPhotoPreview(url);
     };
 
+    const handleSubjectChange = (subject) => {
+        setSubjects(prev => 
+            prev.includes(subject) 
+                ? prev.filter(s => s !== subject)
+                : [...prev, subject]
+        );
+        if (subject !== 'Other' && !subjects.includes('Other')) {
+            setOtherSubject('');
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -163,14 +185,33 @@ function TutorProfilePage() {
             return;
         }
 
+        if (subjects.length === 0) {
+            alert('Please select at least one subject.');
+            setLoading(false);
+            return;
+        }
+
+        if (subjects.includes('Other') && !otherSubject) {
+            alert('Please specify your other subject.');
+            setLoading(false);
+            return;
+        }
+
         try {
+            // Create subjects string for display
+            let subjectsString = subjects.filter(s => s !== 'Other').join(', ');
+            if (subjects.includes('Other') && otherSubject) {
+                subjectsString = subjectsString ? subjectsString + ', ' + otherSubject : otherSubject;
+            }
+
             if (tutorProfile) {
                 // Update existing profile
                 const { error } = await supabase
                     .from('tutors')
                     .update({
                         name,
-                        subjects,
+                        subjects: subjectsString,
+                        other_subject: subjects.includes('Other') ? otherSubject : null,
                         photo: photoUrl
                     })
                     .eq('id', user.id);
@@ -189,7 +230,8 @@ function TutorProfilePage() {
                     .insert({
                         id: user.id,
                         name,
-                        subjects,
+                        subjects: subjectsString,
+                        other_subject: subjects.includes('Other') ? otherSubject : null,
                         photo: photoUrl,
                         is_approved: false
                     });
@@ -210,8 +252,8 @@ function TutorProfilePage() {
                 body: JSON.stringify({
                     tutorName: name,
                     tutorEmail: user.email,
-                    subject: subjects,
-                    experience: '' // Add experience field if available
+                    subject: subjectsString,
+                    experience: ''
                 })
             });
         } catch (err) {
@@ -266,7 +308,7 @@ function TutorProfilePage() {
                     
                     <div className="profile-info">
                         <h3>{name}</h3>
-                        <p className="subjects"><strong>Subjects:</strong> {subjects}</p>
+                        <p className="subjects"><strong>Subjects:</strong> {subjects.join(', ')}</p>
                     </div>
 
                     {/* Add this statistics section */}
@@ -393,15 +435,42 @@ function TutorProfilePage() {
                 </div>
 
                 <div className="form-group">
-                    <label>Subjects (e.g., Calculus AB, Physics 1) *</label>
-                    <input
-                        type="text"
-                        placeholder="List the subjects you can tutor"
-                        value={subjects}
-                        onChange={(e) => setSubjects(e.target.value)}
-                        required
-                    />
+                    <label>Subjects You Can Tutor *</label>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                        gap: '1rem',
+                        padding: '1rem',
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-color)'
+                    }}>
+                        {mathSubjects.map(subject => (
+                            <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={subjects.includes(subject)}
+                                    onChange={() => handleSubjectChange(subject)}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                <span>{subject}</span>
+                            </label>
+                        ))}
+                    </div>
                 </div>
+
+                {subjects.includes('Other') && (
+                    <div className="form-group">
+                        <label>Please specify your other subject(s) *</label>
+                        <input
+                            type="text"
+                            placeholder="e.g., Physics, Chemistry"
+                            value={otherSubject}
+                            onChange={(e) => setOtherSubject(e.target.value)}
+                            required
+                        />
+                    </div>
+                )}
 
                 <div className="form-group">
                     <label>Profile Photo *</label>

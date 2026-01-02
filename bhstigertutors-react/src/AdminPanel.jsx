@@ -398,6 +398,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             ? [...new Set(session.group_tutoring_registrations.map(reg => reg.subject))]
                             : [];
                         const learnerCount = session.group_tutoring_registrations?.length || 0;
+                        // Count tutors from allUsers with role 'tutor'
+                        const tutorCount = allUsers.filter(u => u.role === 'tutor').length;
                         
                         return (
                             <div key={session.id} className="tutor-manage-item">
@@ -413,7 +415,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         📚 Subjects: {registeredSubjects.length > 0 ? registeredSubjects.join(', ') : 'None'}
                                     </p>
                                     <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
-                                        👥 Learners: {learnerCount}
+                                        👥 Learners: {learnerCount} | 👨‍🏫 Tutors: {tutorCount}
                                     </p>
                                 </div>
                                 <button
