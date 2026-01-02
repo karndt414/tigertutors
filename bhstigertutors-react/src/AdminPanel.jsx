@@ -405,9 +405,18 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         const registeredSubjects = session.group_tutoring_registrations
                             ? [...new Set(session.group_tutoring_registrations.map(reg => reg.subject))]
                             : [];
-                        const learnerCount = session.group_tutoring_registrations?.length || 0;
-                        // Count tutors from allUsers with role 'tutor'
-                        const tutorCount = allUsers.filter(u => u.role === 'tutor').length;
+                        
+                        // Count learners: registered users who are NOT tutors or admins
+                        const learnerCount = session.group_tutoring_registrations?.filter(reg => {
+                            const user = allUsers.find(u => u.email === reg.school_email);
+                            return user && user.role !== 'tutor' && user.role !== 'admin';
+                        }).length || 0;
+                        
+                        // Count tutors: registered users who ARE tutors or admins
+                        const tutorCount = session.group_tutoring_registrations?.filter(reg => {
+                            const user = allUsers.find(u => u.email === reg.school_email);
+                            return user && (user.role === 'tutor' || user.role === 'admin');
+                        }).length || 0;
                         
                         return (
                             <div key={session.id} className="tutor-manage-item">
