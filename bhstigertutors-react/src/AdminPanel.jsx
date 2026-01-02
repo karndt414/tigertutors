@@ -138,8 +138,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
             `)
             .order('registered_at', { ascending: false });
         
-        if (error) console.error(error);
-        else setGroupTutoringRegistrations(data || []);
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        // Fetch all users to map emails to roles
+        const { data: usersData } = await supabase
+            .from('users')
+            .select('email, role');
+
+        // Add user role info to registrations
+        const enrichedData = (data || []).map(reg => ({
+            ...reg,
+            userRole: usersData?.find(u => u.email === reg.school_email)?.role
+        }));
+
+        setGroupTutoringRegistrations(enrichedData);
     };
 
     const handleAddAllowedRole = async (e) => {
@@ -408,14 +423,12 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         
                         // Count learners: registered users who are NOT tutors or admins
                         const learnerCount = session.group_tutoring_registrations?.filter(reg => {
-                            const user = allUsers.find(u => u.email === reg.school_email);
-                            return user && user.role !== 'tutor' && user.role !== 'admin';
+                            return reg.userRole && reg.userRole !== 'tutor' && reg.userRole !== 'admin';
                         }).length || 0;
                         
                         // Count tutors: registered users who ARE tutors or admins
                         const tutorCount = session.group_tutoring_registrations?.filter(reg => {
-                            const user = allUsers.find(u => u.email === reg.school_email);
-                            return user && (user.role === 'tutor' || user.role === 'admin');
+                            return reg.userRole && (reg.userRole === 'tutor' || reg.userRole === 'admin');
                         }).length || 0;
                         
                         return (
