@@ -76,7 +76,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const fetchGroupSessions = async () => {
         const { data, error } = await supabase
             .from('group_tutoring_sessions')
-            .select('*')
+            .select(`
+                *,
+                group_tutoring_registrations (
+                    id,
+                    subject
+                )
+            `)
             .order('session_date', { ascending: true });
         
         if (error) console.error(error);
@@ -387,25 +393,38 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 {groupSessions.length === 0 ? (
                     <p style={{ color: 'var(--text-secondary)' }}>No group tutoring sessions yet</p>
                 ) : (
-                    groupSessions.map(session => (
-                        <div key={session.id} className="tutor-manage-item">
-                            <div>
-                                <strong>{session.session_time}</strong>
-                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                                    {new Date(session.session_date).toLocaleDateString()} • {session.room_assignment}
-                                </p>
-                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
-                                    Subjects: {session.subjects && session.subjects.length > 0 ? session.subjects.join(', ') : 'None'}
-                                </p>
+                    groupSessions.map(session => {
+                        const registeredSubjects = session.group_tutoring_registrations
+                            ? [...new Set(session.group_tutoring_registrations.map(reg => reg.subject))]
+                            : [];
+                        const learnerCount = session.group_tutoring_registrations?.length || 0;
+                        
+                        return (
+                            <div key={session.id} className="tutor-manage-item">
+                                <div>
+                                    <strong>{session.session_time}</strong>
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                        {new Date(session.session_date).toLocaleDateString()} • {session.room_assignment}
+                                    </p>
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                        👨‍🏫 Teacher: {session.teacher_name}
+                                    </p>
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                        📚 Subjects: {registeredSubjects.length > 0 ? registeredSubjects.join(', ') : 'None'}
+                                    </p>
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                                        👥 Learners: {learnerCount}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => handleDeleteGroupSession(session.id)}
+                                    className="delete-button"
+                                >
+                                    Delete
+                                </button>
                             </div>
-                            <button
-                                onClick={() => handleDeleteGroupSession(session.id)}
-                                className="delete-button"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 
