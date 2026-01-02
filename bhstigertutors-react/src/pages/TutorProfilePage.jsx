@@ -15,6 +15,10 @@ function TutorProfilePage() {
     const [subjects, setSubjects] = useState('');
     const [photoUrl, setPhotoUrl] = useState('');
     const [photoPreview, setPhotoPreview] = useState('');
+    const [selectedSubjects, setSelectedSubjects] = useState([]);
+    const [otherSubject, setOtherSubject] = useState('');
+
+    const mathSubjects = ['Algebra', 'Geometry', 'Precalculus', 'Calculus', 'Statistics', 'Other'];
 
     // Add this state
     const [registeredSessions, setRegisteredSessions] = useState([]);
@@ -152,6 +156,14 @@ function TutorProfilePage() {
         setPhotoPreview(url);
     };
 
+    const handleSubjectChange = (subject) => {
+        setSelectedSubjects(prev => 
+            prev.includes(subject) 
+                ? prev.filter(s => s !== subject)
+                : [...prev, subject]
+        );
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -162,19 +174,31 @@ function TutorProfilePage() {
             return;
         }
 
-        if (!subjects.trim()) {
-            alert('Please enter your subjects.');
+        if (selectedSubjects.length === 0) {
+            alert('Please select at least one subject.');
+            setLoading(false);
+            return;
+        }
+
+        if (selectedSubjects.includes('Other') && !otherSubject.trim()) {
+            alert('Please specify your other subject.');
             setLoading(false);
             return;
         }
 
         try {
+            // Create subjects string
+            let subjectsString = selectedSubjects.filter(s => s !== 'Other').join(', ');
+            if (selectedSubjects.includes('Other') && otherSubject.trim()) {
+                subjectsString = subjectsString ? subjectsString + ', ' + otherSubject : otherSubject;
+            }
+
             if (tutorProfile) {
                 const { error } = await supabase
                     .from('tutors')
                     .update({
                         name,
-                        subjects: subjects,
+                        subjects: subjectsString,
                         photo: photoUrl
                     })
                     .eq('id', tutorProfile.id);
@@ -192,7 +216,7 @@ function TutorProfilePage() {
                     .insert({
                         id: user.id,
                         name,
-                        subjects: subjects,
+                        subjects: subjectsString,
                         photo: photoUrl,
                         is_approved: false
                     });
@@ -411,25 +435,52 @@ function TutorProfilePage() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Subjects You Can Tutor *</label>
-                    <input
-                        type="text"
-                        placeholder="e.g., Algebra, Geometry, Calculus"
-                        value={subjects}
-                        onChange={(e) => setSubjects(e.target.value)}
-                        required
-                        style={{
-                            width: '100%',
-                            padding: '0.75rem',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '6px',
-                            backgroundColor: 'var(--bg-primary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '1em',
-                            boxSizing: 'border-box'
-                        }}
-                    />
+                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 500 }}>Subjects You Can Tutor *</label>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                        gap: '0.75rem',
+                        padding: '1rem',
+                        backgroundColor: 'var(--bg-primary)',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-color)'
+                    }}>
+                        {mathSubjects.map(subject => (
+                            <label key={subject} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedSubjects.includes(subject)}
+                                    onChange={() => handleSubjectChange(subject)}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                <span>{subject}</span>
+                            </label>
+                        ))}
+                    </div>
                 </div>
+
+                {selectedSubjects.includes('Other') && (
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Specify Other Subject(s) *</label>
+                        <input
+                            type="text"
+                            placeholder="e.g., Physics, Chemistry"
+                            value={otherSubject}
+                            onChange={(e) => setOtherSubject(e.target.value)}
+                            required={selectedSubjects.includes('Other')}
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '6px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '1em',
+                                boxSizing: 'border-box'
+                            }}
+                        />
+                    </div>
+                )}
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo *</label>
