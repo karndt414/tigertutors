@@ -419,29 +419,44 @@ function TutorProfilePage() {
 
     // Edit mode
     return (
-        <div className="tutor-profile-page">
+        <div className="tutor-profile-page" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
             <h2>Tutor Profile</h2>
             
-            <form onSubmit={handleSubmit} className="profile-form">
-                <div className="form-group">
-                    <label>Name *</label>
+            <form onSubmit={handleSubmit} className="profile-form" style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                padding: '2rem',
+                border: '1px solid var(--border-color)'
+            }}>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Name *</label>
                     <input
                         type="text"
                         placeholder="Your name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '6px',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
+                            fontSize: '1em',
+                            boxSizing: 'border-box'
+                        }}
                     />
                 </div>
 
-                <div className="form-group">
-                    <label>Subjects You Can Tutor *</label>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 500 }}>Subjects You Can Tutor *</label>
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                         gap: '1rem',
                         padding: '1rem',
-                        backgroundColor: 'var(--bg-secondary)',
+                        backgroundColor: 'var(--bg-primary)',
                         borderRadius: '6px',
                         border: '1px solid var(--border-color)'
                     }}>
@@ -460,25 +475,35 @@ function TutorProfilePage() {
                 </div>
 
                 {subjects.includes('Other') && (
-                    <div className="form-group">
-                        <label>Please specify your other subject(s) *</label>
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Please specify your other subject(s) *</label>
                         <input
                             type="text"
                             placeholder="e.g., Physics, Chemistry"
                             value={otherSubject}
                             onChange={(e) => setOtherSubject(e.target.value)}
                             required
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '6px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                fontSize: '1em',
+                                boxSizing: 'border-box'
+                            }}
                         />
                     </div>
                 )}
 
-                <div className="form-group">
-                    <label>Profile Photo *</label>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo *</label>
                     <ImageUpload onUpload={handlePhotoUpload} />
                 </div>
 
-                <div className="form-buttons">
-                    <button type="submit" disabled={loading} className="submit-button">
+                <div className="form-buttons" style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" disabled={loading} className="submit-button" style={{ flex: 1, opacity: loading ? 0.6 : 1 }}>
                         {loading ? 'Saving...' : tutorProfile ? 'Update Profile' : 'Create Profile'}
                     </button>
                     {tutorProfile && (
@@ -486,6 +511,17 @@ function TutorProfilePage() {
                             type="button" 
                             onClick={() => setIsEditing(false)}
                             className="cancel-button"
+                            style={{
+                                flex: 1,
+                                padding: '0.75rem 1.5rem',
+                                backgroundColor: 'var(--bg-tertiary)',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontSize: '1em',
+                                fontWeight: 500
+                            }}
                         >
                             Cancel
                         </button>
