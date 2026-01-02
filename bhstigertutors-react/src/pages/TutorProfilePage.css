@@ -163,7 +163,6 @@
     align-items: center;
     cursor: pointer;
     white-space: nowrap;
-    justify-content: flex-start;
 }
 
 .subject-label input[type="checkbox"] {
