@@ -210,15 +210,9 @@ function TutorProfilePage() {
                     setLoading(false);
                 } else {
                     alert('Profile updated!');
-                    // Reset form states
-                    setOtherSubject('');
-                    setSelectedSubjects([]);
-                    setName('');
-                    setPhotoUrl('');
-                    setPhotoPreview('');
                     setLoading(false);
                     setIsEditing(false);
-                    // Refresh the profile
+                    // Refresh the profile from database
                     await fetchTutorProfile(user.id);
                 }
             } else {
