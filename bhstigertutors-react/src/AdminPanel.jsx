@@ -429,6 +429,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
         setSelectedText(e.target.value.substring(e.target.selectionStart, e.target.selectionEnd));
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return text;
+        
+        return text
+            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
+            .map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i}>{part.slice(2, -2)}</strong>;
+                } else if (part.startsWith('__') && part.endsWith('__')) {
+                    return <u key={i}>{part.slice(2, -2)}</u>;
+                } else if (part.startsWith('*') && part.endsWith('*')) {
+                    return <em key={i}>{part.slice(1, -1)}</em>;
+                }
+                return part;
+            });
+    };
+
     return (
         <div className="admin-panel">
 
@@ -875,7 +892,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     ) : (
                         <div>
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
-                                {homePageContent || 'No content yet'}
+                                {parseMarkdown(homePageContent) || 'No content yet'}
                             </p>
                             <button onClick={() => {
                                 setEditingPage('home');
@@ -926,7 +943,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     ) : (
                         <div>
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
-                                {aboutPageContent || 'No content yet'}
+                                {parseMarkdown(aboutPageContent) || 'No content yet'}
                             </p>
                             <button onClick={() => setEditingPage('about')}>Edit</button>
                         </div>
@@ -974,7 +991,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     ) : (
                         <div>
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px', fontSize: '0.85em' }}>
-                                {groupTutoringContent || 'No content yet'}
+                                {parseMarkdown(groupTutoringContent) || 'No content yet'}
                             </p>
                             <button onClick={() => setEditingPage('group_tutoring')}>Edit</button>
                         </div>
@@ -1022,7 +1039,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     ) : (
                         <div>
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
-                                {contactPageContent || 'No content yet'}
+                                {parseMarkdown(contactPageContent) || 'No content yet'}
                             </p>
                             <button onClick={() => setEditingPage('contact')}>Edit</button>
                         </div>
