@@ -275,11 +275,6 @@ function GroupTutoring() {
 
     const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
 
-    useEffect(() => {
-        fetchContent();
-        loadTutoringLeadEmail();
-    }, []);
-
     const loadTutoringLeadEmail = async () => {
         const { data } = await supabase
             .from('site_config')
