@@ -181,11 +181,18 @@ function TutorProfilePage() {
     };
 
     const handleSubjectChange = (subject) => {
-        setSelectedSubjects(prev => 
-            prev.includes(subject) 
+        setSelectedSubjects(prev => {
+            const updated = prev.includes(subject) 
                 ? prev.filter(s => s !== subject)
-                : [...prev, subject]
-        );
+                : [...prev, subject];
+            
+            // Clear otherSubject when "Other" is unchecked
+            if (subject === 'Other' && !prev.includes('Other')) {
+                setOtherSubject('');
+            }
+            
+            return updated;
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -258,6 +265,74 @@ function TutorProfilePage() {
             alert('An error occurred. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+
+        let subject = formData.subject;
+        if (formData.subject === 'Other') {
+            if (!formData.otherSubject) {
+                alert('Please specify your subject');
+                return;
+            }
+            subject = formData.otherSubject;
+        }
+
+        if (!formData.fullName || !formData.schoolEmail || !formData.subject || !formData.helpNeeded) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        if (!formData.acknowledgements.rti || !formData.acknowledgements.materials) {
+            alert('Please acknowledge both requirements');
+            return;
+        }
+
+        try {
+            // Check if already registered for this session
+            const { data: existingReg, error: checkError } = await supabase
+                .from('group_tutoring_registrations')
+                .select('id')
+                .eq('session_id', selectedSession.id)
+                .eq('school_email', formData.schoolEmail);
+
+            if (existingReg && existingReg.length > 0) {
+                alert('You\'re already registered for this session');
+                setShowRegistrationForm(false);
+                return;
+            }
+
+            console.log('Submitting registration...');
+            
+            const { data, error } = await supabase
+                .from('group_tutoring_registrations')
+                .insert({
+                    session_id: selectedSession.id,
+                    full_name: formData.fullName,
+                    school_email: formData.schoolEmail,
+                    subject: subject,
+                    help_needed: formData.helpNeeded,
+                    previous_programs: formData.previousPrograms,
+                    registered_at: new Date().toISOString(),
+                    room_assignment: selectedSession.room_assignment
+                });
+
+            if (error) {
+                if (error.code === '23505') {
+                    alert('You\'re already registered for this session');
+                } else {
+                    console.error('Supabase error:', error);
+                    alert('Error registering: ' + error.message);
+                }
+                return;
+            }
+
+            // ... rest of the code
+        } catch (err) {
+            console.error('Error:', err);
+            alert('An error occurred. Please try again.');
         }
     };
 

@@ -476,6 +476,18 @@ function GroupTutoring() {
         }
 
         try {
+            // Check if tutor already registered for this session
+            const { data: existingReg } = await supabase
+                .from('group_tutoring_registrations')
+                .select('id')
+                .eq('session_id', session.id)
+                .eq('school_email', user.email);
+
+            if (existingReg && existingReg.length > 0) {
+                alert('You\'re already registered for this session');
+                return;
+            }
+
             const { error } = await supabase
                 .from('group_tutoring_registrations')
                 .insert({
