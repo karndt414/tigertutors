@@ -301,7 +301,7 @@ function GroupTutoring() {
         calendarDays.push(i);
     }
 
-    const mathSubjects = ['Algebra 1', 'Geometry', 'Algebra 2', 'Precalculus', 'AP Precalculus', 'AP Calculus AB', 'AP Calculus BC', 'AP Statistics', 'Other'];
+    const mathSubjects = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
 
     if (showConfirmation) {
         return (
