@@ -738,6 +738,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>Home Page</h4>
                     {editingPage === 'home' ? (
                         <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
+                            <input
+                                type="email"
+                                placeholder="Contact email"
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    marginBottom: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px'
+                                }}
+                            />
                             <textarea
                                 value={homePageContent}
                                 onChange={(e) => setHomePageContent(e.target.value)}
@@ -771,6 +785,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>About Page</h4>
                     {editingPage === 'about' ? (
                         <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
+                            <input
+                                type="email"
+                                placeholder="Contact email"
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    marginBottom: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px'
+                                }}
+                            />
                             <textarea
                                 value={aboutPageContent}
                                 onChange={(e) => setAboutPageContent(e.target.value)}
@@ -804,6 +832,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>Group Tutoring Page</h4>
                     {editingPage === 'group_tutoring' ? (
                         <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
+                            <input
+                                type="email"
+                                placeholder="Contact email"
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    marginBottom: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px'
+                                }}
+                            />
                             <textarea
                                 value={groupTutoringContent}
                                 onChange={(e) => setGroupTutoringContent(e.target.value)}
@@ -837,6 +879,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>Contact Page</h4>
                     {editingPage === 'contact' ? (
                         <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
+                            <input
+                                type="email"
+                                placeholder="Contact email"
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    marginBottom: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px'
+                                }}
+                            />
                             <textarea
                                 value={contactPageContent}
                                 onChange={(e) => setContactPageContent(e.target.value)}
