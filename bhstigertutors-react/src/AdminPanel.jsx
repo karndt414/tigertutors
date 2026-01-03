@@ -28,6 +28,9 @@ function AdminPanel({ tutors, onTutorAdded }) {
         teacherName: ''
     });
     const [groupTutoringRegistrations, setGroupTutoringRegistrations] = useState([]);
+    const [homePageContent, setHomePageContent] = useState('');
+    const [aboutPageContent, setAboutPageContent] = useState('');
+    const [editingPage, setEditingPage] = useState(null);
 
     const checkUser = async () => {
         try {
@@ -48,6 +51,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchAllUsers();
         fetchGroupSessions();
         fetchGroupTutoringRegistrations();
+        fetchPageContent();
     }, []);
 
     const handleDelete = async (tutorId) => {
@@ -155,6 +159,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }));
 
         setGroupTutoringRegistrations(enrichedData);
+    };
+
+    const fetchPageContent = async () => {
+        const { data: homeData } = await supabase
+            .from('page_content')
+            .select('content')
+            .eq('page_name', 'home')
+            .single();
+        
+        const { data: aboutData } = await supabase
+            .from('page_content')
+            .select('content')
+            .eq('page_name', 'about')
+            .single();
+
+        if (homeData) setHomePageContent(homeData.content);
+        if (aboutData) setAboutPageContent(aboutData.content);
     };
 
     const handleAddAllowedRole = async (e) => {
@@ -329,6 +350,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
         } else {
             alert('Registration deleted');
             fetchGroupTutoringRegistrations();
+        }
+    };
+
+    const handleSavePageContent = async (pageName, content) => {
+        const { error } = await supabase
+            .from('page_content')
+            .upsert({
+                page_name: pageName,
+                content: content,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'page_name' });
+
+        if (error) {
+            alert('Error saving content: ' + error.message);
+        } else {
+            alert(`${pageName} page updated!`);
+            setEditingPage(null);
         }
     };
 
@@ -674,6 +712,77 @@ function AdminPanel({ tutors, onTutorAdded }) {
                       )}
                   </tbody>
               </table>
+            </div>
+
+            <hr />
+
+            <h3>Manage Page Content</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                    <h4>Home Page</h4>
+                    {editingPage === 'home' ? (
+                        <div>
+                            <textarea
+                                value={homePageContent}
+                                onChange={(e) => setHomePageContent(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    minHeight: '200px',
+                                    padding: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px',
+                                    fontFamily: 'monospace'
+                                }}
+                            />
+                            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                                <button onClick={() => handleSavePageContent('home', homePageContent)}>Save</button>
+                                <button onClick={() => setEditingPage(null)} style={{ backgroundColor: 'var(--bg-tertiary)' }}>Cancel</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
+                                {homePageContent || 'No content yet'}
+                            </p>
+                            <button onClick={() => setEditingPage('home')}>Edit</button>
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <h4>About Page</h4>
+                    {editingPage === 'about' ? (
+                        <div>
+                            <textarea
+                                value={aboutPageContent}
+                                onChange={(e) => setAboutPageContent(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    minHeight: '200px',
+                                    padding: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px',
+                                    fontFamily: 'monospace'
+                                }}
+                            />
+                            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                                <button onClick={() => handleSavePageContent('about', aboutPageContent)}>Save</button>
+                                <button onClick={() => setEditingPage(null)} style={{ backgroundColor: 'var(--bg-tertiary)' }}>Cancel</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
+                                {aboutPageContent || 'No content yet'}
+                            </p>
+                            <button onClick={() => setEditingPage('about')}>Edit</button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
