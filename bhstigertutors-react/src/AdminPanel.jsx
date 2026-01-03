@@ -35,6 +35,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
     const [selectedText, setSelectedText] = useState('');
     const [editingPageType, setEditingPageType] = useState(null);
+    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
+    const [newTutoringLeadEmail, setNewTutoringLeadEmail] = useState('');
 
     const checkUser = async () => {
         try {
@@ -56,6 +58,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchGroupSessions();
         fetchGroupTutoringRegistrations();
         fetchPageContent();
+        fetchTutoringLeadEmail();
     }, []);
 
     const handleDelete = async (tutorId) => {
@@ -444,6 +447,43 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 }
                 return part;
             });
+    };
+
+    const fetchTutoringLeadEmail = async () => {
+        const { data } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'tutoring_lead_email')
+            .single();
+        
+        if (data) {
+            setTutoringLeadEmail(data.value);
+            setNewTutoringLeadEmail(data.value);
+        }
+    };
+
+    const handleUpdateTutoringLeadEmail = async (e) => {
+        e.preventDefault();
+        
+        if (!newTutoringLeadEmail.trim()) {
+            alert('Please enter an email');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('site_config')
+            .upsert({
+                key: 'tutoring_lead_email',
+                value: newTutoringLeadEmail,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' });
+
+        if (error) {
+            alert('Error updating email: ' + error.message);
+        } else {
+            alert('Tutoring lead email updated!');
+            setTutoringLeadEmail(newTutoringLeadEmail);
+        }
     };
 
     return (
@@ -1223,6 +1263,40 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     )}
                 </div>
             </div>
+
+            <hr />
+
+            <h3>Site Configuration</h3>
+            <div style={{ marginBottom: '20px' }}>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                    Update site-wide settings here
+                </p>
+                
+                <form onSubmit={handleUpdateTutoringLeadEmail} style={{ marginBottom: '20px' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                            Tutoring Lead Email
+                        </label>
+                        <input
+                            type="email"
+                            value={newTutoringLeadEmail}
+                            onChange={(e) => setNewTutoringLeadEmail(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '8px',
+                                marginBottom: '10px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '6px'
+                            }}
+                        />
+                        <button type="submit">Update Email</button>
+                    </div>
+                </form>
+            </div>
+
+            <hr />
         </div>
     );
 }

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import { getTutoringLeadEmail } from '../configUtils';
 import '../App.css';
 
 function ContactPage() {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(true);
-    const contactEmail = "wolfkame@bentonvillek12.org";
+    const [contactEmail, setContactEmail] = useState('wolfkame@bentonvillek12.org');
     const subject = "BHS Tutoring Inquiry";
     const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}`;
 
@@ -21,7 +22,13 @@ function ContactPage() {
 
     useEffect(() => {
         fetchContent();
+        loadTutoringLeadEmail();
     }, []);
+
+    const loadTutoringLeadEmail = async () => {
+        const email = await getTutoringLeadEmail();
+        setContactEmail(email);
+    };
 
     const fetchContent = async () => {
         try {

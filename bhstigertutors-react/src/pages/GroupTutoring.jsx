@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import './GroupTutoring.css';
+import { getTutoringLeadEmail } from '../configUtils';
 
 const FLEX_SCHEDULE = {
     '6.2': 2,  // Tuesday (0=Sun, 1=Mon, 2=Tue, etc.)
@@ -21,6 +22,7 @@ function GroupTutoring() {
     const [userRole, setUserRole] = useState(null);
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
     const [loading, setLoading] = useState(true);
+    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
 
     // Form state
     const [formData, setFormData] = useState({
@@ -40,6 +42,7 @@ function GroupTutoring() {
         checkUser();
         fetchSessions();
         fetchGroupTutoringContent();
+        loadTutoringLeadEmail();
     }, []);
 
     const checkUser = async () => {
@@ -95,6 +98,11 @@ function GroupTutoring() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const loadTutoringLeadEmail = async () => {
+        const email = await getTutoringLeadEmail();
+        setTutoringLeadEmail(email);
     };
 
     const getSessionsForDate = (date) => {
@@ -249,7 +257,7 @@ function GroupTutoring() {
                     year: 'numeric' 
                 }),
                 time: selectedSession.session_time,
-                email: 'wolfkame@bentonvillek12.org'
+                email: tutoringLeadEmail
             });
 
             setShowRegistrationForm(false);
