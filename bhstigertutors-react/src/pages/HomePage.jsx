@@ -30,10 +30,32 @@ function HomePage() {
         }
     };
 
+    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
+
+    useEffect(() => {
+        fetchContent();
+        loadTutoringLeadEmail();
+    }, []);
+
+    const loadTutoringLeadEmail = async () => {
+        const { data } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'tutoring_lead_email')
+            .single();
+
+        if (data) {
+            setTutoringLeadEmail(data.value);
+        }
+    };
+
     const parseMarkdown = (text) => {
         if (!text) return text;
-        
-        return text
+
+        // Replace email placeholder with actual email
+        let processedText = text.replace('{{tutoring_lead_email}}', tutoringLeadEmail);
+
+        return processedText
             .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
             .map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {

@@ -22,7 +22,6 @@ function GroupTutoring() {
     const [userRole, setUserRole] = useState(null);
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
     const [loading, setLoading] = useState(true);
-    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
 
     // Form state
     const [formData, setFormData] = useState({
@@ -98,11 +97,6 @@ function GroupTutoring() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const loadTutoringLeadEmail = async () => {
-        const email = await getTutoringLeadEmail();
-        setTutoringLeadEmail(email);
     };
 
     const getSessionsForDate = (date) => {
@@ -279,10 +273,32 @@ function GroupTutoring() {
         }
     };
 
+    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
+
+    useEffect(() => {
+        fetchContent();
+        loadTutoringLeadEmail();
+    }, []);
+
+    const loadTutoringLeadEmail = async () => {
+        const { data } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'tutoring_lead_email')
+            .single();
+
+        if (data) {
+            setTutoringLeadEmail(data.value);
+        }
+    };
+
     const parseMarkdown = (text) => {
         if (!text) return text;
-        
-        return text
+
+        // Replace email placeholder with actual email
+        let processedText = text.replace('{{tutoring_lead_email}}', tutoringLeadEmail);
+
+        return processedText
             .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
             .map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
@@ -324,7 +340,7 @@ function GroupTutoring() {
                         <p className="confirmation-action">Sign up in RTI immediately.</p>
                     </div>
                     <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--text-secondary)' }}>
-                        Thank you for registering for group tutoring. We can't wait to see you! Questions or can't find the flex? Email Meg Wolfka, tutoring coordinator, at <a href={`mailto:${confirmationData.email}`}>{confirmationData.email}</a>.
+                        Thank you for registering for group tutoring. We can't wait to see you! Questions or can't find the flex? Email our tutoring coordinator at <a href={`mailto:${confirmationData.email}`}>{confirmationData.email}</a>.
                     </p>
                     <button onClick={() => {
                         setShowConfirmation(false);

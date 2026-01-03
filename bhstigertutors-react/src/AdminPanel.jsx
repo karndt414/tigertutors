@@ -434,8 +434,11 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
     const parseMarkdown = (text) => {
         if (!text) return text;
-        
-        return text
+
+        // Replace email placeholder with actual email
+        let processedText = text.replace('{{tutoring_lead_email}}', tutoringLeadEmail);
+
+        return processedText
             .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
             .map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
@@ -838,20 +841,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>Home Page</h4>
                     {editingPage === 'home' ? (
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
-                            <input
-                                type="email"
-                                placeholder="Contact email"
-                                style={{
-                                    width: '100%',
-                                    padding: '8px',
-                                    marginBottom: '10px',
-                                    backgroundColor: 'var(--bg-primary)',
-                                    color: 'var(--text-primary)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '6px'
-                                }}
-                            />
                             <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
                                 <button
                                     type="button"
@@ -907,6 +896,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 >
                                     U
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85em'
+                                    }}
+                                >
+                                    📧 Insert Email
+                                </button>
                             </div>
                             <textarea
                                 value={homePageContent}
@@ -922,7 +928,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     borderRadius: '6px',
                                     fontFamily: 'monospace'
                                 }}
-                                placeholder="Use **text** for bold, *text* for italic, __text__ for underline"
+                                placeholder="Use **text** for bold, *text* for italic, __text__ for underline, or {{tutoring_lead_email}} to insert the tutoring lead email"
                             />
                             <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
                                 <button onClick={() => handleSavePageContent('home', homePageContent)}>Save</button>
@@ -946,25 +952,11 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>About Page</h4>
                     {editingPage === 'about' ? (
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
-                            <input
-                                type="email"
-                                placeholder="Contact email"
-                                style={{
-                                    width: '100%',
-                                    padding: '8px',
-                                    marginBottom: '10px',
-                                    backgroundColor: 'var(--bg-primary)',
-                                    color: 'var(--text-primary)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '6px'
-                                }}
-                            />
                             <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('about');
+                                        setEditingPageType('home');
                                         applyFormatting('bold');
                                     }}
                                     style={{
@@ -982,7 +974,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('about');
+                                        setEditingPageType('home');
                                         applyFormatting('italic');
                                     }}
                                     style={{
@@ -1000,7 +992,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('about');
+                                        setEditingPageType('home');
                                         applyFormatting('underline');
                                     }}
                                     style={{
@@ -1014,6 +1006,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     }}
                                 >
                                     U
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85em'
+                                    }}
+                                >
+                                    📧 Insert Email
                                 </button>
                             </div>
                             <textarea
@@ -1053,25 +1062,11 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>Group Tutoring Page</h4>
                     {editingPage === 'group_tutoring' ? (
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
-                            <input
-                                type="email"
-                                placeholder="Contact email"
-                                style={{
-                                    width: '100%',
-                                    padding: '8px',
-                                    marginBottom: '10px',
-                                    backgroundColor: 'var(--bg-primary)',
-                                    color: 'var(--text-primary)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '6px'
-                                }}
-                            />
                             <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('group_tutoring');
+                                        setEditingPageType('home');
                                         applyFormatting('bold');
                                     }}
                                     style={{
@@ -1089,7 +1084,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('group_tutoring');
+                                        setEditingPageType('home');
                                         applyFormatting('italic');
                                     }}
                                     style={{
@@ -1107,7 +1102,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('group_tutoring');
+                                        setEditingPageType('home');
                                         applyFormatting('underline');
                                     }}
                                     style={{
@@ -1121,6 +1116,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     }}
                                 >
                                     U
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85em'
+                                    }}
+                                >
+                                    📧 Insert Email
                                 </button>
                             </div>
                             <textarea
@@ -1160,25 +1172,11 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     <h4>Contact Page</h4>
                     {editingPage === 'contact' ? (
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Email</label>
-                            <input
-                                type="email"
-                                placeholder="Contact email"
-                                style={{
-                                    width: '100%',
-                                    padding: '8px',
-                                    marginBottom: '10px',
-                                    backgroundColor: 'var(--bg-primary)',
-                                    color: 'var(--text-primary)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '6px'
-                                }}
-                            />
                             <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('contact');
+                                        setEditingPageType('home');
                                         applyFormatting('bold');
                                     }}
                                     style={{
@@ -1196,7 +1194,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('contact');
+                                        setEditingPageType('home');
                                         applyFormatting('italic');
                                     }}
                                     style={{
@@ -1214,7 +1212,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setEditingPageType('contact');
+                                        setEditingPageType('home');
                                         applyFormatting('underline');
                                     }}
                                     style={{
@@ -1228,6 +1226,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     }}
                                 >
                                     U
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85em'
+                                    }}
+                                >
+                                    📧 Insert Email
                                 </button>
                             </div>
                             <textarea
