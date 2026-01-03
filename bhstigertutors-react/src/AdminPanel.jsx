@@ -439,7 +439,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         let processedText = text.replace('{{tutoring_lead_email}}', tutoringLeadEmail);
 
         return processedText
-            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
+            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g)
             .map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
                     return <strong key={i}>{part.slice(2, -2)}</strong>;
@@ -447,6 +447,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     return <u key={i}>{part.slice(2, -2)}</u>;
                 } else if (part.startsWith('*') && part.endsWith('*')) {
                     return <em key={i}>{part.slice(1, -1)}</em>;
+                } else if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part)) {
+                    return <a key={i} href={`mailto:${part}`} style={{ color: 'var(--accent-primary)', textDecoration: 'underline', cursor: 'pointer' }}>{part}</a>;
                 }
                 return part;
             });
@@ -1010,7 +1012,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                        setAboutPageContent(aboutPageContent + '{{tutoring_lead_email}}');
                                     }}
                                     style={{
                                         padding: '6px 12px',
@@ -1120,7 +1122,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                        setGroupTutoringContent(groupTutoringContent + '{{tutoring_lead_email}}');
                                     }}
                                     style={{
                                         padding: '6px 12px',
@@ -1230,7 +1232,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setHomePageContent(homePageContent + '{{tutoring_lead_email}}');
+                                        setContactPageContent(contactPageContent + '{{tutoring_lead_email}}');
                                     }}
                                     style={{
                                         padding: '6px 12px',
