@@ -155,6 +155,20 @@ function GroupTutoring() {
         }
 
         try {
+            // Check if already registered for this session
+            const { data: existingReg } = await supabase
+                .from('group_tutoring_registrations')
+                .select('id')
+                .eq('session_id', selectedSession.id)
+                .eq('school_email', formData.schoolEmail)
+                .single();
+
+            if (existingReg) {
+                alert('You\'re already registered for this session');
+                setShowRegistrationForm(false);
+                return;
+            }
+
             console.log('Submitting registration...');
             
             const { data, error } = await supabase
@@ -171,8 +185,12 @@ function GroupTutoring() {
                 });
 
             if (error) {
-                console.error('Supabase error:', error);
-                alert('Error registering: ' + error.message);
+                if (error.code === '23505') {
+                    alert('You\'re already registered for this session');
+                } else {
+                    console.error('Supabase error:', error);
+                    alert('Error registering: ' + error.message);
+                }
                 return;
             }
 

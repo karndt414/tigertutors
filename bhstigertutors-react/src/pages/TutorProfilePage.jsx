@@ -246,7 +246,7 @@ function TutorProfilePage() {
                 if (error) {
                     alert('Error creating profile: ' + error.message);
                 } else {
-                    alert('Profile created! Admin will review and approve it.');
+                    alert('Profile created!');
                     setIsEditing(false);
                     setOtherSubject(''); // Reset other subject
                     setSelectedSubjects([]); // Reset selected subjects

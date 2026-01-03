@@ -70,7 +70,7 @@ function LoginModal({ isOpen, onClose }) {
                     return;
                 }
 
-                setSuccess(`Account created as ${finalRole}! Check your email to confirm.`);
+                setSuccess(`Account created as ${finalRole}!`);
                 setTimeout(() => {
                     setEmail('');
                     setPassword('');
