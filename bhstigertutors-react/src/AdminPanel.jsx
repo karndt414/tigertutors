@@ -33,6 +33,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [editingPage, setEditingPage] = useState(null);
     const [contactPageContent, setContactPageContent] = useState('');
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
+    const [selectedText, setSelectedText] = useState('');
+    const [editingPageType, setEditingPageType] = useState(null);
 
     const checkUser = async () => {
         try {
@@ -384,6 +386,47 @@ function AdminPanel({ tutors, onTutorAdded }) {
             alert(`${pageName} page updated!`);
             setEditingPage(null);
         }
+    };
+
+    const applyFormatting = (format) => {
+        if (!selectedText) {
+            alert('Please select text to format');
+            return;
+        }
+
+        let formattedText = '';
+        switch(format) {
+            case 'bold':
+                formattedText = `**${selectedText}**`;
+                break;
+            case 'italic':
+                formattedText = `*${selectedText}*`;
+                break;
+            case 'underline':
+                formattedText = `__${selectedText}__`;
+                break;
+            default:
+                return;
+        }
+
+        // Replace selected text with formatted version in the active textarea
+        const currentContent = editingPageType === 'home' ? homePageContent :
+                              editingPageType === 'about' ? aboutPageContent :
+                              editingPageType === 'group_tutoring' ? groupTutoringContent :
+                              editingPageType === 'contact' ? contactPageContent : '';
+
+        const newContent = currentContent.replace(selectedText, formattedText);
+
+        if (editingPageType === 'home') setHomePageContent(newContent);
+        else if (editingPageType === 'about') setAboutPageContent(newContent);
+        else if (editingPageType === 'group_tutoring') setGroupTutoringContent(newContent);
+        else if (editingPageType === 'contact') setContactPageContent(newContent);
+
+        setSelectedText('');
+    };
+
+    const handleTextareaSelect = (e) => {
+        setSelectedText(e.target.value.substring(e.target.selectionStart, e.target.selectionEnd));
     };
 
     return (
@@ -752,9 +795,66 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     borderRadius: '6px'
                                 }}
                             />
+                            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('home');
+                                        applyFormatting('bold');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontWeight: 'bold',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <strong>B</strong>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('home');
+                                        applyFormatting('italic');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontStyle: 'italic',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    I
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('home');
+                                        applyFormatting('underline');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        textDecoration: 'underline',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    U
+                                </button>
+                            </div>
                             <textarea
                                 value={homePageContent}
                                 onChange={(e) => setHomePageContent(e.target.value)}
+                                onSelect={handleTextareaSelect}
                                 style={{
                                     width: '100%',
                                     minHeight: '200px',
@@ -765,6 +865,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     borderRadius: '6px',
                                     fontFamily: 'monospace'
                                 }}
+                                placeholder="Use **text** for bold, *text* for italic, __text__ for underline"
                             />
                             <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
                                 <button onClick={() => handleSavePageContent('home', homePageContent)}>Save</button>
@@ -776,7 +877,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
                                 {homePageContent || 'No content yet'}
                             </p>
-                            <button onClick={() => setEditingPage('home')}>Edit</button>
+                            <button onClick={() => {
+                                setEditingPage('home');
+                                setEditingPageType('home');
+                            }}>Edit</button>
                         </div>
                     )}
                 </div>
@@ -802,6 +906,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <textarea
                                 value={aboutPageContent}
                                 onChange={(e) => setAboutPageContent(e.target.value)}
+                                onSelect={handleTextareaSelect}
                                 style={{
                                     width: '100%',
                                     minHeight: '200px',
@@ -849,6 +954,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <textarea
                                 value={groupTutoringContent}
                                 onChange={(e) => setGroupTutoringContent(e.target.value)}
+                                onSelect={handleTextareaSelect}
                                 style={{
                                     width: '100%',
                                     minHeight: '200px',
@@ -896,6 +1002,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <textarea
                                 value={contactPageContent}
                                 onChange={(e) => setContactPageContent(e.target.value)}
+                                onSelect={handleTextareaSelect}
                                 style={{
                                     width: '100%',
                                     minHeight: '200px',
