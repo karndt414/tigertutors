@@ -920,6 +920,62 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     borderRadius: '6px'
                                 }}
                             />
+                            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('about');
+                                        applyFormatting('bold');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontWeight: 'bold',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <strong>B</strong>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('about');
+                                        applyFormatting('italic');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontStyle: 'italic',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    I
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('about');
+                                        applyFormatting('underline');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        textDecoration: 'underline',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    U
+                                </button>
+                            </div>
                             <textarea
                                 value={aboutPageContent}
                                 onChange={(e) => setAboutPageContent(e.target.value)}
@@ -945,7 +1001,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
                                 {parseMarkdown(aboutPageContent) || 'No content yet'}
                             </p>
-                            <button onClick={() => setEditingPage('about')}>Edit</button>
+                            <button onClick={() => {
+                                setEditingPage('about');
+                                setEditingPageType('about');
+                            }}>Edit</button>
                         </div>
                     )}
                 </div>
@@ -968,6 +1027,62 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     borderRadius: '6px'
                                 }}
                             />
+                            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('group_tutoring');
+                                        applyFormatting('bold');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontWeight: 'bold',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <strong>B</strong>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('group_tutoring');
+                                        applyFormatting('italic');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontStyle: 'italic',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    I
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('group_tutoring');
+                                        applyFormatting('underline');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        textDecoration: 'underline',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    U
+                                </button>
+                            </div>
                             <textarea
                                 value={groupTutoringContent}
                                 onChange={(e) => setGroupTutoringContent(e.target.value)}
@@ -993,7 +1108,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px', fontSize: '0.85em' }}>
                                 {parseMarkdown(groupTutoringContent) || 'No content yet'}
                             </p>
-                            <button onClick={() => setEditingPage('group_tutoring')}>Edit</button>
+                            <button onClick={() => {
+                                setEditingPage('group_tutoring');
+                                setEditingPageType('group_tutoring');
+                            }}>Edit</button>
                         </div>
                     )}
                 </div>
@@ -1016,6 +1134,62 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     borderRadius: '6px'
                                 }}
                             />
+                            <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('contact');
+                                        applyFormatting('bold');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontWeight: 'bold',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <strong>B</strong>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('contact');
+                                        applyFormatting('italic');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontStyle: 'italic',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    I
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingPageType('contact');
+                                        applyFormatting('underline');
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        textDecoration: 'underline',
+                                        backgroundColor: 'var(--bg-tertiary)',
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    U
+                                </button>
+                            </div>
                             <textarea
                                 value={contactPageContent}
                                 onChange={(e) => setContactPageContent(e.target.value)}
@@ -1041,7 +1215,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
                                 {parseMarkdown(contactPageContent) || 'No content yet'}
                             </p>
-                            <button onClick={() => setEditingPage('contact')}>Edit</button>
+                            <button onClick={() => {
+                                setEditingPage('contact');
+                                setEditingPageType('contact');
+                            }}>Edit</button>
                         </div>
                     )}
                 </div>

@@ -30,13 +30,30 @@ function HomePage() {
         }
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return text;
+        
+        return text
+            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
+            .map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i}>{part.slice(2, -2)}</strong>;
+                } else if (part.startsWith('__') && part.endsWith('__')) {
+                    return <u key={i}>{part.slice(2, -2)}</u>;
+                } else if (part.startsWith('*') && part.endsWith('*')) {
+                    return <em key={i}>{part.slice(1, -1)}</em>;
+                }
+                return part;
+            });
+    };
+
     if (loading) return <p>Loading...</p>;
 
     return (
         <div>
             <h2>Welcome to BHS Tiger Tutors!</h2>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
-                {content}
+                {parseMarkdown(content)}
             </p>
         </div>
     );

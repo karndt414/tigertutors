@@ -271,6 +271,23 @@ function GroupTutoring() {
         }
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return text;
+        
+        return text
+            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
+            .map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i}>{part.slice(2, -2)}</strong>;
+                } else if (part.startsWith('__') && part.endsWith('__')) {
+                    return <u key={i}>{part.slice(2, -2)}</u>;
+                } else if (part.startsWith('*') && part.endsWith('*')) {
+                    return <em key={i}>{part.slice(1, -1)}</em>;
+                }
+                return part;
+            });
+    };
+
     // Calendar rendering
     const daysInMonth = getDaysInMonth(currentMonth);
     const firstDay = getFirstDayOfMonth(currentMonth);
@@ -616,7 +633,7 @@ function GroupTutoring() {
             
             <div className="group-tutoring-description" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
                 <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-                    {groupTutoringContent}
+                    {parseMarkdown(groupTutoringContent)}
                 </p>
             </div>
 

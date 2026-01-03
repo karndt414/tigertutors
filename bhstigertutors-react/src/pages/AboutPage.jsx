@@ -20,7 +20,6 @@ function AboutPage() {
             if (data && data.content) {
                 setContent(data.content);
             } else {
-                // Fallback content if nothing in database
                 setContent('Mu Alpha Theta is the National High School and Two-Year College Mathematics Honor Society. We are dedicated to inspiring keen interest in mathematics, developing strong scholarship in the subject, and promoting the enjoyment of mathematics in high school and two-year college students.\n\nThe BHS chapter upholds these values by offering free peer tutoring, participating in math competitions, and engaging in community service.');
             }
         } catch (err) {
@@ -30,13 +29,30 @@ function AboutPage() {
         }
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return text;
+        
+        return text
+            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__)/g)
+            .map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i}>{part.slice(2, -2)}</strong>;
+                } else if (part.startsWith('__') && part.endsWith('__')) {
+                    return <u key={i}>{part.slice(2, -2)}</u>;
+                } else if (part.startsWith('*') && part.endsWith('*')) {
+                    return <em key={i}>{part.slice(1, -1)}</em>;
+                }
+                return part;
+            });
+    };
+
     if (loading) return <p>Loading...</p>;
 
     return (
         <div>
             <h2>About Mu Alpha Theta</h2>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
-                {content}
+                {parseMarkdown(content)}
             </p>
         </div>
     );
