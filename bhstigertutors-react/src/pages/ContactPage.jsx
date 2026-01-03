@@ -1,10 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import '../App.css';
 
 function ContactPage() {
+    const [content, setContent] = useState('');
+    const [loading, setLoading] = useState(true);
     const contactEmail = "wolfkame@bentonvillek12.org";
     const subject = "BHS Tutoring Inquiry";
     const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}`;
+
+    useEffect(() => {
+        fetchContent();
+    }, []);
+
+    const fetchContent = async () => {
+        try {
+            const { data } = await supabase
+                .from('page_content')
+                .select('content')
+                .eq('page_name', 'contact')
+                .single();
+
+            if (data && data.content) {
+                setContent(data.content);
+            } else {
+                setContent('Have questions about tutoring? Want to learn more about joining Mu Alpha Theta?\n\nThe best way to get in touch is to email the faculty sponsor or student officers directly.\nClick the button below to start an email, or use one of the forms below.');
+            }
+        } catch (err) {
+            console.error('Error fetching content:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const [formType, setFormType] = useState(null);
     const [formData, setFormData] = useState({
@@ -14,7 +41,6 @@ function ContactPage() {
         subject: '',
         message: ''
     });
-    const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
     const handleInputChange = (e) => {
@@ -27,7 +53,6 @@ function ContactPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
 
         try {
             const response = await fetch('/api/send-admin-email', {
@@ -57,20 +82,14 @@ function ContactPage() {
         } catch (err) {
             console.error('Form submission error:', err);
             alert('Error submitting form. Please try again.');
-        } finally {
-            setLoading(false);
         }
     };
 
     return (
         <div>
             <h2>Contact Us</h2>
-            <p style={{ lineHeight: 1.7, fontSize: '1.1em' }}>
-                Have questions about tutoring? Want to learn more about joining Mu Alpha Theta?
-            </p>
-            <p style={{ lineHeight: 1.7, fontSize: '1.1em', marginTop: '1em' }}>
-                The best way to get in touch is to email the faculty sponsor or student officers directly.
-                Click the button below to start an email, or use one of the forms below.
+            <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
+                {content}
             </p>
 
             <a
@@ -272,20 +291,18 @@ function ContactPage() {
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             <button
                                 type="submit"
-                                disabled={loading}
                                 style={{
                                     padding: '0.75rem 2rem',
                                     backgroundColor: 'var(--accent-primary)',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '6px',
-                                    cursor: loading ? 'not-allowed' : 'pointer',
+                                    cursor: 'pointer',
                                     fontSize: '1em',
-                                    fontWeight: 500,
-                                    opacity: loading ? 0.6 : 1
+                                    fontWeight: 500
                                 }}
                             >
-                                {loading ? 'Sending...' : 'Send'}
+                                Send
                             </button>
                             <button
                                 type="button"

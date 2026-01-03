@@ -31,6 +31,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [homePageContent, setHomePageContent] = useState('');
     const [aboutPageContent, setAboutPageContent] = useState('');
     const [editingPage, setEditingPage] = useState(null);
+    const [contactPageContent, setContactPageContent] = useState('');
+    const [groupTutoringContent, setGroupTutoringContent] = useState('');
 
     const checkUser = async () => {
         try {
@@ -174,8 +176,22 @@ function AdminPanel({ tutors, onTutorAdded }) {
             .eq('page_name', 'about')
             .single();
 
+        const { data: groupData } = await supabase
+            .from('page_content')
+            .select('content')
+            .eq('page_name', 'group_tutoring')
+            .single();
+
+        const { data: contactData } = await supabase
+            .from('page_content')
+            .select('content')
+            .eq('page_name', 'contact')
+            .single();
+
         if (homeData) setHomePageContent(homeData.content);
         if (aboutData) setAboutPageContent(aboutData.content);
+        if (groupData) setGroupTutoringContent(groupData.content);
+        if (contactData) setContactPageContent(contactData.content);
     };
 
     const handleAddAllowedRole = async (e) => {
@@ -780,6 +796,72 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 {aboutPageContent || 'No content yet'}
                             </p>
                             <button onClick={() => setEditingPage('about')}>Edit</button>
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <h4>Group Tutoring Page</h4>
+                    {editingPage === 'group_tutoring' ? (
+                        <div>
+                            <textarea
+                                value={groupTutoringContent}
+                                onChange={(e) => setGroupTutoringContent(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    minHeight: '200px',
+                                    padding: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px',
+                                    fontFamily: 'monospace'
+                                }}
+                            />
+                            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                                <button onClick={() => handleSavePageContent('group_tutoring', groupTutoringContent)}>Save</button>
+                                <button onClick={() => setEditingPage(null)} style={{ backgroundColor: 'var(--bg-tertiary)' }}>Cancel</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px', fontSize: '0.85em' }}>
+                                {groupTutoringContent || 'No content yet'}
+                            </p>
+                            <button onClick={() => setEditingPage('group_tutoring')}>Edit</button>
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <h4>Contact Page</h4>
+                    {editingPage === 'contact' ? (
+                        <div>
+                            <textarea
+                                value={contactPageContent}
+                                onChange={(e) => setContactPageContent(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    minHeight: '200px',
+                                    padding: '10px',
+                                    backgroundColor: 'var(--bg-primary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '6px',
+                                    fontFamily: 'monospace'
+                                }}
+                            />
+                            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                                <button onClick={() => handleSavePageContent('contact', contactPageContent)}>Save</button>
+                                <button onClick={() => setEditingPage(null)} style={{ backgroundColor: 'var(--bg-tertiary)' }}>Cancel</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px' }}>
+                                {contactPageContent || 'No content yet'}
+                            </p>
+                            <button onClick={() => setEditingPage('contact')}>Edit</button>
                         </div>
                     )}
                 </div>

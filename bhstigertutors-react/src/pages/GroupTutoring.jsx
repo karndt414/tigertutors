@@ -19,6 +19,8 @@ function GroupTutoring() {
     const [confirmationData, setConfirmationData] = useState(null);
     const [user, setUser] = useState(null);
     const [userRole, setUserRole] = useState(null);
+    const [groupTutoringContent, setGroupTutoringContent] = useState('');
+    const [loading, setLoading] = useState(true);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -37,6 +39,7 @@ function GroupTutoring() {
     useEffect(() => {
         checkUser();
         fetchSessions();
+        fetchGroupTutoringContent();
     }, []);
 
     const checkUser = async () => {
@@ -71,6 +74,27 @@ function GroupTutoring() {
 
         if (error) console.error(error);
         else setSessions(data || []);
+    };
+
+    const fetchGroupTutoringContent = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('page_content')
+                .select('content')
+                .eq('page_name', 'group_tutoring')
+                .single();
+
+            if (data && data.content) {
+                setGroupTutoringContent(data.content);
+            } else {
+                // Fallback content if nothing in database
+                setGroupTutoringContent('Group tutoring brings students and tutors together in a math classroom during flex. Once they arrive, students are assigned to a tutor who can help them with their current math class. Either one or two students are assigned to each tutor. Throughout the session, tutors explain concepts, work examples, and help with homework questions. Group tutoring is great for students who are struggling with a specific concept or want a convenient way to ask questions as they work on homework. All math students working on the listed subject are welcome, including those needing significant, consistent help or wanting to see if MATh tutoring is a good fit for them.\n\nIf you are seeking long-term individual tutoring, please fill out the form in your math Google Classroom.\n\nHave questions? Email Meg Wolfka, tutoring coordinator, at wolfkame@bentonvillek12.org.\n\nRegister for as many sessions as you would like. Click on a session below to register.');
+            }
+        } catch (err) {
+            console.error('Error fetching content:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getSessionsForDate = (date) => {
@@ -591,17 +615,8 @@ function GroupTutoring() {
             <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Group Tutoring</h2>
             
             <div className="group-tutoring-description" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-                <p>
-                    Group tutoring brings students and tutors together in a math classroom during flex. Once they arrive, students are assigned to a tutor who can help them with their current math class. Either one or two students are assigned to each tutor. Throughout the session, tutors explain concepts, work examples, and help with homework questions. Group tutoring is great for students who are struggling with a specific concept or want a convenient way to ask questions as they work on homework. All math students working on the listed subject are welcome, including those needing significant, consistent help or wanting to see if MATh tutoring is a good fit for them.
-                </p>
-                <p>
-                    If you are seeking long-term individual tutoring, please fill out the form in your math Google Classroom.
-                </p>
-                <p>
-                    Have questions? Email Meg Wolfka, tutoring coordinator, at <a href="mailto:wolfkame@bentonvillek12.org">wolfkame@bentonvillek12.org</a>.
-                </p>
-                <p className="register-instruction">
-                    Register for as many sessions as you would like. Click on a session below to register.
+                <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+                    {groupTutoringContent}
                 </p>
             </div>
 
