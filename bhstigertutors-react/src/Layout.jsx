@@ -11,7 +11,7 @@ function Layout({ openLogin, onSignOut, user, userRole, tutors, loading }) {
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/about">About</Link>
-            <Link to="/tutors">Tutors</Link>
+            {/* <Link to="/tutors">Find Tutors</Link> */}
             <Link to="/group-tutoring">Sessions</Link>
             <Link to="/contact">Contact</Link>
             {user && userRole === 'tutor' && <Link to="/tutor-profile">Tutor Profile</Link>}
