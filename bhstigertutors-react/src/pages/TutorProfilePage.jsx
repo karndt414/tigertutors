@@ -336,6 +336,29 @@ function TutorProfilePage() {
         }
     };
 
+    const handleRemoveSession = async (registrationId) => {
+        if (!window.confirm('Are you sure you want to remove yourself from this session?')) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('group_tutoring_registrations')
+                .delete()
+                .eq('id', registrationId);
+
+            if (error) {
+                alert('Error removing session: ' + error.message);
+            } else {
+                alert('Removed from session');
+                await fetchTutorSessions(user.id);
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            alert('An error occurred. Please try again.');
+        }
+    };
+
     // Not logged in
     if (!user) {
         return (
@@ -454,7 +477,7 @@ function TutorProfilePage() {
                                 }}>
                                     <div>
                                         <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600 }}>
-                                            {reg.group_tutoring_sessions?.session_time}
+                                            {reg.group_tutoring_sessions?.session_time} • {reg.group_tutoring_sessions?.teacher_name}
                                         </p>
                                         <p style={{ margin: '0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
                                             {new Date(reg.group_tutoring_sessions?.session_date).toLocaleDateString()}
