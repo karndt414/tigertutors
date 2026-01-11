@@ -41,6 +41,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [newTutoringLeadEmail, setNewTutoringLeadEmail] = useState('');
     const [mathSubjects, setMathSubjects] = useState([]);
     const [newSubject, setNewSubject] = useState('');
+    const [studentPresidentEmail, setStudentPresidentEmail] = useState('');
+    const [newStudentPresidentEmail, setNewStudentPresidentEmail] = useState('');
 
     const checkUser = async () => {
         try {
@@ -63,6 +65,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchGroupTutoringRegistrations();
         fetchPageContent();
         fetchTutoringLeadEmail();
+        fetchStudentPresidentEmail();
         fetchMathSubjects();
     }, []);
 
@@ -497,6 +500,43 @@ function AdminPanel({ tutors, onTutorAdded }) {
         } else {
             alert('Tutoring lead email updated!');
             setTutoringLeadEmail(newTutoringLeadEmail);
+        }
+    };
+
+    const fetchStudentPresidentEmail = async () => {
+        const { data } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'student_president_email')
+            .single();
+        
+        if (data) {
+            setStudentPresidentEmail(data.value);
+            setNewStudentPresidentEmail(data.value);
+        }
+    };
+
+    const handleUpdateStudentPresidentEmail = async (e) => {
+        e.preventDefault();
+        
+        if (!newStudentPresidentEmail.trim()) {
+            alert('Please enter an email');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('site_config')
+            .upsert({
+                key: 'student_president_email',
+                value: newStudentPresidentEmail,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' });
+
+        if (error) {
+            alert('Error updating email: ' + error.message);
+        } else {
+            alert('Student president email updated!');
+            setStudentPresidentEmail(newStudentPresidentEmail);
         }
     };
 
@@ -1397,6 +1437,29 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             type="email"
                             value={newTutoringLeadEmail}
                             onChange={(e) => setNewTutoringLeadEmail(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '8px',
+                                marginBottom: '10px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '6px'
+                            }}
+                        />
+                        <button type="submit">Update Email</button>
+                    </div>
+                </form>
+
+                <form onSubmit={handleUpdateStudentPresidentEmail} style={{ marginBottom: '20px' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
+                            Student President Email
+                        </label>
+                        <input
+                            type="email"
+                            value={newStudentPresidentEmail}
+                            onChange={(e) => setNewStudentPresidentEmail(e.target.value)}
                             style={{
                                 width: '100%',
                                 padding: '8px',
