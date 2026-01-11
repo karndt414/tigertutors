@@ -592,7 +592,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Button Label (optional)</label>
                         <input
                             type="text"
-                            placeholder="e.g., Algebra 2 - Mrs. Smith"
+                            placeholder="e.g., ACT Prep"
                             value={newGroupSession.buttonLabel}
                             onChange={(e) => setNewGroupSession({ ...newGroupSession, buttonLabel: e.target.value })}
                         />
