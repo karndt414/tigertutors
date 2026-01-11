@@ -607,9 +607,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                 onChange={(e) => setNewGroupSession({ ...newGroupSession, buttonColor: e.target.value })}
                                 style={{ width: '50px', height: '36px', cursor: 'pointer', borderRadius: '4px' }}
                             />
-                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9em', alignSelf: 'center' }}>
-                                {newGroupSession.buttonColor}
-                            </span>
                         </div>
                     </div>
                 </div>
