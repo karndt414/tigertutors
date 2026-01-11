@@ -19,29 +19,50 @@ function LoginModal({ isOpen, onClose }) {
 
         try {
             if (isSignUp) {
+                // Prevent admin account creation
+                if (role === 'admin') {
+                    setError('Admin accounts cannot be created through signup. Contact an administrator.');
+                    setLoading(false);
+                    return;
+                }
+
                 let finalRole = 'learner';
 
-                // Check if email is approved for admin/tutor role
-                if (role !== 'learner') {
+                // Check if email is approved for tutor role
+                if (role === 'tutor') {
                     const { data: allowedRole } = await supabase
                         .from('allowed_roles')
                         .select('role')
-                        .eq('email', email)
+                        .eq('email', email.toLowerCase())
                         .single();
 
                     if (!allowedRole) {
-                        setError(`This email hasn't been approved to register as ${role}. You can register as a learner instead.`);
+                        // Send email to tutoring lead and student president about pending tutor
+                        try {
+                            await fetch('/api/send-tutor-approval-request', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    tutorEmail: email.toLowerCase(),
+                                    timestamp: new Date().toISOString()
+                                })
+                            });
+                        } catch (emailErr) {
+                            console.error('Error sending approval request email:', emailErr);
+                        }
+
+                        setError('Tutor account pending approval. An approval request has been sent to leadership.');
                         setLoading(false);
                         return;
                     }
 
-                    if (allowedRole.role !== role) {
-                        setError(`This email is approved as ${allowedRole.role}, not ${role}`);
+                    if (allowedRole.role !== 'tutor') {
+                        setError(`This email is approved as ${allowedRole.role}, not tutor`);
                         setLoading(false);
                         return;
                     }
 
-                    finalRole = role;
+                    finalRole = 'tutor';
                 }
 
                 // Sign up with Supabase Auth
@@ -139,10 +160,9 @@ function LoginModal({ isOpen, onClose }) {
                             >
                                 <option value="learner">Learner</option>
                                 <option value="tutor">Tutor</option>
-                                <option value="admin">Admin</option>
                             </select>
                             <p style={{ fontSize: '0.8em', color: 'var(--text-secondary)', margin: '0' }}>
-                                Tutors and Admins must be pre-approved by an administrator.
+                                Tutors must be pre-approved by an administrator.
                             </p>
                         </>
                     )}

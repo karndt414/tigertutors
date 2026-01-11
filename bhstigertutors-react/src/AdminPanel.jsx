@@ -43,6 +43,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [newSubject, setNewSubject] = useState('');
     const [studentPresidentEmail, setStudentPresidentEmail] = useState('');
     const [newStudentPresidentEmail, setNewStudentPresidentEmail] = useState('');
+    const [pendingTutorRequests, setPendingTutorRequests] = useState([]);
 
     const checkUser = async () => {
         try {
@@ -67,6 +68,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchTutoringLeadEmail();
         fetchStudentPresidentEmail();
         fetchMathSubjects();
+        fetchPendingTutorRequests();
     }, []);
 
     const handleDelete = async (tutorId) => {
@@ -608,6 +610,81 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }
     };
 
+    const fetchPendingTutorRequests = async () => {
+        const { data, error } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'pending_tutor_requests')
+            .single();
+        
+        if (data && data.value) {
+            setPendingTutorRequests(JSON.parse(data.value));
+        } else {
+            setPendingTutorRequests([]);
+        }
+    };
+
+    const handleApprovePendingTutor = async (email) => {
+        try {
+            // Add to allowed_roles
+            const { error: roleError } = await supabase
+                .from('allowed_roles')
+                .insert({
+                    email: email.toLowerCase(),
+                    role: 'tutor',
+                    approved_by: user?.email || 'admin@system'
+                });
+
+            if (roleError && roleError.code !== '23505') {
+                alert('Error approving tutor: ' + roleError.message);
+                return;
+            }
+
+            // Remove from pending requests
+            const updatedRequests = pendingTutorRequests.filter(req => req.email !== email);
+            
+            const { error: configError } = await supabase
+                .from('site_config')
+                .upsert({
+                    key: 'pending_tutor_requests',
+                    value: JSON.stringify(updatedRequests),
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'key' });
+
+            if (configError) {
+                alert('Error updating requests: ' + configError.message);
+            } else {
+                alert(`${email} approved as tutor!`);
+                setPendingTutorRequests(updatedRequests);
+                fetchAllowedRoles();
+            }
+        } catch (err) {
+            console.error('Approval error:', err);
+            alert('Error approving tutor');
+        }
+    };
+
+    const handleDenyPendingTutor = async (email) => {
+        if (!window.confirm(`Deny tutor request for ${email}?`)) return;
+
+        const updatedRequests = pendingTutorRequests.filter(req => req.email !== email);
+        
+        const { error } = await supabase
+            .from('site_config')
+            .upsert({
+                key: 'pending_tutor_requests',
+                value: JSON.stringify(updatedRequests),
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' });
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Tutor request denied');
+            setPendingTutorRequests(updatedRequests);
+        }
+    };
+
     return (
         <div className="admin-panel">
 
@@ -909,6 +986,45 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             >
                                 Remove
                             </button>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            <hr />
+
+            <h3>Pending Tutor Approvals</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                Tutors waiting for approval
+            </p>
+
+            <div className="tutor-manage-list">
+                {pendingTutorRequests.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)' }}>No pending tutor requests</p>
+                ) : (
+                    pendingTutorRequests.map((request, index) => (
+                        <div key={index} className="tutor-manage-item">
+                            <div>
+                                <strong>{request.email}</strong>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                    Requested: {new Date(request.timestamp).toLocaleString()}
+                                </p>
+                            </div>
+                            <div className="tutor-manage-buttons">
+                                <button
+                                    onClick={() => handleApprovePendingTutor(request.email)}
+                                    className="edit-button"
+                                    style={{ backgroundColor: 'var(--accent-primary)' }}
+                                >
+                                    Approve
+                                </button>
+                                <button
+                                    onClick={() => handleDenyPendingTutor(request.email)}
+                                    className="delete-button"
+                                >
+                                    Deny
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}
