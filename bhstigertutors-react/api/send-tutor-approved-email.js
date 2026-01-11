@@ -22,7 +22,7 @@ export default async function handler(req, res) {
             <p>Great news! Your tutor account has been approved on Tiger Tutors.</p>
             
             <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p>Your account is now active and ready to use. You can sign in with your email and password.</p>
+                <p>Your account is now active and ready to use. You can sign up with your email and password.</p>
             </div>
 
             <p>
