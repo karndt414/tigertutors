@@ -660,7 +660,7 @@ function GroupTutoring() {
                     }),
                     time: session.session_time,
                     email: tutoringLeadEmail,
-                    teacher_name: selected.teacher_name
+                    teacher_name: session.teacher_name
                 });
                 setShowTutorConfirmation(true);
                 fetchSessions();
