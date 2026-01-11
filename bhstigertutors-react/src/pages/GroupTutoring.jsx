@@ -369,7 +369,7 @@ function GroupTutoring() {
                 <div className="confirmation-container">
                     <h3 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Registration Confirmed!</h3>
                     <div className="confirmation-box">
-                        <p className="confirmation-room">{tutorConfirmationData.room}</p>
+                        <p className="confirmation-room">{tutorConfirmationData.room} - {tutorConfirmationData.teacherName}</p>
                         <p className="confirmation-detail">{tutorConfirmationData.date}</p>
                         <p className="confirmation-detail">{tutorConfirmationData.time}</p>
                     </div>
@@ -502,6 +502,17 @@ function GroupTutoring() {
                                     required
                                 />
                                 Not much. I mostly understand and can work some homework problems. Or I just want to work and ask questions if I get stuck.
+                            </label>
+                            <label className="radio-label">
+                                <input
+                                    type="radio"
+                                    name="helpNeeded"
+                                    value="Not Applicable (ACT prep, etc.)"
+                                    checked={formData.helpNeeded === "Not Applicable (ACT prep, etc.)"}
+                                    onChange={handleFormChange}
+                                    required
+                                />
+                                Not Applicable (ACT prep, etc.)
                             </label>
                         </div>
                     </div>
