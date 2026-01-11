@@ -39,7 +39,7 @@ function GroupTutoring() {
         checkUser();
         fetchSessions();
         fetchGroupTutoringContent();
-        fetchTutoringLeadEmail();
+        loadTutoringLeadEmail();
         fetchMathSubjects();
     }, []);
 
