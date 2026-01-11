@@ -265,7 +265,8 @@ function GroupTutoring() {
                     year: 'numeric' 
                 }),
                 time: selectedSession.session_time,
-                email: tutoringLeadEmail
+                email: tutoringLeadEmail,
+                teacher_name: selectedSession.teacher_name
             });
 
             setShowRegistrationForm(false);
@@ -343,7 +344,7 @@ function GroupTutoring() {
                 <div className="confirmation-container">
                     <h3 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Registration Confirmed!</h3>
                     <div className="confirmation-box">
-                        <p className="confirmation-room">{confirmationData.room}</p>
+                        <p className="confirmation-room">{confirmationData.room} - {confirmationData.teacher_name}</p>
                         <p className="confirmation-detail">{confirmationData.date}</p>
                         <p className="confirmation-detail">{confirmationData.time}</p>
                         <p className="confirmation-action">Sign up in RTI immediately.</p>
@@ -658,7 +659,8 @@ function GroupTutoring() {
                         year: 'numeric' 
                     }),
                     time: session.session_time,
-                    email: tutoringLeadEmail
+                    email: tutoringLeadEmail,
+                    teacher_name: selectedSession.teacher_name
                 });
                 setShowTutorConfirmation(true);
                 fetchSessions();
