@@ -1423,107 +1423,52 @@ function AdminPanel({ tutors, onTutorAdded }) {
             <hr />
 
             <h3>Site Configuration</h3>
-            <div style={{ marginBottom: '20px' }}>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                    Update site-wide settings here
-                </p>
+            <div className="site-config-section">
+                <p>Update site-wide settings here</p>
                 
-                <form onSubmit={handleUpdateTutoringLeadEmail} style={{ marginBottom: '20px' }}>
+                <form onSubmit={handleUpdateTutoringLeadEmail} className="site-config-form">
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
-                            Tutoring Lead Email
-                        </label>
+                        <label>Tutoring Lead Email</label>
                         <input
                             type="email"
                             value={newTutoringLeadEmail}
                             onChange={(e) => setNewTutoringLeadEmail(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                marginBottom: '10px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '6px'
-                            }}
                         />
                         <button type="submit">Update Email</button>
                     </div>
                 </form>
 
-                <form onSubmit={handleUpdateStudentPresidentEmail} style={{ marginBottom: '20px' }}>
+                <form onSubmit={handleUpdateStudentPresidentEmail} className="site-config-form">
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>
-                            Student President Email
-                        </label>
+                        <label>Student President Email</label>
                         <input
                             type="email"
                             value={newStudentPresidentEmail}
                             onChange={(e) => setNewStudentPresidentEmail(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px',
-                                marginBottom: '10px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '6px'
-                            }}
                         />
                         <button type="submit">Update Email</button>
                     </div>
                 </form>
 
                 <h3>Manage Math Subjects</h3>
-                <div style={{ marginBottom: '20px' }}>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                        Edit the list of subjects available for students to select when registering
-                    </p>
+                <div className="manage-subjects-section">
+                    <p>Edit the list of subjects available for students to select when registering</p>
 
-                    <form onSubmit={handleAddSubject} style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+                    <form onSubmit={handleAddSubject} className="add-subject-form">
                         <input
                             type="text"
                             placeholder="New subject (e.g., Calculus)"
                             value={newSubject}
                             onChange={(e) => setNewSubject(e.target.value)}
-                            style={{
-                                flex: 1,
-                                padding: '8px',
-                                backgroundColor: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '6px'
-                            }}
                         />
                         <button type="submit">Add Subject</button>
                     </form>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    <div className="subjects-list">
                         {mathSubjects.map(subject => (
-                            <div
-                                key={subject}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    padding: '8px 12px',
-                                    backgroundColor: 'var(--bg-secondary)',
-                                    borderRadius: '6px',
-                                    border: '1px solid var(--border-color)'
-                                }}
-                            >
+                            <div key={subject} className="subject-tag">
                                 <span>{subject}</span>
-                                <button
-                                    onClick={() => handleRemoveSubject(subject)}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: 'var(--accent-danger)',
-                                        cursor: 'pointer',
-                                        fontSize: '1.2em',
-                                        padding: '0'
-                                    }}
-                                >
+                                <button onClick={() => handleRemoveSubject(subject)}>
                                     ×
                                 </button>
                             </div>
