@@ -640,9 +640,37 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 return;
             }
 
+            // Create user account for the tutor
+            try {
+                await fetch('/api/create-tutor-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tutorEmail: email.toLowerCase(),
+                        role: 'tutor'
+                    })
+                });
+            } catch (userErr) {
+                console.error('Error creating user account:', userErr);
+                alert('Warning: Tutor added to allowed roles but user account creation may have failed');
+            }
+
+            // Send approval email to tutor
+            try {
+                await fetch('/api/send-tutor-approved-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tutorEmail: email.toLowerCase()
+                    })
+                });
+            } catch (emailErr) {
+                console.error('Error sending approval email:', emailErr);
+            }
+
             // Remove from pending requests
             const updatedRequests = pendingTutorRequests.filter(req => req.email !== email);
-            
+
             const { error: configError } = await supabase
                 .from('site_config')
                 .upsert({
@@ -657,6 +685,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 alert(`${email} approved as tutor!`);
                 setPendingTutorRequests(updatedRequests);
                 fetchAllowedRoles();
+                fetchAllUsers();
             }
         } catch (err) {
             console.error('Approval error:', err);
