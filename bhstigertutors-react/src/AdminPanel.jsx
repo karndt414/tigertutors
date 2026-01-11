@@ -25,7 +25,9 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [newGroupSession, setNewGroupSession] = useState({
         sessionDate: '',
         roomAssignment: '',
-        teacherName: ''
+        teacherName: '',
+        buttonColor: '#3b82f6',
+        buttonLabel: ''
     });
     const [groupTutoringRegistrations, setGroupTutoringRegistrations] = useState([]);
     const [homePageContent, setHomePageContent] = useState('');
@@ -289,7 +291,9 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 session_time: newGroupSession.sessionTime,
                 subjects: allSubjects,
                 room_assignment: newGroupSession.roomAssignment,
-                teacher_name: newGroupSession.teacherName
+                teacher_name: newGroupSession.teacherName,
+                button_label: newGroupSession.buttonLabel || newGroupSession.sessionTime,
+                button_color: newGroupSession.buttonColor
             });
 
         if (error) {
@@ -299,7 +303,9 @@ function AdminPanel({ tutors, onTutorAdded }) {
             setNewGroupSession({
                 sessionDate: '',
                 roomAssignment: '',
-                teacherName: ''
+                teacherName: '',
+                buttonColor: '#3b82f6',
+                buttonLabel: ''
             });
             fetchGroupSessions();
         }
@@ -580,6 +586,31 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             onChange={(e) => setNewGroupSession({ ...newGroupSession, teacherName: e.target.value })}
                             required
                         />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Button Label (optional)</label>
+                        <input
+                            type="text"
+                            placeholder="e.g., Algebra 2 - Mrs. Smith"
+                            value={newGroupSession.buttonLabel}
+                            onChange={(e) => setNewGroupSession({ ...newGroupSession, buttonLabel: e.target.value })}
+                        />
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Button Color</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                                type="color"
+                                value={newGroupSession.buttonColor}
+                                onChange={(e) => setNewGroupSession({ ...newGroupSession, buttonColor: e.target.value })}
+                                style={{ width: '50px', height: '36px', cursor: 'pointer', borderRadius: '4px' }}
+                            />
+                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9em', alignSelf: 'center' }}>
+                                {newGroupSession.buttonColor}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

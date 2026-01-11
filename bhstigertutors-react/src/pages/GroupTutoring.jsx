@@ -688,9 +688,13 @@ function GroupTutoring() {
                                                 key={session.id}
                                                 className="session-button"
                                                 onClick={() => handleSessionClick(session)}
-                                                style={{ fontSize: '0.7em', padding: '6px 8px' }}
+                                                style={{
+                                                    fontSize: '0.7em',
+                                                    padding: '6px 8px',
+                                                    backgroundColor: session.button_color || '#3b82f6'
+                                                }}
                                             >
-                                                {session.session_time}
+                                                {session.button_label || session.session_time}
                                             </button>
                                         ))}
                                     </div>
