@@ -22,23 +22,31 @@ export default async function handler(req, res) {
     const { type, name, email, userType, subject, message } = req.body;
 
     try {
-        console.log('Fetching admin emails from users table...');
+        console.log('Fetching tutoring lead and student president emails...');
         
-        // Fetch all admin emails from users table
-        const { data: admins, error: adminError } = await supabase
-            .from('users')
-            .select('email')
-            .eq('role', 'admin');
+        // Fetch tutoring lead and student president emails
+        const { data: tutoringLeadData } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'tutoring_lead_email')
+            .single();
 
-        console.log('Admins result:', { admins, adminError });
+        const { data: presidentData } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'student_president_email')
+            .single();
 
-        if (adminError || !admins || admins.length === 0) {
-            console.error('No admins found or error:', adminError);
-            return res.status(500).json({ error: 'Could not fetch admin emails' });
+        const emails = [];
+        if (tutoringLeadData?.value) emails.push(tutoringLeadData.value);
+        if (presidentData?.value) emails.push(presidentData.value);
+
+        if (emails.length === 0) {
+            console.error('No recipient emails found');
+            return res.status(500).json({ error: 'Could not find recipient emails' });
         }
 
-        const adminEmails = admins.map(admin => admin.email);
-        console.log('Admin emails to send to:', adminEmails);
+        console.log('Sending to:', emails);
 
         const emailType = type === 'question' ? '📝 Question' : '⚠️ Complaint';
         const htmlContent = `
@@ -53,16 +61,16 @@ export default async function handler(req, res) {
                 <p><strong>Message:</strong></p>
                 <p>${message.replace(/\n/g, '<br>')}</p>
             </div>
-
+            
             <p style="color: #666; font-size: 0.9em; margin-top: 20px;">
                 Reply to: <a href="mailto:${email}">${email}</a>
             </p>
         `;
 
-        // Send email to all admins
+        // Send email to tutoring lead and student president
         await transporter.sendMail({
             from: `Tiger Tutors <${process.env.GMAIL_EMAIL}>`,
-            to: adminEmails.join(','),
+            to: emails.join(','),
             subject: `[${emailType}] ${subject}`,
             html: htmlContent
         });
