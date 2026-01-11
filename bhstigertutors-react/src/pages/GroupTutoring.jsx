@@ -17,7 +17,9 @@ function GroupTutoring() {
     const [selectedSession, setSelectedSession] = useState(null);
     const [showRegistrationForm, setShowRegistrationForm] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showTutorConfirmation, setShowTutorConfirmation] = useState(false);
     const [confirmationData, setConfirmationData] = useState(null);
+    const [tutorConfirmationData, setTutorConfirmationData] = useState(null);
     const [user, setUser] = useState(null);
     const [userRole, setUserRole] = useState(null);
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
