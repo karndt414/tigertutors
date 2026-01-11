@@ -24,27 +24,39 @@ function GroupTutoring() {
     const [userRole, setUserRole] = useState(null);
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
     const [loading, setLoading] = useState(true);
-
-    // Form state
+    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
+    const [mathSubjects, setMathSubjects] = useState([]);
     const [formData, setFormData] = useState({
         fullName: '',
-        schoolEmail: '',
+        schoolEmail: user?.email || '',
         subject: '',
-        otherSubject: '',
         helpNeeded: '',
         previousPrograms: [],
-        acknowledgements: {
-            rti: false,
-            materials: false
-        }
+        acknowledgements: { rti: false, materials: false }
     });
 
     useEffect(() => {
         checkUser();
         fetchSessions();
         fetchGroupTutoringContent();
-        loadTutoringLeadEmail();
+        fetchTutoringLeadEmail();
+        fetchMathSubjects();
     }, []);
+
+    const fetchMathSubjects = async () => {
+        const { data, error } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'math_subjects')
+            .single();
+        
+        if (data && data.value) {
+            setMathSubjects(JSON.parse(data.value));
+        } else {
+            // Fallback to default subjects
+            setMathSubjects(['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus']);
+        }
+    };
 
     const checkUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -275,8 +287,6 @@ function GroupTutoring() {
         }
     };
 
-    const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
-
     const loadTutoringLeadEmail = async () => {
         const { data } = await supabase
             .from('site_config')
@@ -324,8 +334,6 @@ function GroupTutoring() {
         calendarDays.push(i);
     }
 
-    const mathSubjects = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
-
     if (loading) return <div>Loading...</div>;
 
     if (showConfirmation) {
@@ -369,7 +377,7 @@ function GroupTutoring() {
                 <div className="confirmation-container">
                     <h3 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Registration Confirmed!</h3>
                     <div className="confirmation-box">
-                        <p className="confirmation-room">{tutorConfirmationData.room} - {tutorConfirmationData.teacherName}</p>
+                        <p className="confirmation-room">{tutorConfirmationData.room} - {tutorConfirmationData.teacher_name}</p>
                         <p className="confirmation-detail">{tutorConfirmationData.date}</p>
                         <p className="confirmation-detail">{tutorConfirmationData.time}</p>
                     </div>
@@ -516,6 +524,8 @@ function GroupTutoring() {
                             </label>
                         </div>
                     </div>
+
+                    <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px solid var(--border-color)' }} />
 
                     <div className="form-group">
                         <label>What MATh tutoring programs have you previously participated in?</label>

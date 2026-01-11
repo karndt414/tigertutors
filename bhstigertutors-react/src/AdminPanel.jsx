@@ -39,6 +39,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [editingPageType, setEditingPageType] = useState(null);
     const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
     const [newTutoringLeadEmail, setNewTutoringLeadEmail] = useState('');
+    const [mathSubjects, setMathSubjects] = useState([]);
+    const [newSubject, setNewSubject] = useState('');
 
     const checkUser = async () => {
         try {
@@ -61,6 +63,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchGroupTutoringRegistrations();
         fetchPageContent();
         fetchTutoringLeadEmail();
+        fetchMathSubjects();
     }, []);
 
     const handleDelete = async (tutorId) => {
@@ -494,6 +497,74 @@ function AdminPanel({ tutors, onTutorAdded }) {
         } else {
             alert('Tutoring lead email updated!');
             setTutoringLeadEmail(newTutoringLeadEmail);
+        }
+    };
+
+    const fetchMathSubjects = async () => {
+        const { data, error } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'math_subjects')
+            .single();
+        
+        if (data && data.value) {
+            setMathSubjects(JSON.parse(data.value));
+        } else {
+            // Default subjects
+            setMathSubjects(['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus']);
+        }
+    };
+
+    const handleAddSubject = async (e) => {
+        e.preventDefault();
+        
+        if (!newSubject.trim()) {
+            alert('Please enter a subject');
+            return;
+        }
+
+        if (mathSubjects.includes(newSubject)) {
+            alert('Subject already exists');
+            return;
+        }
+
+        const updatedSubjects = [...mathSubjects, newSubject];
+        
+        const { error } = await supabase
+            .from('site_config')
+            .upsert({
+                key: 'math_subjects',
+                value: JSON.stringify(updatedSubjects),
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' });
+
+        if (error) {
+            alert('Error adding subject: ' + error.message);
+        } else {
+            alert('Subject added!');
+            setMathSubjects(updatedSubjects);
+            setNewSubject('');
+        }
+    };
+
+    const handleRemoveSubject = async (subject) => {
+        if (!window.confirm(`Remove "${subject}"?`)) return;
+
+        const updatedSubjects = mathSubjects.filter(s => s !== subject);
+        
+        const { error } = await supabase
+            .from('site_config')
+            .upsert({
+                key: 'math_subjects',
+                value: JSON.stringify(updatedSubjects),
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' });
+
+        if (error) {
+            alert('Error removing subject: ' + error.message);
+        } else {
+            alert('Subject removed');
+            setMathSubjects(updatedSubjects);
         }
     };
 
@@ -1339,6 +1410,65 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         <button type="submit">Update Email</button>
                     </div>
                 </form>
+
+                <h3>Manage Math Subjects</h3>
+                <div style={{ marginBottom: '20px' }}>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                        Edit the list of subjects available for students to select when registering
+                    </p>
+
+                    <form onSubmit={handleAddSubject} style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+                        <input
+                            type="text"
+                            placeholder="New subject (e.g., Calculus)"
+                            value={newSubject}
+                            onChange={(e) => setNewSubject(e.target.value)}
+                            style={{
+                                flex: 1,
+                                padding: '8px',
+                                backgroundColor: 'var(--bg-primary)',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '6px'
+                            }}
+                        />
+                        <button type="submit">Add Subject</button>
+                    </form>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        {mathSubjects.map(subject => (
+                            <div
+                                key={subject}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 12px',
+                                    backgroundColor: 'var(--bg-secondary)',
+                                    borderRadius: '6px',
+                                    border: '1px solid var(--border-color)'
+                                }}
+                            >
+                                <span>{subject}</span>
+                                <button
+                                    onClick={() => handleRemoveSubject(subject)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: 'var(--accent-danger)',
+                                        cursor: 'pointer',
+                                        fontSize: '1.2em',
+                                        padding: '0'
+                                    }}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <hr />
             </div>
 
             <hr />
