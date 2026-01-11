@@ -532,6 +532,8 @@ function GroupTutoring() {
                         </div>
                     </div>
 
+                    <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px solid var(--border-color)' }} />
+
                     <div className="form-group">
                         <label className="checkbox-label">
                             <input
