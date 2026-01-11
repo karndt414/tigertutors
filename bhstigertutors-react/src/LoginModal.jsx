@@ -6,10 +6,46 @@ function LoginModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
+    const [isTutorRequest, setIsTutorRequest] = useState(false);
     const [role, setRole] = useState('learner');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [tutorName, setTutorName] = useState('');
+    const [tutorEmail, setTutorEmail] = useState('');
+
+    const handleTutorRequest = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+        setLoading(true);
+
+        try {
+            // Send email to tutoring lead and student president about pending tutor
+            await fetch('/api/send-tutor-approval-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tutorEmail: tutorEmail.toLowerCase(),
+                    tutorName: tutorName,
+                    timestamp: new Date().toISOString()
+                })
+            });
+
+            setSuccess('Tutor request submitted! You will be notified when your account is approved.');
+            setTimeout(() => {
+                setTutorName('');
+                setTutorEmail('');
+                setIsTutorRequest(false);
+                onClose();
+            }, 2000);
+        } catch (err) {
+            console.error('Error submitting tutor request:', err);
+            setError('Failed to submit tutor request. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,13 +55,6 @@ function LoginModal({ isOpen, onClose }) {
 
         try {
             if (isSignUp) {
-                // Prevent admin account creation
-                if (role === 'admin') {
-                    setError('Admin accounts cannot be created through signup. Contact an administrator.');
-                    setLoading(false);
-                    return;
-                }
-
                 let finalRole = 'learner';
 
                 // Check if email is approved for tutor role
@@ -37,21 +66,7 @@ function LoginModal({ isOpen, onClose }) {
                         .single();
 
                     if (!allowedRole) {
-                        // Send email to tutoring lead and student president about pending tutor
-                        try {
-                            await fetch('/api/send-tutor-approval-request', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    tutorEmail: email.toLowerCase(),
-                                    timestamp: new Date().toISOString()
-                                })
-                            });
-                        } catch (emailErr) {
-                            console.error('Error sending approval request email:', emailErr);
-                        }
-
-                        setError('Tutor account pending approval. An approval request has been sent to leadership.');
+                        setError('This email has not been approved as a tutor. Use the "Request Tutor Access" button instead.');
                         setLoading(false);
                         return;
                     }
@@ -63,6 +78,23 @@ function LoginModal({ isOpen, onClose }) {
                     }
 
                     finalRole = 'tutor';
+                }
+
+                // Check if email is approved for admin role
+                if (role === 'admin') {
+                    const { data: allowedRole } = await supabase
+                        .from('allowed_roles')
+                        .select('role')
+                        .eq('email', email.toLowerCase())
+                        .single();
+
+                    if (!allowedRole || allowedRole.role !== 'admin') {
+                        setError('This email has not been approved as an admin.');
+                        setLoading(false);
+                        return;
+                    }
+
+                    finalRole = 'admin';
                 }
 
                 // Sign up with Supabase Auth
@@ -130,61 +162,138 @@ function LoginModal({ isOpen, onClose }) {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="close-button" onClick={onClose}>&times;</button>
                 
-                <h2>{isSignUp ? 'Create Account' : 'Login'}</h2>
+                {isTutorRequest ? (
+                    <>
+                        <h2>Request Tutor Access</h2>
 
-                {error && <div className="error-message">{error}</div>}
-                {success && <div className="success-message">{success}</div>}
+                        {error && <div className="error-message">{error}</div>}
+                        {success && <div className="success-message">{success}</div>}
 
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-
-                    {isSignUp && (
-                        <>
-                            <select
-                                value={role}
-                                onChange={(e) => setRole(e.target.value)}
+                        <form onSubmit={handleTutorRequest}>
+                            <input
+                                type="text"
+                                placeholder="Full Name"
+                                value={tutorName}
+                                onChange={(e) => setTutorName(e.target.value)}
                                 required
+                            />
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={tutorEmail}
+                                onChange={(e) => setTutorEmail(e.target.value)}
+                                required
+                            />
+
+                            <button type="submit" disabled={loading}>
+                                {loading ? 'Submitting...' : 'Submit Request'}
+                            </button>
+                        </form>
+
+                        <p className="modal-toggle">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsTutorRequest(false);
+                                    setError('');
+                                    setSuccess('');
+                                    setTutorName('');
+                                    setTutorEmail('');
+                                }}
                             >
-                                <option value="learner">Learner</option>
-                                <option value="tutor">Tutor</option>
-                            </select>
-                            <p style={{ fontSize: '0.8em', color: 'var(--text-secondary)', margin: '0' }}>
-                                Tutors must be pre-approved by an administrator.
+                                Back to Login
+                            </button>
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <h2>{isSignUp ? 'Create Account' : 'Login'}</h2>
+
+                        {error && <div className="error-message">{error}</div>}
+                        {success && <div className="success-message">{success}</div>}
+
+                        <form onSubmit={handleSubmit}>
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+
+                            {isSignUp && (
+                                <>
+                                    <select
+                                        value={role}
+                                        onChange={(e) => setRole(e.target.value)}
+                                        required
+                                    >
+                                        <option value="learner">Learner</option>
+                                        <option value="tutor">Tutor</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                    <p style={{ fontSize: '0.8em', color: 'var(--text-secondary)', margin: '0' }}>
+                                        Tutors and Admins must be pre-approved by an administrator.
+                                    </p>
+                                </>
+                            )}
+
+                            <button type="submit" disabled={loading}>
+                                {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Login'}
+                            </button>
+                        </form>
+
+                        {!isSignUp && (
+                            <p className="modal-toggle">
+                                Don't have an account?{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsSignUp(true);
+                                        setError('');
+                                        setSuccess('');
+                                    }}
+                                >
+                                    Sign Up
+                                </button>
+                                {' '}or{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsTutorRequest(true);
+                                        setError('');
+                                        setSuccess('');
+                                    }}
+                                >
+                                    Request Tutor Access
+                                </button>
                             </p>
-                        </>
-                    )}
+                        )}
 
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Login'}
-                    </button>
-                </form>
-
-                <p className="modal-toggle">
-                    {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setIsSignUp(!isSignUp);
-                            setError('');
-                            setSuccess('');
-                        }}
-                    >
-                        {isSignUp ? 'Login' : 'Sign Up'}
-                    </button>
-                </p>
+                        {isSignUp && (
+                            <p className="modal-toggle">
+                                Already have an account?{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsSignUp(false);
+                                        setError('');
+                                        setSuccess('');
+                                    }}
+                                >
+                                    Login
+                                </button>
+                            </p>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );

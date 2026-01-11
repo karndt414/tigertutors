@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { tutorEmail, timestamp } = req.body;
+    const { tutorEmail, tutorName, timestamp } = req.body;
 
     try {
         console.log('Fetching tutoring lead and student president emails...');
@@ -64,6 +64,7 @@ export default async function handler(req, res) {
         if (!requests.find(r => r.email === tutorEmail)) {
             requests.push({
                 email: tutorEmail,
+                name: tutorName,
                 timestamp: timestamp
             });
 
@@ -82,6 +83,7 @@ export default async function handler(req, res) {
             <p>A new tutor is waiting for approval on Tiger Tutors!</p>
             
             <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Tutor Name:</strong> ${tutorName}</p>
                 <p><strong>Tutor Email:</strong> ${tutorEmail}</p>
                 <p><strong>Requested:</strong> ${new Date(timestamp).toLocaleString('en-US', { timeZone: 'America/Chicago' })}</p>
             </div>
