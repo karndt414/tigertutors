@@ -463,13 +463,29 @@ function TutorProfilePage() {
                                             Room: {reg.group_tutoring_sessions?.room_assignment}
                                         </p>
                                     </div>
+                                    <button
+                                        onClick={() => handleRemoveSession(reg.id)}
+                                        className="delete-button"
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                            color: 'var(--accent-danger)',
+                                            border: '1px solid var(--accent-danger)',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85em',
+                                            fontWeight: 500
+                                        }}
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {/* Registered Sessions Section (all sessions) */}
+                {/* Registered Sessions Section (all sessions)
                 {registeredSessions.length > 0 && (
                     <div style={{ marginTop: '2rem' }}>
                         <h3>All Registered Sessions</h3>
@@ -494,10 +510,10 @@ function TutorProfilePage() {
                                         </p>
                                     </div>
                                 </div>
-                            ))}
+                            ))}}
                         </div>
                     </div>
-                )}
+                )*/}
             </div>
         );
     }
