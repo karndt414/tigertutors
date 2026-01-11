@@ -324,6 +324,8 @@ function GroupTutoring() {
 
     const mathSubjects = ['Pre-AP Geometry', 'Geometry', 'Advanced Algebra 2', 'Algebra 2', 'AP Precalculus'];
 
+    if (loading) return <div>Loading...</div>;
+
     if (showConfirmation) {
         return (
             <div className="group-tutoring">
@@ -350,6 +352,39 @@ function GroupTutoring() {
                             previousPrograms: [],
                             acknowledgements: { rti: false, materials: false }
                         });
+                    }} style={{ marginTop: '2rem', display: 'block', margin: '2rem auto 0' }}>
+                        Return to Calendar
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (showTutorConfirmation) {
+        return (
+            <div className="group-tutoring">
+                <h2 style={{ textAlign: 'center' }}>Group Tutoring</h2>
+                <div className="confirmation-container">
+                    <h3 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Registration Confirmed!</h3>
+                    <div className="confirmation-box">
+                        <p className="confirmation-room">{tutorConfirmationData.room}</p>
+                        <p className="confirmation-detail">{tutorConfirmationData.date}</p>
+                        <p className="confirmation-detail">{tutorConfirmationData.time}</p>
+                    </div>
+                    <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--text-secondary)' }}>
+                        Thank you for registering to tutor! Please make sure to:
+                    </p>
+                    <ul style={{ maxWidth: '500px', margin: '1rem auto', textAlign: 'left', color: 'var(--text-secondary)' }}>
+                        <li>Register for this session in RTI</li>
+                        <li>Come prepared with materials to help students</li>
+                        <li>Arrive a few minutes early</li>
+                    </ul>
+                    <p style={{ textAlign: 'center', marginTop: '1rem', color: 'var(--text-secondary)' }}>
+                        Questions? Email our tutoring coordinator at <a href={`mailto:${tutorConfirmationData.email}`}>{tutorConfirmationData.email}</a>.
+                    </p>
+                    <button onClick={() => {
+                        setShowTutorConfirmation(false);
+                        setSelectedSession(null);
                     }} style={{ marginTop: '2rem', display: 'block', margin: '2rem auto 0' }}>
                         Return to Calendar
                     </button>
@@ -589,9 +624,19 @@ function GroupTutoring() {
                     console.error('Email send error:', emailErr);
                 }
 
-                alert('Registered for session!');
+                // Show tutor confirmation screen
+                setTutorConfirmationData({
+                    room: session.room_assignment,
+                    date: new Date(session.session_date).toLocaleDateString('en-US', { 
+                        month: '2-digit', 
+                        day: '2-digit', 
+                        year: 'numeric' 
+                    }),
+                    time: session.session_time,
+                    email: tutoringLeadEmail
+                });
+                setShowTutorConfirmation(true);
                 fetchSessions();
-                window.dispatchEvent(new Event('sessionRegistered'));
             }
         } catch (err) {
             console.error('Error:', err);
@@ -710,6 +755,39 @@ function GroupTutoring() {
             </div>
         </div>
     );
+
+    if (showTutorConfirmation) {
+        return (
+            <div className="group-tutoring">
+                <h2 style={{ textAlign: 'center' }}>Group Tutoring</h2>
+                <div className="confirmation-container">
+                    <h3 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Registration Confirmed!</h3>
+                    <div className="confirmation-box">
+                        <p className="confirmation-room">{tutorConfirmationData.room}</p>
+                        <p className="confirmation-detail">{tutorConfirmationData.date}</p>
+                        <p className="confirmation-detail">{tutorConfirmationData.time}</p>
+                    </div>
+                    <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--text-secondary)' }}>
+                        Thank you for registering to tutor! Please make sure to:
+                    </p>
+                    <ul style={{ maxWidth: '500px', margin: '1rem auto', textAlign: 'left', color: 'var(--text-secondary)' }}>
+                        <li>Register for this session in RTI</li>
+                        <li>Come prepared with materials to help students</li>
+                        <li>Arrive a few minutes early</li>
+                    </ul>
+                    <p style={{ textAlign: 'center', marginTop: '1rem', color: 'var(--text-secondary)' }}>
+                        Questions? Email our tutoring coordinator at <a href={`mailto:${tutorConfirmationData.email}`}>{tutorConfirmationData.email}</a>.
+                    </p>
+                    <button onClick={() => {
+                        setShowTutorConfirmation(false);
+                        setSelectedSession(null);
+                    }} style={{ marginTop: '2rem', display: 'block', margin: '2rem auto 0' }}>
+                        Return to Calendar
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return userRole === 'tutor' || userRole === 'admin' ? monthCalendar : learnerForm;
 }
