@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './ImageUpload.css';
 
 function ImageUpload({ onUpload }) {
     const [uploading, setUploading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [error, setError] = useState(null);
+    const fileInputRef = useRef(null);
 
     const handleUpload = async (event) => {
         try {
@@ -74,6 +75,10 @@ function ImageUpload({ onUpload }) {
         }
     };
 
+    const handleButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
     return (
         <div className="image-upload-container">
             {imagePreview ? (
@@ -84,19 +89,24 @@ function ImageUpload({ onUpload }) {
                 </div>
             )}
 
-            <label className="image-input-label">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUpload}
-                    disabled={uploading}
-                    className="image-input"
-                    style={{ display: 'none' }}
-                />
-                <button type="button" disabled={uploading} style={{ marginTop: '10px' }}>
-                    {uploading ? 'Uploading...' : 'Choose Image'}
-                </button>
-            </label>
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleUpload}
+                disabled={uploading}
+                className="image-input"
+                style={{ display: 'none' }}
+            />
+
+            <button 
+                type="button" 
+                onClick={handleButtonClick}
+                disabled={uploading}
+                style={{ marginTop: '10px' }}
+            >
+                {uploading ? 'Uploading...' : 'Choose Image'}
+            </button>
 
             {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
         </div>
