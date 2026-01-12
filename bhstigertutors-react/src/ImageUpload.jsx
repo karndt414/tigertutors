@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './ImageUpload.css';
 
 function ImageUpload({ onUpload }) {
@@ -40,7 +40,8 @@ function ImageUpload({ onUpload }) {
                     });
 
                     if (!uploadResponse.ok) {
-                        throw new Error('Upload failed');
+                        const errorData = await uploadResponse.json();
+                        throw new Error(errorData.error || 'Upload failed');
                     }
 
                     const uploadData = await uploadResponse.json();
@@ -48,12 +49,12 @@ function ImageUpload({ onUpload }) {
 
                     // Pass the URL up to the parent component
                     onUpload(uploadData.publicUrl);
+                    setUploading(false);
 
                 } catch (err) {
                     console.error('Error uploading to Cloudflare:', err);
                     setError('Error uploading image: ' + err.message);
                     setImagePreview(null);
-                } finally {
                     setUploading(false);
                 }
             };
@@ -83,16 +84,21 @@ function ImageUpload({ onUpload }) {
                 </div>
             )}
 
-            <input
-                type="file"
-                accept="image/*"
-                onChange={handleUpload}
-                disabled={uploading}
-                className="image-input"
-            />
+            <label className="image-input-label">
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUpload}
+                    disabled={uploading}
+                    className="image-input"
+                    style={{ display: 'none' }}
+                />
+                <button type="button" disabled={uploading} style={{ marginTop: '10px' }}>
+                    {uploading ? 'Uploading...' : 'Choose Image'}
+                </button>
+            </label>
 
-            {uploading && <p>Uploading...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
         </div>
     );
 }
