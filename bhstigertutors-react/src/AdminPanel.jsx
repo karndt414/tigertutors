@@ -739,26 +739,43 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 padding: '3rem 2rem',
                 borderRadius: '12px',
                 marginBottom: '2rem',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                textAlign: 'center'
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
             }}>
-                <h1 style={{
-                    fontSize: '2.5rem',
-                    fontWeight: 700,
-                    color: 'white',
-                    margin: '0 0 0.5rem 0',
-                    letterSpacing: '0.5px'
-                }}>
-                    ⚙️ Admin Panel
-                </h1>
-                <p style={{
-                    fontSize: '1rem',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    margin: '0',
-                    fontWeight: 300
-                }}>
-                    Manage tutors, sessions, users, and site content
-                </p>
+                {/* Overlay for better contrast */}
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.2)',
+                    borderRadius: '12px'
+                }}></div>
+
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    <h1 style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 700,
+                        color: 'white',
+                        margin: '0 0 0.5rem 0',
+                        letterSpacing: '0.5px',
+                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                    }}>
+                        ⚙️ Admin Panel
+                    </h1>
+                    <p style={{
+                        fontSize: '1rem',
+                        color: 'rgba(255, 255, 255, 0.95)',
+                        margin: '0',
+                        fontWeight: 300,
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                    }}>
+                        Manage tutors, sessions, users, and site content
+                    </p>
+                </div>
             </div>
 
             <hr />
