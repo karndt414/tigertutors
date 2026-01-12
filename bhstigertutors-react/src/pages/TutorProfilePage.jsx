@@ -616,7 +616,7 @@ function TutorProfilePage() {
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo (Optional)</label>
                     <ImageUpload
                         onUpload={handlePhotoUpload}
-                        currentPhotoUrl={tutor?.photo_url}
+                        currentPhotoUrl={tutorProfile?.photo}
                     />
                 </div>
 
