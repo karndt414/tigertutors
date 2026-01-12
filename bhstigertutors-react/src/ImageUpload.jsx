@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './ImageUpload.css';
 
-function ImageUpload({ onUpload }) {
+function ImageUpload({ onUpload, currentPhotoUrl }) {
     const [uploading, setUploading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [error, setError] = useState(null);
@@ -36,7 +36,8 @@ function ImageUpload({ onUpload }) {
                         body: JSON.stringify({
                             fileName,
                             fileData: base64Data,
-                            contentType: file.type
+                            contentType: file.type,
+                            oldPhotoUrl: currentPhotoUrl
                         })
                     });
 

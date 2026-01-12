@@ -614,7 +614,10 @@ function TutorProfilePage() {
 
                 <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Profile Photo (Optional)</label>
-                    <ImageUpload onUpload={handlePhotoUpload} />
+                    <ImageUpload
+                        onUpload={handlePhotoUpload}
+                        currentPhotoUrl={tutor?.photo_url}
+                    />
                 </div>
 
                 <div className="form-buttons" style={{ display: 'flex', gap: '1rem' }}>

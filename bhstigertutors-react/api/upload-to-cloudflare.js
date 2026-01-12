@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 const s3Client = new S3Client({
     region: 'auto',
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { fileName, fileData, contentType } = req.body;
+    const { fileName, fileData, contentType, oldPhotoUrl } = req.body;
 
     try {
         if (!fileName || !fileData || !contentType) {
@@ -23,6 +23,22 @@ export default async function handler(req, res) {
 
         if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_BUCKET_NAME || !process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || !process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY) {
             return res.status(500).json({ error: 'Missing Cloudflare environment variables' });
+        }
+
+        // Delete old photo if provided
+        if (oldPhotoUrl) {
+            try {
+                const oldFileName = oldPhotoUrl.split('/').pop();
+                const deleteCommand = new DeleteObjectCommand({
+                    Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
+                    Key: oldFileName
+                });
+                await s3Client.send(deleteCommand);
+                console.log('Old photo deleted:', oldFileName);
+            } catch (deleteErr) {
+                console.error('Error deleting old photo:', deleteErr);
+                // Don't fail if deletion fails
+            }
         }
 
         // Convert base64 to buffer
