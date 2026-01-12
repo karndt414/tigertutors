@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
 import './ImageUpload.css';
 
 function ImageUpload({ onUpload }) {
@@ -18,46 +17,58 @@ function ImageUpload({ onUpload }) {
 
             const file = event.target.files[0];
             const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
+            const fileName = `tutor-${Date.now()}.${fileExt}`;
 
             // Show preview
             setImagePreview(URL.createObjectURL(file));
 
-            // Upload file to Supabase
-            const { error: uploadError, data } = await supabase.storage
-                .from('tutor-photos')
-                .upload(filePath, file, {
-                    cacheControl: '3600',
-                    upsert: false
-                });
+            // Convert file to base64
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const base64Data = reader.result.split(',')[1];
 
-            if (uploadError) {
-                console.error('Upload error:', uploadError);
-                throw uploadError;
-            }
+                try {
+                    // Upload to Cloudflare via API
+                    const uploadResponse = await fetch('/api/upload-to-cloudflare', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileName,
+                            fileData: base64Data,
+                            contentType: file.type
+                        })
+                    });
 
-            console.log('File uploaded successfully:', data);
+                    if (!uploadResponse.ok) {
+                        throw new Error('Upload failed');
+                    }
 
-            // Get the public URL
-            const { data: publicUrlData } = supabase.storage
-                .from('tutor-photos')
-                .getPublicUrl(filePath);
+                    const uploadData = await uploadResponse.json();
+                    console.log('Public URL:', uploadData.publicUrl);
 
-            if (!publicUrlData || !publicUrlData.publicUrl) {
-                throw new Error('Could not get public URL.');
-            }
+                    // Pass the URL up to the parent component
+                    onUpload(uploadData.publicUrl);
 
-            console.log('Public URL:', publicUrlData.publicUrl);
+                } catch (err) {
+                    console.error('Error uploading to Cloudflare:', err);
+                    setError('Error uploading image: ' + err.message);
+                    setImagePreview(null);
+                } finally {
+                    setUploading(false);
+                }
+            };
 
-            // Pass the URL up to the parent component (AdminPanel)
-            onUpload(publicUrlData.publicUrl);
+            reader.onerror = () => {
+                setError('Error reading file');
+                setUploading(false);
+            };
+
+            reader.readAsDataURL(file);
 
         } catch (err) {
             console.error('Error in handleUpload:', err);
             setError('Error uploading image: ' + err.message);
             setImagePreview(null);
-        } finally {
             setUploading(false);
         }
     };
@@ -67,21 +78,21 @@ function ImageUpload({ onUpload }) {
             {imagePreview ? (
                 <img src={imagePreview} alt="Tutor preview" className="image-preview" />
             ) : (
-                <div className="image-placeholder">No Photo</div>
+                <div className="image-upload-placeholder">
+                    <p>No image selected</p>
+                </div>
             )}
 
-            {error && <div style={{ color: 'var(--accent-danger)', fontSize: '0.9em' }}>{error}</div>}
-
-            <label htmlFor="file-upload" className="file-upload-button">
-                {uploading ? 'Uploading...' : 'Upload Photo'}
-            </label>
             <input
-                id="file-upload"
                 type="file"
-                accept="image/png, image/jpeg"
+                accept="image/*"
                 onChange={handleUpload}
                 disabled={uploading}
+                className="image-input"
             />
+
+            {uploading && <p>Uploading...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
 }
