@@ -911,6 +911,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
                     {expandedSections.manageSessions ? '▼' : '▶'} Manage Group Tutoring Sessions
+                    <span style={{
+                        backgroundColor: 'var(--accent-primary)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85em',
+                        fontWeight: 600
+                    }}>
+                        {groupSessions.length}
+                    </span>
                 </h3>
                 {expandedSections.manageSessions && (
                     <div className="tutor-manage-list">
@@ -1041,6 +1055,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
                     {expandedSections.tutors ? '▼' : '▶'} Manage Tutors
+                    <span style={{
+                        backgroundColor: 'var(--accent-primary)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85em',
+                        fontWeight: 600
+                    }}>
+                        {tutors.length}
+                    </span>
                 </h3>
                 {expandedSections.tutors && (
                     <div className="tutor-manage-list">
@@ -1144,6 +1172,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
                     {expandedSections.pendingTutors ? '▼' : '▶'} Pending Tutor Approvals
+                    <span style={{
+                        backgroundColor: 'var(--accent-danger)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85em',
+                        fontWeight: 600
+                    }}>
+                        {pendingTutorRequests.length}
+                    </span>
                 </h3>
                 {expandedSections.pendingTutors && (
                     <>
@@ -1194,6 +1236,20 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
                     {expandedSections.userAccounts ? '▼' : '▶'} All User Accounts
+                    <span style={{
+                        backgroundColor: 'var(--accent-primary)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85em',
+                        fontWeight: 600
+                    }}>
+                        {allUsers.length}
+                    </span>
                 </h3>
                 {expandedSections.userAccounts && (
                     <>
