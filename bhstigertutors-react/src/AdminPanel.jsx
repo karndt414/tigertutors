@@ -906,11 +906,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
             {/* Manage Group Tutoring Sessions */}
             <div>
-                <h3 
+                <h3
                     onClick={() => toggleSection('manageSessions')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                    {expandedSections.manageSessions ? '▼' : '▶'} Manage Group Tutoring Sessions
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {expandedSections.manageSessions ? '▼' : '▶'} Manage Group Tutoring Sessions
+                    </span>
                     <span style={{
                         backgroundColor: 'var(--accent-primary)',
                         color: 'white',
@@ -1050,11 +1052,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
             {/* Manage Tutors */}
             <div>
-                <h3 
+                <h3
                     onClick={() => toggleSection('tutors')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                    {expandedSections.tutors ? '▼' : '▶'} Manage Tutors
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {expandedSections.tutors ? '▼' : '▶'} Manage Tutors
+                    </span>
                     <span style={{
                         backgroundColor: 'var(--accent-primary)',
                         color: 'white',
@@ -1167,11 +1171,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
             {/* Pending Tutor Approvals */}
             <div>
-                <h3 
+                <h3
                     onClick={() => toggleSection('pendingTutors')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                    {expandedSections.pendingTutors ? '▼' : '▶'} Pending Tutor Approvals
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {expandedSections.pendingTutors ? '▼' : '▶'} Pending Tutor Approvals
+                    </span>
                     <span style={{
                         backgroundColor: 'var(--accent-danger)',
                         color: 'white',
@@ -1231,11 +1237,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
             {/* All User Accounts */}
             <div>
-                <h3 
+                <h3
                     onClick={() => toggleSection('userAccounts')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                    {expandedSections.userAccounts ? '▼' : '▶'} All User Accounts
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {expandedSections.userAccounts ? '▼' : '▶'} All User Accounts
+                    </span>
                     <span style={{
                         backgroundColor: 'var(--accent-primary)',
                         color: 'white',
