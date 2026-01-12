@@ -734,6 +734,33 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
     return (
         <div className="admin-panel">
+            <div style={{
+                background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
+                padding: '3rem 2rem',
+                borderRadius: '12px',
+                marginBottom: '2rem',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                textAlign: 'center'
+            }}>
+                <h1 style={{
+                    fontSize: '2.5rem',
+                    fontWeight: 700,
+                    color: 'white',
+                    margin: '0 0 0.5rem 0',
+                    letterSpacing: '0.5px'
+                }}>
+                    ⚙️ Admin Panel
+                </h1>
+                <p style={{
+                    fontSize: '1rem',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    margin: '0',
+                    fontWeight: 300
+                }}>
+                    Manage tutors, sessions, users, and site content
+                </p>
+            </div>
+
             <hr />
 
             {/* Group Tutoring Sessions */}
