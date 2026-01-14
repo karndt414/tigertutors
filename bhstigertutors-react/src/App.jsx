@@ -147,16 +147,36 @@ function ProtectedTutorRoute({ children }) {
 
     useEffect(() => {
         const checkRole = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data } = await supabase
-                    .from('users')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-                setUserRole(data?.role);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    setLoading(false);
+                    return;
+                }
+
+                const { data: { session } } = await supabase.auth.getSession();
+
+                const response = await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${session?.access_token}`
+                        },
+                        body: JSON.stringify({ userId: user.id })
+                    }
+                );
+
+                if (response.ok) {
+                    const { role } = await response.json();
+                    setUserRole(role);
+                }
+            } catch (err) {
+                console.error('Role check failed:', err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         checkRole();
@@ -179,16 +199,36 @@ function ProtectedLearnerRoute({ children }) {
 
     useEffect(() => {
         const checkRole = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data } = await supabase
-                    .from('users')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-                setUserRole(data?.role);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    setLoading(false);
+                    return;
+                }
+
+                const { data: { session } } = await supabase.auth.getSession();
+
+                const response = await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${session?.access_token}`
+                        },
+                        body: JSON.stringify({ userId: user.id })
+                    }
+                );
+
+                if (response.ok) {
+                    const { role } = await response.json();
+                    setUserRole(role);
+                }
+            } catch (err) {
+                console.error('Role check failed:', err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
 
         checkRole();
