@@ -55,39 +55,15 @@ function AdminPanel({ tutors, onTutorAdded }) {
         pageContent: false,
         siteConfig: false
     });
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [adminCheckComplete, setAdminCheckComplete] = useState(false);
 
     const checkUser = async () => {
         try {
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error) {
-                console.warn('Auth check skipped (expected in some environments)');
-                return;
-            }
-            setUser(user);
-        } catch (err) {
-            console.warn('Could not check user:', err);
-        }
-    };
-
-    useEffect(() => {
-        checkUser();
-        verifyAdminAccess();
-        fetchAllowedRoles();
-        fetchAllUsers();
-        fetchGroupSessions();
-        fetchGroupTutoringRegistrations();
-        fetchPageContent();
-        fetchTutoringLeadEmail();
-        fetchStudentPresidentEmail();
-        fetchMathSubjects();
-        fetchPendingTutorRequests();
-    }, []);
-
-    const verifyAdminAccess = async () => {
-        try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                alert('Not authenticated');
+                setIsAdmin(false);
+                setAdminCheckComplete(true);
                 return;
             }
 
@@ -98,16 +74,50 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 .single();
 
             if (error || data?.role !== 'admin') {
-                alert('Admin access required');
+                setIsAdmin(false);
+                setAdminCheckComplete(true);
                 return;
             }
 
+            setIsAdmin(true);
             setUser(user);
+            setAdminCheckComplete(true);
+            
+            // Now fetch all the admin data
+            fetchAllowedRoles();
+            fetchAllUsers();
+            fetchGroupSessions();
+            fetchGroupTutoringRegistrations();
+            fetchPageContent();
+            fetchTutoringLeadEmail();
+            fetchStudentPresidentEmail();
+            fetchMathSubjects();
+            fetchPendingTutorRequests();
         } catch (err) {
             console.error('Admin verification failed:', err);
-            alert('Error verifying admin access');
+            setIsAdmin(false);
+            setAdminCheckComplete(true);
         }
     };
+
+    useEffect(() => {
+        checkUser();
+    }, []);
+
+    // Show loading while checking
+    if (!adminCheckComplete) {
+        return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Loading...</p>;
+    }
+
+    // Show error if not admin
+    if (!isAdmin) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--accent-danger)' }}>
+                <h2>Access Denied</h2>
+                <p>You do not have permission to access the Admin Panel.</p>
+            </div>
+        );
+    }
 
     const handleDelete = async (tutorId) => {
         if (!window.confirm('Are you sure you want to delete this tutor?')) {
