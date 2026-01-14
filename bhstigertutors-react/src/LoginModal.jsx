@@ -21,27 +21,65 @@ function LoginModal({ isOpen, onClose }) {
         setLoading(true);
 
         try {
-            // Send email to tutoring lead and student president about pending tutor
+            // 1. Fetch existing pending requests
+            const { data: configData } = await supabase
+                .from('site_config')
+                .select('value')
+                .eq('key', 'pending_tutor_requests')
+                .single();
+
+            let pendingRequests = [];
+            if (configData && configData.value) {
+                pendingRequests = JSON.parse(configData.value);
+            }
+
+            // 2. Check if email already exists
+            if (pendingRequests.find(req => req.email === tutorEmail.toLowerCase())) {
+                setError('This email has already submitted a request');
+                setLoading(false);
+                return;
+            }
+
+            // 3. Add new request
+            const newRequest = {
+                email: tutorEmail.toLowerCase(),
+                name: tutorName,
+                timestamp: new Date().toISOString()
+            };
+            pendingRequests.push(newRequest);
+
+            // 4. Save back to site_config
+            const { error: configError } = await supabase
+                .from('site_config')
+                .upsert({
+                    key: 'pending_tutor_requests',
+                    value: JSON.stringify(pendingRequests),
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'key' });
+
+            if (configError) {
+                setError('Error submitting request: ' + configError.message);
+                setLoading(false);
+                return;
+            }
+
+            // 5. Send email notification (existing code)
             await fetch('/api/send-tutor-approval-request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     tutorEmail: tutorEmail.toLowerCase(),
-                    tutorName: tutorName,
+                    tutorName,
                     timestamp: new Date().toISOString()
                 })
             });
 
-            setSuccess('Tutor request submitted! You will be notified when your account is approved.');
-            setTimeout(() => {
-                setTutorName('');
-                setTutorEmail('');
-                setIsTutorRequest(false);
-                onClose();
-            }, 2000);
+            setSuccess('Tutor request submitted! Check your email for updates.');
+            setTutorEmail('');
+            setTutorName('');
         } catch (err) {
-            console.error('Error submitting tutor request:', err);
-            setError('Failed to submit tutor request. Please try again.');
+            console.error('Signup error:', err);
+            setError('Error submitting request');
         } finally {
             setLoading(false);
         }
