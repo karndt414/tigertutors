@@ -66,22 +66,19 @@ function App() {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                console.log('❌ No user logged in');
+                console.log('No user logged in');
                 setUserRole('learner');
                 return;
             }
 
-            console.log('✓ User ID:', user.id);
-
-            // Query the view instead of users table
             const { data, error } = await supabase
-                .from('user_roles')
+                .from('users')
                 .select('role')
                 .eq('id', user.id)
                 .single();
 
             if (error) {
-                console.error('❌ Query error:', error.message);
+                console.error('Error fetching role:', error.message);
                 setUserRole('learner');
                 return;
             }
@@ -89,7 +86,7 @@ function App() {
             console.log('✅ Role fetched:', data?.role);
             setUserRole(data?.role || 'learner');
         } catch (err) {
-            console.error('❌ Fetch error:', err);
+            console.error('Fetch error:', err);
             setUserRole('learner');
         }
     }
@@ -150,9 +147,8 @@ function ProtectedTutorRoute({ children }) {
                     return;
                 }
 
-                // Use view instead of table
                 const { data, error } = await supabase
-                    .from('user_roles')
+                    .from('users')
                     .select('role')
                     .eq('id', user.id)
                     .single();
@@ -171,8 +167,6 @@ function ProtectedTutorRoute({ children }) {
     }, []);
 
     if (loading) return <p>Loading...</p>;
-    
-    // Allow both tutors AND admins
     if (userRole !== 'tutor' && userRole !== 'admin') {
         return <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--accent-danger)' }}>
             Access denied. This page is for tutors only.
@@ -196,9 +190,8 @@ function ProtectedLearnerRoute({ children }) {
                     return;
                 }
 
-                // Use view instead of table
                 const { data, error } = await supabase
-                    .from('user_roles')
+                    .from('users')
                     .select('role')
                     .eq('id', user.id)
                     .single();
