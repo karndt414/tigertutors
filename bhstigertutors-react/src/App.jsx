@@ -73,9 +73,9 @@ function App() {
 
             console.log('✓ User ID:', user.id);
 
-            // Query the view instead of the table (bypasses RLS on users)
+            // Query the view instead of users table
             const { data, error } = await supabase
-                .from('user_roles')  // <-- Use view instead
+                .from('user_roles')
                 .select('role')
                 .eq('id', user.id)
                 .single();
@@ -150,8 +150,9 @@ function ProtectedTutorRoute({ children }) {
                     return;
                 }
 
+                // Use view instead of table
                 const { data, error } = await supabase
-                    .from('users')
+                    .from('user_roles')
                     .select('role')
                     .eq('id', user.id)
                     .single();
@@ -193,8 +194,9 @@ function ProtectedLearnerRoute({ children }) {
                     return;
                 }
 
+                // Use view instead of table
                 const { data, error } = await supabase
-                    .from('users')
+                    .from('user_roles')
                     .select('role')
                     .eq('id', user.id)
                     .single();
