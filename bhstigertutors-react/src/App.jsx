@@ -64,22 +64,36 @@ function App() {
 
     async function fetchUserRole() {
         try {
-            const { data, error } = await supabase
-                .from('users')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-            
-            if (error) {
-                console.error('❌ Role fetch error:', error.code, error.message);
-                console.log('Defaulting to learner');
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
                 setUserRole('learner');
-            } else {
-                console.log('✅ Role fetched:', data?.role);
-                setUserRole(data?.role || 'learner');
+                return;
             }
+
+            const { data: { session } } = await supabase.auth.getSession();
+
+            const response = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${session?.access_token}`
+                    },
+                    body: JSON.stringify({ userId: user.id })
+                }
+            );
+
+            if (!response.ok) {
+                setUserRole('learner');
+                return;
+            }
+
+            const { role } = await response.json();
+            console.log('✅ Role fetched:', role);
+            setUserRole(role || 'learner');
         } catch (err) {
-            console.error('❌ Unexpected error:', err);
+            console.error('Role fetch failed:', err);
             setUserRole('learner');
         }
     }

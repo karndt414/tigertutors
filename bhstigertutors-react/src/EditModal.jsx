@@ -29,20 +29,29 @@ function EditModal({ tutor, onClose, onUpdated }) {
                 return;
             }
 
-            const { data, error } = await supabase
-                .from('users')
-                .select('role')
-                .eq('id', user.id)
-                .single();
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            // Call your Edge Function
+            const response = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${session?.access_token}`
+                    },
+                    body: JSON.stringify({ userId: user.id })
+                }
+            );
 
-            if (error) {
-                console.error('Error checking admin status:', error);
+            if (!response.ok) {
                 setIsAdmin(false);
-            } else if (data?.role === 'admin') {
-                setIsAdmin(true);
-            } else {
-                setIsAdmin(false);
+                setAdminCheckLoading(false);
+                return;
             }
+
+            const { role } = await response.json();
+            setIsAdmin(role === 'admin');
         } catch (err) {
             console.error('Admin check failed:', err);
             setIsAdmin(false);
