@@ -73,9 +73,9 @@ function App() {
 
             console.log('✓ User ID:', user.id);
 
-            // Query directly instead of Edge Function
+            // Query the view instead of the table (bypasses RLS on users)
             const { data, error } = await supabase
-                .from('users')
+                .from('user_roles')  // <-- Use view instead
                 .select('role')
                 .eq('id', user.id)
                 .single();
