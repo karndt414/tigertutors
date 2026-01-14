@@ -146,20 +146,43 @@ function AdminPanel({ tutors, onTutorAdded }) {
     };
 
     const fetchAllUsers = async () => {
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error(error);
-            return;
-        }
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                console.error('No user logged in');
+                return;
+            }
 
-        // Custom sort: admin → tutor → learner
-        const roleOrder = { admin: 0, tutor: 1, learner: 2 };
-        const sorted = (data || []).sort((a, b) => roleOrder[a.role] - roleOrder[b.role]);
-        setAllUsers(sorted);
+            // Check if user is admin first
+            const { data: roleData, error: roleError } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (roleError || roleData?.role !== 'admin') {
+                console.error('Not an admin');
+                return;
+            }
+
+            // Now fetch users
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error fetching users:', error.message);
+                return;
+            }
+
+            // Custom sort: admin → tutor → learner
+            const roleOrder = { admin: 0, tutor: 1, learner: 2 };
+            const sorted = (data || []).sort((a, b) => roleOrder[a.role] - roleOrder[b.role]);
+            setAllUsers(sorted);
+        } catch (err) {
+            console.error('Fetch error:', err);
+        }
     };
 
     const fetchGroupTutoringRegistrations = async () => {
