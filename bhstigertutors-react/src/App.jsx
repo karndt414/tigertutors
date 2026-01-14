@@ -71,13 +71,15 @@ function App() {
                 .single();
             
             if (error) {
-                console.warn('Could not fetch role:', error);
+                console.error('❌ Role fetch error:', error.code, error.message);
+                console.log('Defaulting to learner');
                 setUserRole('learner');
             } else {
+                console.log('✅ Role fetched:', data?.role);
                 setUserRole(data?.role || 'learner');
             }
         } catch (err) {
-            console.warn('Error fetching role:', err);
+            console.error('❌ Unexpected error:', err);
             setUserRole('learner');
         }
     }
