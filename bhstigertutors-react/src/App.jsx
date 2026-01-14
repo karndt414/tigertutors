@@ -66,11 +66,18 @@ function App() {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
+                console.log('No user, defaulting to learner');
                 setUserRole('learner');
                 return;
             }
 
             const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session?.access_token) {
+                console.warn('No access token available');
+                setUserRole('learner');
+                return;
+            }
 
             const response = await fetch(
                 `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
@@ -78,13 +85,14 @@ function App() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session?.access_token}`
+                        Authorization: `Bearer ${session.access_token}`
                     },
                     body: JSON.stringify({ userId: user.id })
                 }
             );
 
             if (!response.ok) {
+                console.error('Failed to fetch role, status:', response.status);
                 setUserRole('learner');
                 return;
             }
@@ -156,13 +164,19 @@ function ProtectedTutorRoute({ children }) {
 
                 const { data: { session } } = await supabase.auth.getSession();
 
+                if (!session?.access_token) {
+                    console.warn('No access token available');
+                    setLoading(false);
+                    return;
+                }
+
                 const response = await fetch(
                     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            Authorization: `Bearer ${session?.access_token}`
+                            Authorization: `Bearer ${session.access_token}`
                         },
                         body: JSON.stringify({ userId: user.id })
                     }
@@ -171,6 +185,8 @@ function ProtectedTutorRoute({ children }) {
                 if (response.ok) {
                     const { role } = await response.json();
                     setUserRole(role);
+                } else {
+                    console.error('Role fetch failed:', response.status);
                 }
             } catch (err) {
                 console.error('Role check failed:', err);
@@ -208,13 +224,19 @@ function ProtectedLearnerRoute({ children }) {
 
                 const { data: { session } } = await supabase.auth.getSession();
 
+                if (!session?.access_token) {
+                    console.warn('No access token available');
+                    setLoading(false);
+                    return;
+                }
+
                 const response = await fetch(
                     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
                     {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            Authorization: `Bearer ${session?.access_token}`
+                            Authorization: `Bearer ${session.access_token}`
                         },
                         body: JSON.stringify({ userId: user.id })
                     }
@@ -223,6 +245,8 @@ function ProtectedLearnerRoute({ children }) {
                 if (response.ok) {
                     const { role } = await response.json();
                     setUserRole(role);
+                } else {
+                    console.error('Role fetch failed:', response.status);
                 }
             } catch (err) {
                 console.error('Role check failed:', err);
