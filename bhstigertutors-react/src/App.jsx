@@ -171,6 +171,8 @@ function ProtectedTutorRoute({ children }) {
     }, []);
 
     if (loading) return <p>Loading...</p>;
+    
+    // Allow both tutors AND admins
     if (userRole !== 'tutor' && userRole !== 'admin') {
         return <p style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--accent-danger)' }}>
             Access denied. This page is for tutors only.
