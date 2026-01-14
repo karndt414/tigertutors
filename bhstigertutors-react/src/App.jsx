@@ -57,19 +57,30 @@ function App() {
     }, []);
 
     useEffect(() => {
-        const fetchUserRole = async () => {
-            if (user) {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-                
-                if (data) setUserRole(data.role);
-            }
-        };
-        fetchUserRole();
+        if (user) {
+            fetchUserRole();
+        }
     }, [user]);
+
+    async function fetchUserRole() {
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+            
+            if (error) {
+                console.warn('Could not fetch role:', error);
+                setUserRole('learner');
+            } else {
+                setUserRole(data?.role || 'learner');
+            }
+        } catch (err) {
+            console.warn('Error fetching role:', err);
+            setUserRole('learner');
+        }
+    }
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();

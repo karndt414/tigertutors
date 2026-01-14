@@ -71,6 +71,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
     useEffect(() => {
         checkUser();
+        verifyAdminAccess();
         fetchAllowedRoles();
         fetchAllUsers();
         fetchGroupSessions();
@@ -81,6 +82,32 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchMathSubjects();
         fetchPendingTutorRequests();
     }, []);
+
+    const verifyAdminAccess = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                alert('Not authenticated');
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (error || data?.role !== 'admin') {
+                alert('Admin access required');
+                return;
+            }
+
+            setUser(user);
+        } catch (err) {
+            console.error('Admin verification failed:', err);
+            alert('Error verifying admin access');
+        }
+    };
 
     const handleDelete = async (tutorId) => {
         if (!window.confirm('Are you sure you want to delete this tutor?')) {
