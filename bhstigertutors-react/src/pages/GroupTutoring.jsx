@@ -34,6 +34,7 @@ function GroupTutoring() {
         previousPrograms: [],
         acknowledgements: { rti: false, materials: false }
     });
+    const [sessionCapacity, setSessionCapacity] = useState({});
 
     useEffect(() => {
         checkUser();
@@ -42,6 +43,18 @@ function GroupTutoring() {
         loadTutoringLeadEmail();
         fetchMathSubjects();
     }, []);
+
+    useEffect(() => {
+        const fetchAllCapacities = async () => {
+            const capacities = {};
+            for (const session of sessions) {
+                const { learnerCount, tutorCount } = await getSessionCapacity(session.id);
+                capacities[session.id] = { learnerCount, tutorCount };
+            }
+            setSessionCapacity(capacities);
+        };
+        fetchAllCapacities();
+    }, [sessions]);
 
     const fetchMathSubjects = async () => {
         const { data, error } = await supabase
@@ -111,6 +124,18 @@ function GroupTutoring() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const getSessionCapacity = async (sessionId) => {
+        const { data: registrations } = await supabase
+            .from('group_tutoring_registrations')
+            .select('subject')
+            .eq('session_id', sessionId);
+
+        const learnerCount = registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
+        const tutorCount = registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
+
+        return { learnerCount, tutorCount };
     };
 
     const getSessionsForDate = (date) => {
@@ -206,6 +231,19 @@ function GroupTutoring() {
             if (existingReg) {
                 alert('You\'re already registered for this session');
                 setShowRegistrationForm(false);
+                return;
+            }
+
+            // Check capacity
+            const { learnerCount, tutorCount } = await getSessionCapacity(selectedSession.id);
+
+            if (subject !== 'Tutor' && learnerCount >= 20) {
+                alert('This session is full for learners (20 learners max). Please choose another session.');
+                return;
+            }
+
+            if (subject === 'Tutor' && tutorCount >= 10) {
+                alert('This session is full for tutors (10 tutors max). Please choose another session.');
                 return;
             }
 
@@ -611,6 +649,19 @@ function GroupTutoring() {
                 return;
             }
 
+            // Check tutor capacity
+            const { data: registrations } = await supabase
+                .from('group_tutoring_registrations')
+                .select('subject')
+                .eq('session_id', session.id);
+
+            const tutorCount = registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
+
+            if (tutorCount >= 10) {
+                alert('This session is full for tutors (10 tutors max). Please choose another session.');
+                return;
+            }
+
             const { error } = await supabase
                 .from('group_tutoring_registrations')
                 .insert({
@@ -700,20 +751,28 @@ function GroupTutoring() {
                                 {day && <div className="day-number">{day}</div>}
                                 {daySessions.length > 0 && (
                                     <div className="sessions-container">
-                                        {daySessions.map(session => (
-                                            <button
-                                                key={session.id}
-                                                className="session-button"
-                                                onClick={() => handleTutorSessionClick(session)}
-                                                style={{
-                                                    fontSize: '0.7em',
-                                                    padding: '6px 8px',
-                                                    backgroundColor: session.button_color || '#3b82f6'
-                                                }}
-                                            >
-                                                {session.button_label || session.session_time}
-                                            </button>
-                                        ))}
+                                        {daySessions.map(session => {
+                                            const capacity = sessionCapacity[session.id] || { learnerCount: 0, tutorCount: 0 };
+                                            const isTutorFull = capacity.tutorCount >= 10;
+
+                                            // Hide button if full for tutors
+                                            if (isTutorFull) return null;
+
+                                            return (
+                                                <button
+                                                    key={session.id}
+                                                    className="session-button"
+                                                    onClick={() => handleTutorSessionClick(session)}
+                                                    style={{
+                                                        fontSize: '0.7em',
+                                                        padding: '6px 8px',
+                                                        backgroundColor: session.button_color || '#3b82f6'
+                                                    }}
+                                                >
+                                                    {session.button_label || session.session_time}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -759,20 +818,28 @@ function GroupTutoring() {
                                 {day && <div className="day-number">{day}</div>}
                                 {daySessions.length > 0 && (
                                     <div className="sessions-container">
-                                        {daySessions.map(session => (
-                                            <button
-                                                key={session.id}
-                                                className="session-button"
-                                                onClick={() => handleSessionClick(session)}
-                                                style={{
-                                                    fontSize: '0.7em',
-                                                    padding: '6px 8px',
-                                                    backgroundColor: session.button_color || '#3b82f6'
-                                                }}
-                                            >
-                                                {session.button_label || session.session_time}
-                                            </button>
-                                        ))}
+                                        {daySessions.map(session => {
+                                            const capacity = sessionCapacity[session.id] || { learnerCount: 0, tutorCount: 0 };
+                                            const isLearnerFull = capacity.learnerCount >= 20;
+
+                                            // Hide button if full for learners
+                                            if (isLearnerFull) return null;
+
+                                            return (
+                                                <button
+                                                    key={session.id}
+                                                    className="session-button"
+                                                    onClick={() => handleSessionClick(session)}
+                                                    style={{
+                                                        fontSize: '0.7em',
+                                                        padding: '6px 8px',
+                                                        backgroundColor: session.button_color || '#3b82f6'
+                                                    }}
+                                                >
+                                                    {session.button_label || session.session_time}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
