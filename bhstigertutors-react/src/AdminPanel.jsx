@@ -155,7 +155,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
             // Check if user is admin first
             const { data: roleData, error: roleError } = await supabase
-                .from('user_roles')
+                .from('users')
                 .select('role')
                 .eq('id', user.id)
                 .single();
