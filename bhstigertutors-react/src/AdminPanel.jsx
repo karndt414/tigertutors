@@ -55,69 +55,19 @@ function AdminPanel({ tutors, onTutorAdded }) {
         pageContent: false,
         siteConfig: false
     });
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [adminCheckComplete, setAdminCheckComplete] = useState(false);
-
-    const checkUser = async () => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                setIsAdmin(false);
-                setAdminCheckComplete(true);
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('users')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-            if (error || data?.role !== 'admin') {
-                setIsAdmin(false);
-                setAdminCheckComplete(true);
-                return;
-            }
-
-            setIsAdmin(true);
-            setUser(user);
-            setAdminCheckComplete(true);
-            
-            // Now fetch all the admin data
-            fetchAllowedRoles();
-            fetchAllUsers();
-            fetchGroupSessions();
-            fetchGroupTutoringRegistrations();
-            fetchPageContent();
-            fetchTutoringLeadEmail();
-            fetchStudentPresidentEmail();
-            fetchMathSubjects();
-            fetchPendingTutorRequests();
-        } catch (err) {
-            console.error('Admin verification failed:', err);
-            setIsAdmin(false);
-            setAdminCheckComplete(true);
-        }
-    };
 
     useEffect(() => {
-        checkUser();
+        // Just fetch data directly
+        fetchAllowedRoles();
+        fetchAllUsers();
+        fetchGroupSessions();
+        fetchGroupTutoringRegistrations();
+        fetchPageContent();
+        fetchTutoringLeadEmail();
+        fetchStudentPresidentEmail();
+        fetchMathSubjects();
+        fetchPendingTutorRequests();
     }, []);
-
-    // Show loading while checking
-    if (!adminCheckComplete) {
-        return <p style={{ textAlign: 'center', marginTop: '2rem' }}>Loading...</p>;
-    }
-
-    // Show error if not admin
-    if (!isAdmin) {
-        return (
-            <div style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--accent-danger)' }}>
-                <h2>Access Denied</h2>
-                <p>You do not have permission to access the Admin Panel.</p>
-            </div>
-        );
-    }
 
     const handleDelete = async (tutorId) => {
         if (!window.confirm('Are you sure you want to delete this tutor?')) {
