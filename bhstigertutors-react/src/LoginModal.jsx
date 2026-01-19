@@ -146,21 +146,30 @@ function LoginModal({ isOpen, onClose }) {
                 });
 
                 if (signUpError) {
+                    console.error('Sign up error:', signUpError);
                     setError(signUpError.message);
                     setLoading(false);
                     return;
                 }
 
+                console.log('Auth signup successful. User ID:', data.user?.id);
+
+                // Wait a moment for the user to be created
+                await new Promise(resolve => setTimeout(resolve, 500));
+
                 // Create user profile with validated role
-                const { error: profileError } = await supabase.from('users').insert({
+                const { error: profileError, data: profileData } = await supabase.from('users').insert({
                     id: data.user.id,
                     email,
                     role: finalRole,
-                    created_at: new Date(),
+                    created_at: new Date().toISOString(),
                 });
 
+                console.log('Profile insert - Data:', profileData, 'Error:', profileError);
+
                 if (profileError) {
-                    setError(profileError.message);
+                    console.error('Full profile error:', profileError);
+                    setError('Database error: ' + profileError.message);
                     setLoading(false);
                     return;
                 }
