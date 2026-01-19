@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
 );
 
 export default async function handler(req, res) {
@@ -12,12 +12,14 @@ export default async function handler(req, res) {
 
     const { userId, email, role } = req.body;
 
+    console.log('Creating user profile:', { userId, email, role });
+
     if (!userId || !email || !role) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
-        const { error } = await supabaseAdmin
+        const { error, data } = await supabaseAdmin
             .from('users')
             .insert({
                 id: userId,
@@ -31,9 +33,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: error.message });
         }
 
-        return res.status(200).json({ success: true });
+        console.log('User profile created:', data);
+        return res.status(200).json({ success: true, data });
     } catch (err) {
         console.error('Server error:', err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: err.message });
     }
 }
