@@ -12,6 +12,7 @@ import TutorProfilePage from './pages/TutorProfilePage';
 import LearnerProfilePage from './pages/LearnerProfilePage';
 import { supabase } from './supabaseClient';
 import './App.css';
+import ErrorPopup from './components/ErrorPopup';
 
 function App() {
     const navigate = useNavigate();
@@ -22,6 +23,7 @@ function App() {
     const [authLoading, setAuthLoading] = useState(true);
     const [userRole, setUserRole] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isErrorPopupOpen, setIsErrorPopupOpen] = useState(false);
 
     // Fetch tutors from Supabase
     useEffect(() => {
@@ -98,12 +100,18 @@ function App() {
         navigate('/'); 
     };
 
+    // Make error handler globally available
+    useEffect(() => {
+        window.showError = () => setIsErrorPopupOpen(true);
+    }, []);
+
     if (authLoading) {
         return <p style={{ textAlign: 'center', padding: '50px' }}>Loading...</p>;
     }
 
     return (
         <>
+            <ErrorPopup isOpen={isErrorPopupOpen} onClose={() => setIsErrorPopupOpen(false)} />
             <Routes>
                 <Route path="/" element={<Layout openLogin={() => setIsLoginModalOpen(true)} tutors={tutors} loading={loading} onSignOut={handleSignOut} user={user} userRole={userRole} />}>
                     <Route index element={<HomePage />} />

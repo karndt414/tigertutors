@@ -118,8 +118,8 @@ function LearnerProfilePage() {
                 }
             }
         } catch (err) {
-            console.error('Submit error:', err);
-            alert('Error saving profile');
+            window.showError();
+            console.error('Saving error:', err);
         } finally {
             setLoading(false);
         }
@@ -143,8 +143,8 @@ function LearnerProfilePage() {
                 await fetchRegisteredSessions();
             }
         } catch (err) {
+            window.showError();
             console.error('Error:', err);
-            alert('An error occurred. Please try again.');
         }
     };
 
