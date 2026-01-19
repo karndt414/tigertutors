@@ -188,15 +188,36 @@ function LoginModal({ isOpen, onClose }) {
                 });
 
                 if (signInError) {
+                    console.error('Login error:', signInError);
                     setError(signInError.message);
-                } else {
-                    setSuccess('Logged in successfully!');
-                    setTimeout(() => {
-                        setEmail('');
-                        setPassword('');
-                        onClose();
-                    }, 1000);
+                    setLoading(false);
+                    return;
                 }
+
+                console.log('Login successful:', data.user?.id);
+
+                // Fetch user role
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                console.log('User role fetch - Data:', userData, 'Error:', userError);
+
+                if (userError) {
+                    console.error('Failed to fetch user role:', userError);
+                    setError('Failed to load user profile');
+                    setLoading(false);
+                    return;
+                }
+
+                setSuccess('Logged in successfully!');
+                setTimeout(() => {
+                    setEmail('');
+                    setPassword('');
+                    onClose();
+                }, 1000);
             }
         } catch (err) {
             setError('An unexpected error occurred');
