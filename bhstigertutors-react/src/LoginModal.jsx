@@ -165,13 +165,19 @@ function LoginModal({ isOpen, onClose }) {
                     }),
                 });
 
+                console.log('Profile API response status:', profileRes.status);
+                
+                const profileData = await profileRes.json();
+                console.log('Profile API response:', profileData);
+
                 if (!profileRes.ok) {
-                    const err = await profileRes.json();
-                    console.error('Profile creation error:', err);
-                    setError('Database error: ' + (err.error || 'Failed to create profile'));
+                    console.error('Profile creation error:', profileData);
+                    setError('Database error: ' + (profileData.error || 'Failed to create profile'));
                     setLoading(false);
                     return;
                 }
+
+                console.log('Profile created successfully!');
 
                 setSuccess(`Account created as ${finalRole}!`);
                 setTimeout(() => {
