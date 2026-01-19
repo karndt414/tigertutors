@@ -154,22 +154,21 @@ function LoginModal({ isOpen, onClose }) {
 
                 console.log('Auth signup successful. User ID:', data.user?.id);
 
-                // Wait a moment for the user to be created
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                // Create user profile with validated role
-                const { error: profileError, data: profileData } = await supabase.from('users').insert({
-                    id: data.user.id,
-                    email,
-                    role: finalRole,
-                    created_at: new Date().toISOString(),
+                // Create user profile via backend API (secure)
+                const profileRes = await fetch('/api/create-user-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: data.user.id,
+                        email,
+                        role: finalRole,
+                    }),
                 });
 
-                console.log('Profile insert - Data:', profileData, 'Error:', profileError);
-
-                if (profileError) {
-                    console.error('Full profile error:', profileError);
-                    setError('Database error: ' + profileError.message);
+                if (!profileRes.ok) {
+                    const err = await profileRes.json();
+                    console.error('Profile creation error:', err);
+                    setError('Database error: ' + (err.error || 'Failed to create profile'));
                     setLoading(false);
                     return;
                 }
