@@ -1485,7 +1485,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('about');
                                                 applyFormatting('bold');
                                             }}
                                             style={{
@@ -1503,7 +1503,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('about');
                                                 applyFormatting('italic');
                                             }}
                                             style={{
@@ -1521,7 +1521,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('about');
                                                 applyFormatting('underline');
                                             }}
                                             style={{
@@ -1595,7 +1595,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('group_tutoring');
                                                 applyFormatting('bold');
                                             }}
                                             style={{
@@ -1613,7 +1613,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('group_tutoring');
                                                 applyFormatting('italic');
                                             }}
                                             style={{
@@ -1631,7 +1631,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('group_tutoring');
                                                 applyFormatting('underline');
                                             }}
                                             style={{
@@ -1705,7 +1705,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('contact');
                                                 applyFormatting('bold');
                                             }}
                                             style={{
@@ -1723,7 +1723,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('contact');
                                                 applyFormatting('italic');
                                             }}
                                             style={{
@@ -1741,7 +1741,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                setEditingPageType('home');
+                                                setEditingPageType('contact');
                                                 applyFormatting('underline');
                                             }}
                                             style={{

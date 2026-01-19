@@ -97,13 +97,15 @@ function LoginModal({ isOpen, onClose }) {
 
                 // Check if email is approved for tutor role
                 if (role === 'tutor') {
-                    const { data: allowedRole } = await supabase
+                    const { data: allowedRole, error: roleError } = await supabase
                         .from('allowed_roles')
                         .select('role')
                         .eq('email', email.toLowerCase())
                         .single();
 
-                    if (!allowedRole) {
+                    console.log('Tutor check - Data:', allowedRole, 'Error:', roleError);
+
+                    if (roleError || !allowedRole) {
                         setError('This email has not been approved as a tutor. Use the "Request Tutor Access" button instead.');
                         setLoading(false);
                         return;
@@ -120,13 +122,15 @@ function LoginModal({ isOpen, onClose }) {
 
                 // Check if email is approved for admin role
                 if (role === 'admin') {
-                    const { data: allowedRole } = await supabase
+                    const { data: allowedRole, error: roleError } = await supabase
                         .from('allowed_roles')
                         .select('role')
                         .eq('email', email.toLowerCase())
                         .single();
 
-                    if (!allowedRole || allowedRole.role !== 'admin') {
+                    console.log('Admin check - Data:', allowedRole, 'Error:', roleError);
+
+                    if (roleError || !allowedRole || allowedRole.role !== 'admin') {
                         setError('This email has not been approved as an admin.');
                         setLoading(false);
                         return;
