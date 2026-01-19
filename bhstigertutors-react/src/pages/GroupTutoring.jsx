@@ -266,8 +266,8 @@ function GroupTutoring() {
                 if (error.code === '23505') {
                     alert('You\'re already registered for this session');
                 } else {
+                    window.showError();
                     console.error('Supabase error:', error);
-                    alert('Error registering: ' + error.message);
                 }
                 return;
             }
@@ -311,8 +311,8 @@ function GroupTutoring() {
             setShowConfirmation(true);
 
         } catch (err) {
+            window.showError();
             console.error('Registration error:', err);
-            alert('An error occurred. Please try again.');
         }
     };
 
@@ -679,7 +679,8 @@ function GroupTutoring() {
                 if (error.code === '23505') {
                     alert('You\'re already registered for this session');
                 } else {
-                    alert('Error registering: ' + error.message);
+                    window.showError();
+                    console.error('Registration error:', error);
                 }
             } else {
                 // Send confirmation email to tutor

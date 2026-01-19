@@ -128,8 +128,8 @@ function ContactPage() {
                 alert('Error submitting form. Please try again.');
             }
         } catch (err) {
+            window.showError();
             console.error('Form submission error:', err);
-            alert('Error submitting form. Please try again.');
         }
     };
 

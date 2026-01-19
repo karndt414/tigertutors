@@ -261,8 +261,8 @@ function TutorProfilePage() {
                 }
             }
         } catch (err) {
+            window.showError();
             console.error('Error:', err);
-            alert('An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -323,8 +323,8 @@ function TutorProfilePage() {
                 if (error.code === '23505') {
                     alert('You\'re already registered for this session');
                 } else {
-                    console.error('Supabase error:', error);
-                    alert('Error registering: ' + error.message);
+                    window.showError();
+                    console.error('Registration error:', error);
                 }
                 return;
             }
@@ -354,8 +354,8 @@ function TutorProfilePage() {
                 await fetchTutorSessions(user.id);
             }
         } catch (err) {
+            window.showError();
             console.error('Error:', err);
-            alert('An error occurred. Please try again.');
         }
     };
 
