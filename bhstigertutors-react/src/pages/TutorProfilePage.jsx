@@ -594,7 +594,7 @@ function TutorProfilePage() {
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Specify Other Subject(s) *</label>
                         <input
                             type="text"
-                            placeholder="e.g., Physics, Chemistry"
+                            placeholder="e.g., College Algebra"
                             value={otherSubject}
                             onChange={(e) => setOtherSubject(e.target.value)}
                             required={selectedSubjects.includes('Other')}
