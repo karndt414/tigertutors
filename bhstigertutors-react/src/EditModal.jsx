@@ -29,29 +29,21 @@ function EditModal({ tutor, onClose, onUpdated }) {
                 return;
             }
 
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            // Call your Edge Function
-            const response = await fetch(
-                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-role`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session?.access_token}`
-                    },
-                    body: JSON.stringify({ userId: user.id })
-                }
-            );
+            // Query users table directly instead of Edge Function
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', user.id)
+                .single();
 
-            if (!response.ok) {
+            if (userError || !userData) {
+                console.error('Failed to fetch user role:', userError);
                 setIsAdmin(false);
                 setAdminCheckLoading(false);
                 return;
             }
 
-            const { role } = await response.json();
-            setIsAdmin(role === 'admin');
+            setIsAdmin(userData.role === 'admin');
         } catch (err) {
             console.error('Admin check failed:', err);
             setIsAdmin(false);
@@ -69,22 +61,6 @@ function EditModal({ tutor, onClose, onUpdated }) {
         }
 
         setLoading(true);
-
-        try {
-            // Log the action
-            const { data: { user } } = await supabase.auth.getUser();
-            await supabase
-                .from('admin_audit_log')
-                .insert({
-                    admin_email: user?.email,
-                    action: 'UPDATE_TUTOR',
-                    table_name: 'tutors',
-                    record_id: tutor.id,
-                    details: { name, subjects, photoUrl }
-                });
-        } catch (err) {
-            console.warn('Could not log action:', err);
-        }
 
         const { error } = await supabase
             .from('tutors')
