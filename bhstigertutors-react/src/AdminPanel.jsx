@@ -69,24 +69,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchPendingTutorRequests();
     }, []);
 
-    const logAdminAction = async (action, tableName, recordId, details) => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            await supabase
-                .from('admin_audit_log')
-                .insert({
-                    admin_email: user?.email,
-                    action,
-                    table_name: tableName,
-                    record_id: recordId,
-                    details
-                });
-        } catch (err) {
-            console.warn('Could not log action:', err);
-        }
-    };
-
     const handleDelete = async (tutorId) => {
         if (!window.confirm('Are you sure you want to delete this tutor?')) {
             return;
@@ -100,7 +82,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         if (error) {
             alert('Error deleting tutor: ' + error.message);
         } else {
-            await logAdminAction('DELETE_TUTOR', 'tutors', tutorId, {});
             alert('Tutor deleted.');
             onTutorAdded();
         }
@@ -290,7 +271,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         if (error) {
             alert('Error: ' + error.message);
         } else {
-            await logAdminAction('DELETE_ROLE', 'allowed_roles', allowedRoleId, {});
             alert('Approval removed');
             fetchAllowedRoles();
         }
@@ -371,7 +351,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         if (error) {
             alert('Error: ' + error.message);
         } else {
-            await logAdminAction('DELETE_SESSION', 'group_tutoring_sessions', sessionId, {});
             alert('Session deleted');
             fetchGroupSessions();
         }
@@ -383,7 +362,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }
 
         try {
-            // Delete from users table
             const { error: userError } = await supabase
                 .from('users')
                 .delete()
@@ -394,9 +372,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
                 return;
             }
 
-            await logAdminAction('DELETE_USER', 'users', userId, { email: userEmail });
-
-            // Delete from auth via API
             const authResponse = await fetch('/api/delete-user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -427,7 +402,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
         if (error) {
             alert('Error: ' + error.message);
         } else {
-            await logAdminAction('DELETE_REGISTRATION', 'group_tutoring_registrations', registrationId, {});
             alert('Registration deleted');
             fetchGroupTutoringRegistrations();
         }
