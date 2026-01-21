@@ -74,16 +74,23 @@ function AdminPanel({ tutors, onTutorAdded }) {
             return;
         }
 
-        const { error } = await supabase
-            .from('tutors')
-            .delete()
-            .eq('id', tutorId);
+        try {
+            const { error } = await supabase
+                .from('tutors')
+                .delete()
+                .eq('id', tutorId);
 
-        if (error) {
-            alert('Error deleting tutor: ' + error.message);
-        } else {
+            if (error) {
+                console.error('Delete error:', error);
+                alert('Error deleting tutor: ' + error.message);
+                return;
+            }
+
             alert('Tutor deleted.');
-            onTutorAdded();
+            onTutorAdded();  // This should refresh the tutors list
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            alert('Error deleting tutor');
         }
     };
 
