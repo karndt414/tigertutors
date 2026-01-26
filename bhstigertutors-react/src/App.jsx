@@ -118,6 +118,7 @@ function App() {
                     {/* <Route path="tutors" element={<FindTutorPage tutors={tutors} loading={loading} />} /> */}
                     <Route path="about" element={<AboutPage />} />
                     <Route path="contact" element={<ContactPage />} />
+                    <Route path="find-tutor" element={<FindTutorPage tutors={tutors} loading={loading} />} />
                     <Route path="group-tutoring" element={<GroupTutoring />} />
                     <Route path="tutor-profile" element={
                         <ProtectedTutorRoute>

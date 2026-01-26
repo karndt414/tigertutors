@@ -16,7 +16,7 @@ function FindTutorPage({ tutors, loading }) {
                             key={tutor.id}
                             name={tutor.name}
                             subjects={tutor.subjects}
-                            photo={tutor.photo}
+                            photo={tutor.photo || '/favicon.png'}
                         />
                     ))
                 ) : (
