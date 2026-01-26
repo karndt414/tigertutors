@@ -115,18 +115,19 @@ function AdminPanel({ tutors, onTutorAdded }) {
         const { data, error } = await supabase
             .from('group_tutoring_sessions')
             .select(`
-                *,
-                group_tutoring_registrations (
-                    id,
-                    full_name,
-                    school_email,
-                    subject,
-                    help_needed,
-                    registered_at
-                )
-            `)
+            *,
+            group_tutoring_registrations (
+                id,
+                full_name,
+                school_email,
+                subject,
+                help_needed,
+                registered_at
+            )
+        `)
+            .eq('is_archived', false)
             .order('session_date', { ascending: true });
-        
+
         if (error) console.error(error);
         else setGroupSessions(data || []);
     };
