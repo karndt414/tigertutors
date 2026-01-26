@@ -36,6 +36,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
     const [editingPage, setEditingPage] = useState(null);
     const [contactPageContent, setContactPageContent] = useState('');
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
+    const [groupTutoringTutorContent, setGroupTutoringTutorContent] = useState('');
     const [selectedText, setSelectedText] = useState('');
     const [editingPageType, setEditingPageType] = useState(null);
     const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
@@ -240,10 +241,17 @@ function AdminPanel({ tutors, onTutorAdded }) {
             .eq('page_name', 'contact')
             .single();
 
+        const { data: groupTutorData } = await supabase
+            .from('page_content')
+            .select('content')
+            .eq('page_name', 'group_tutoring_tutor')
+            .single();
+
         if (homeData) setHomePageContent(homeData.content);
         if (aboutData) setAboutPageContent(aboutData.content);
         if (groupData) setGroupTutoringContent(groupData.content);
         if (contactData) setContactPageContent(contactData.content);
+        if (groupTutorData) setGroupTutoringTutorContent(groupTutorData.content);
     };
 
     const handleAddAllowedRole = async (e) => {
@@ -707,6 +715,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
             setAboutPageContent(aboutPageContent.replace(selectedText, formatted));
         } else if (editingPageType === 'group_tutoring') {
             setGroupTutoringContent(groupTutoringContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'group_tutoring_tutor') {
+            setGroupTutoringTutorContent(groupTutoringTutorContent.replace(selectedText, formatted));
         } else if (editingPageType === 'contact') {
             setContactPageContent(contactPageContent.replace(selectedText, formatted));
         }
@@ -1613,7 +1623,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         </div>
 
                         <div>
-                            <h4>Group Tutoring Page</h4>
+                            <h4>Group Tutoring Page - Learner View</h4>
                             {editingPage === 'group_tutoring' ? (
                                 <div>
                                     <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
@@ -1717,6 +1727,116 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     <button onClick={() => {
                                         setEditingPage('group_tutoring');
                                         setEditingPageType('group_tutoring');
+                                    }}>Edit</button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <h4>Group Tutoring Page - Tutor View</h4>
+                            {editingPage === 'group_tutoring_tutor' ? (
+                                <div>
+                                    <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingPageType('group_tutoring_tutor');
+                                                applyFormatting('bold');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontWeight: 'bold',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <strong>B</strong>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingPageType('group_tutoring_tutor');
+                                                applyFormatting('italic');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontStyle: 'italic',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            I
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingPageType('group_tutoring_tutor');
+                                                applyFormatting('underline');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                textDecoration: 'underline',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            U
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setGroupTutoringTutorContent(groupTutoringTutorContent + '{{tutoring_lead_email}}');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85em'
+                                            }}
+                                        >
+                                            📧 Insert Email
+                                        </button>
+                                    </div>
+                                    <textarea
+                                        value={groupTutoringTutorContent}
+                                        onChange={(e) => setGroupTutoringTutorContent(e.target.value)}
+                                        onSelect={handleTextareaSelect}
+                                        style={{
+                                            width: '100%',
+                                            minHeight: '200px',
+                                            padding: '10px',
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '6px',
+                                            fontFamily: 'monospace'
+                                        }}
+                                    />
+                                    <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                                        <button onClick={() => handleSavePageContent('group_tutoring_tutor', groupTutoringTutorContent)}>Save</button>
+                                        <button onClick={() => setEditingPage(null)} style={{ backgroundColor: 'var(--bg-tertiary)' }}>Cancel</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px', fontSize: '0.85em' }}>
+                                        {parseMarkdown(groupTutoringTutorContent) || 'No content yet'}
+                                    </p>
+                                    <button onClick={() => {
+                                        setEditingPage('group_tutoring_tutor');
+                                        setEditingPageType('group_tutoring_tutor');
                                     }}>Edit</button>
                                 </div>
                             )}
