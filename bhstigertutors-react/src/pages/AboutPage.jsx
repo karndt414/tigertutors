@@ -73,7 +73,14 @@ function AboutPage() {
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div>
+        <div style={{
+            backgroundImage: 'url(/logo.jpeg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed',
+            minHeight: '100vh',
+            padding: '2rem'
+        }}>
             <h2>About Mu Alpha Theta</h2>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
                 {parseMarkdown(content)}
