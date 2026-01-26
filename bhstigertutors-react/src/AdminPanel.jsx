@@ -54,8 +54,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
         pendingTutors: false,
         userAccounts: false,
         pageContent: false,
-        siteConfig: false
+        siteConfig: false,
+        archivedSessions: false
     });
+    const [archivedSessions, setArchivedSessions] = useState([]);
 
     useEffect(() => {
         // Just fetch data directly
@@ -68,6 +70,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchStudentPresidentEmail();
         fetchMathSubjects();
         fetchPendingTutorRequests();
+        fetchArchivedSessions();
     }, []);
 
     const handleDelete = async (tutorId) => {
@@ -368,135 +371,59 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }
     };
 
-    const handleDeleteUser = async (userId, userEmail) => {
-        if (!window.confirm(`Are you sure you want to delete ${userEmail}? This cannot be undone.`)) {
-            return;
-        }
-
-        try {
-            const { error: userError } = await supabase
-                .from('users')
-                .delete()
-                .eq('id', userId);
-
-            if (userError) {
-                alert('Error deleting user: ' + userError.message);
-                return;
-            }
-
-            const authResponse = await fetch('/api/delete-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            });
-
-            if (authResponse.ok) {
-                alert('User deleted successfully');
-            } else {
-                alert('User deleted from database, but auth deletion failed');
-            }
-
-            fetchAllUsers();
-        } catch (err) {
-            console.error('Delete error:', err);
-            alert('Error deleting user');
-        }
-    };
-
-    const handleDeleteRegistration = async (registrationId) => {
-        if (!window.confirm('Delete this registration?')) return;
+    const handleArchiveSession = async (sessionId) => {
+        if (!window.confirm('Archive this session?')) return;
 
         const { error } = await supabase
-            .from('group_tutoring_registrations')
-            .delete()
-            .eq('id', registrationId);
+            .from('group_tutoring_sessions')
+            .update({ is_archived: true })
+            .eq('id', sessionId);
 
         if (error) {
             alert('Error: ' + error.message);
         } else {
-            alert('Registration deleted');
-            fetchGroupTutoringRegistrations();
+            alert('Session archived');
+            fetchGroupSessions();
+            fetchArchivedSessions();
         }
     };
 
-    const handleSavePageContent = async (pageName, content) => {
+    const handleUnarchiveSession = async (sessionId) => {
+        if (!window.confirm('Restore this session?')) return;
+
         const { error } = await supabase
-            .from('page_content')
-            .upsert({
-                page_name: pageName,
-                content: content,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'page_name' });
+            .from('group_tutoring_sessions')
+            .update({ is_archived: false })
+            .eq('id', sessionId);
 
         if (error) {
-            alert('Error saving content: ' + error.message);
+            alert('Error: ' + error.message);
         } else {
-            alert(`${pageName} page updated!`);
-            setEditingPage(null);
+            alert('Session restored');
+            fetchGroupSessions();
+            fetchArchivedSessions();
         }
     };
 
-    const applyFormatting = (format) => {
-        if (!selectedText) {
-            alert('Please select text to format');
-            return;
-        }
-
-        let formattedText = '';
-        switch(format) {
-            case 'bold':
-                formattedText = `**${selectedText}**`;
-                break;
-            case 'italic':
-                formattedText = `*${selectedText}*`;
-                break;
-            case 'underline':
-                formattedText = `__${selectedText}__`;
-                break;
-            default:
-                return;
-        }
-
-        // Replace selected text with formatted version in the active textarea
-        const currentContent = editingPageType === 'home' ? homePageContent :
-                              editingPageType === 'about' ? aboutPageContent :
-                              editingPageType === 'group_tutoring' ? groupTutoringContent :
-                              editingPageType === 'contact' ? contactPageContent : '';
-
-        const newContent = currentContent.replace(selectedText, formattedText);
-
-        if (editingPageType === 'home') setHomePageContent(newContent);
-        else if (editingPageType === 'about') setAboutPageContent(newContent);
-        else if (editingPageType === 'group_tutoring') setGroupTutoringContent(newContent);
-        else if (editingPageType === 'contact') setContactPageContent(newContent);
-
-        setSelectedText('');
-    };
-
-    const handleTextareaSelect = (e) => {
-        setSelectedText(e.target.value.substring(e.target.selectionStart, e.target.selectionEnd));
-    };
-
-    const parseMarkdown = (text) => {
-        if (!text) return text;
-
-        // Replace email placeholder with actual email
-        let processedText = text.replace('{{tutoring_lead_email}}', tutoringLeadEmail);
-
-        return processedText
-            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g)
-            .map((part, i) => {
-                if (part.startsWith('**') && part.endsWith('**')) {
-                    return <strong key={i}>{part.slice(2, -2)}</strong>;
-                } else if (part.startsWith('__') && part.endsWith('__')) {
-                    return <u key={i}>{part.slice(2, -2)}</u>;
-                } else if (part.startsWith('*') && part.endsWith('*')) {
-                    return <em key={i}>{part.slice(1, -1)}</em>;
-                } else if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part)) {
-                    return <a key={i} href={`mailto:${part}`} style={{ color: 'var(--accent-primary)', textDecoration: 'underline', cursor: 'pointer' }}>{part}</a>;
-                }
-                return part;
-            });
+    const fetchArchivedSessions = async () => {
+        const { data, error } = await supabase
+            .from('group_tutoring_sessions')
+            .select(`
+                *,
+                group_tutoring_registrations (
+                    id,
+                    full_name,
+                    school_email,
+                    subject,
+                    help_needed,
+                    registered_at
+                )
+            `)
+            .eq('is_archived', true)
+            .order('session_date', { ascending: false });
+        
+        if (error) console.error(error);
+        else setArchivedSessions(data || []);
     };
 
     const fetchTutoringLeadEmail = async () => {
@@ -971,7 +898,8 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
                                                 alignItems: 'start',
-                                                marginBottom: '15px'
+                                                marginBottom: '15px',
+                                                gap: '10px'
                                             }}>
                                                 <div>
                                                     <strong style={{ fontSize: '1.1em' }}>{session.session_time}</strong>
@@ -985,13 +913,22 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                                         👥 {learnerCount} learners | 👨‍🏫 {tutorCount} tutors
                                                     </p>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDeleteGroupSession(session.id)}
-                                                    className="delete-button"
-                                                    style={{ alignSelf: 'flex-start' }}
-                                                >
-                                                    Delete Session
-                                                </button>
+                                                <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start' }}>
+                                                    <button
+                                                        onClick={() => handleArchiveSession(session.id)}
+                                                        className="edit-button"
+                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                    >
+                                                        Archive
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteGroupSession(session.id)}
+                                                        className="delete-button"
+                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </div>
 
                                         {/* Registrations Dropdown */}
@@ -1884,6 +1821,90 @@ function AdminPanel({ tutors, onTutorAdded }) {
             </div>
 
             <hr />
+
+            {/* Archived Sessions */}
+            <div>
+                <h3
+                    onClick={() => toggleSection('archivedSessions')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {expandedSections.archivedSessions ? '▼' : '▶'} Archived Sessions
+                    </span>
+                    <span style={{
+                        backgroundColor: 'var(--accent-primary)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85em',
+                        fontWeight: 600
+                    }}>
+                        {archivedSessions.length}
+                    </span>
+                </h3>
+                {expandedSections.archivedSessions && (
+                    <div className="sessions-manage-list">
+                        {archivedSessions.length === 0 ? (
+                            <p style={{ color: 'var(--text-secondary)' }}>No archived sessions</p>
+                        ) : (
+                            archivedSessions.map(session => {
+                                const learnerCount = session.group_tutoring_registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
+                                const tutorCount = session.group_tutoring_registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
+
+                                return (
+                                    <div key={session.id} style={{
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '8px',
+                                        padding: '20px',
+                                        marginBottom: '20px',
+                                        backgroundColor: 'var(--bg-secondary)',
+                                        opacity: 0.7
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'start'
+                                        }}>
+                                            <div>
+                                                <strong style={{ fontSize: '1.1em' }}>{session.session_time}</strong>
+                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                                    {new Date(session.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} • {session.room_assignment}
+                                                </p>
+                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                                    👨‍🏫 {session.teacher_name}
+                                                </p>
+                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                                                    👥 {learnerCount} learners | 👨‍🏫 {tutorCount} tutors
+                                                </p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start' }}>
+                                                <button
+                                                    onClick={() => handleUnarchiveSession(session.id)}
+                                                    className="edit-button"
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                >
+                                                    Restore
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteGroupSession(session.id)}
+                                                    className="delete-button"
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
