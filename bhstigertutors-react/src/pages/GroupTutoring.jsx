@@ -836,8 +836,6 @@ function GroupTutoring() {
     const monthCalendar = (
         <div className="group-tutoring">
             <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Group Tutoring Sessions</h2>
-            <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Click to register as a tutor</p>
-            
             {groupTutoringTutorContent && (
                 <div className="group-tutoring-description" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 2rem' }}>
                     <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
