@@ -35,6 +35,12 @@ function GroupTutoring() {
         acknowledgements: { rti: false, materials: false }
     });
     const [sessionCapacity, setSessionCapacity] = useState({});
+    const [showTutorForm, setShowTutorForm] = useState(false);
+    const [tutorFormData, setTutorFormData] = useState({
+        fullName: '',
+        rtiAcknowledgement: false
+    });
+    const [tutorProfile, setTutorProfile] = useState(null);
 
     useEffect(() => {
         checkUser();
@@ -55,6 +61,28 @@ function GroupTutoring() {
         };
         fetchAllCapacities();
     }, [sessions]);
+
+    useEffect(() => {
+        const fetchTutorProfile = async () => {
+            if (user && (userRole === 'tutor' || userRole === 'admin')) {
+                const { data } = await supabase
+                    .from('tutors')
+                    .select('name')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (data) {
+                    setTutorProfile(data);
+                    setTutorFormData(prev => ({
+                        ...prev,
+                        fullName: data.name
+                    }));
+                }
+            }
+        };
+        
+        fetchTutorProfile();
+    }, [user, userRole]);
 
     const fetchMathSubjects = async () => {
         const { data, error } = await supabase
@@ -629,6 +657,60 @@ function GroupTutoring() {
         );
     }
 
+    if (showTutorForm) {
+        return (
+            <div className="group-tutoring">
+                <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Tutor Registration</h2>
+                <form onSubmit={handleTutorFormSubmit} className="registration-form">
+                    <input type="hidden" value={selectedSession?.id || ''} />
+
+                    <div className="form-group">
+                        <label>Session *</label>
+                        <div style={{ 
+                            padding: '0.75rem', 
+                            backgroundColor: 'var(--bg-primary)',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-color)'
+                        }}>
+                            <strong>{selectedSession?.session_time}</strong> - {new Date(selectedSession?.session_date).toLocaleDateString()}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Full Name *</label>
+                        <input
+                            type="text"
+                            name="fullName"
+                            placeholder="Enter your full name"
+                            value={tutorFormData.fullName}
+                            onChange={(e) => setTutorFormData(prev => ({...prev, fullName: e.target.value}))}
+                            required
+                        />
+                    </div>
+
+                    <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px solid var(--border-color)' }} />
+
+                    <div className="form-group">
+                        <label className="checkbox-label">
+                            <input
+                                type="checkbox"
+                                checked={tutorFormData.rtiAcknowledgement}
+                                onChange={(e) => setTutorFormData(prev => ({...prev, rtiAcknowledgement: e.target.checked}))}
+                                required
+                            />
+                            A room/teacher will be provided to me once I submit this form. I understand that I must register for this session in RTI in order to attend.
+                        </label>
+                    </div>
+
+                    <div className="form-buttons">
+                        <button type="submit" className="submit-button">Submit Registration</button>
+                        <button type="button" onClick={() => setShowTutorForm(false)} className="cancel-button">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        );
+    }
+
     // Calendar section
     const handleTutorSessionClick = async (session) => {
         if (!user) {
@@ -636,90 +718,8 @@ function GroupTutoring() {
             return;
         }
 
-        try {
-            // Check if tutor already registered for this session
-            const { data: existingReg } = await supabase
-                .from('group_tutoring_registrations')
-                .select('id')
-                .eq('session_id', session.id)
-                .eq('school_email', user.email);
-
-            if (existingReg && existingReg.length > 0) {
-                alert('You\'re already registered for this session');
-                return;
-            }
-
-            // Check tutor capacity
-            const { data: registrations } = await supabase
-                .from('group_tutoring_registrations')
-                .select('subject')
-                .eq('session_id', session.id);
-
-            const tutorCount = registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
-
-            if (tutorCount >= 10) {
-                alert('This session is full for tutors (10 tutors max). Please choose another session.');
-                return;
-            }
-
-            const { error } = await supabase
-                .from('group_tutoring_registrations')
-                .insert({
-                    session_id: session.id,
-                    full_name: user.email,
-                    school_email: user.email,
-                    subject: 'Tutor',
-                    help_needed: 'N/A',
-                    previous_programs: [],
-                    registered_at: new Date().toISOString(),
-                    room_assignment: session.room_assignment
-                });
-
-            if (error) {
-                if (error.code === '23505') {
-                    alert('You\'re already registered for this session');
-                } else {
-                    window.showError();
-                    console.error('Registration error:', error);
-                }
-            } else {
-                // Send confirmation email to tutor
-                try {
-                    await fetch('/api/send-email', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: user.email,
-                            sessionDetails: {
-                                sessionDate: session.session_date,
-                                sessionTime: session.session_time,
-                                roomAssignment: session.room_assignment,
-                                teacherName: session.teacher_name
-                            }
-                        })
-                    });
-                } catch (emailErr) {
-                    console.error('Email send error:', emailErr);
-                }
-
-                // Show tutor confirmation screen
-                setTutorConfirmationData({
-                    room: session.room_assignment,
-                    date: new Date(session.session_date).toLocaleDateString('en-US', { 
-                        month: '2-digit', 
-                        day: '2-digit', 
-                        year: 'numeric' 
-                    }),
-                    time: session.session_time,
-                    email: tutoringLeadEmail,
-                    teacher_name: session.teacher_name
-                });
-                setShowTutorConfirmation(true);
-                fetchSessions();
-            }
-        } catch (err) {
-            console.error('Error:', err);
-        }
+        setSelectedSession(session);
+        setShowTutorForm(true);
     };
 
     const monthCalendar = (
