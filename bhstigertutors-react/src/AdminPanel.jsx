@@ -30,6 +30,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         buttonLabel: ''
     });
     const [groupTutoringRegistrations, setGroupTutoringRegistrations] = useState([]);
+    const [expandedRegistrations, setExpandedRegistrations] = useState({});
     const [homePageContent, setHomePageContent] = useState('');
     const [aboutPageContent, setAboutPageContent] = useState('');
     const [editingPage, setEditingPage] = useState(null);
@@ -953,10 +954,9 @@ function AdminPanel({ tutors, onTutorAdded }) {
                             <p style={{ color: 'var(--text-secondary)' }}>No group tutoring sessions yet</p>
                         ) : (
                             groupSessions.map(session => {
-                                const [showRegistrations, setShowRegistrations] = React.useState(false);
-                                
                                 const learnerCount = session.group_tutoring_registrations?.length || 0;
-                                
+                                const isExpanded = expandedRegistrations[session.id];
+
                                 return (
                                     <div key={session.id} style={{
                                         border: '1px solid var(--border-color)',
@@ -995,7 +995,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
 
                                         {/* Registrations Dropdown */}
                                         <button
-                                            onClick={() => setShowRegistrations(!showRegistrations)}
+                                            onClick={() => setExpandedRegistrations(prev => ({
+                                                ...prev,
+                                                [session.id]: !prev[session.id]
+                                            }))}
                                             style={{
                                                 width: '100%',
                                                 padding: '12px',
@@ -1012,11 +1015,11 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                             }}
                                         >
                                             <span>Registrations ({learnerCount})</span>
-                                            <span>{showRegistrations ? '▼' : '▶'}</span>
+                                            <span>{isExpanded ? '▼' : '▶'}</span>
                                         </button>
 
                                         {/* Registrations Table */}
-                                        {showRegistrations && (
+                                        {isExpanded && (
                                             <div style={{
                                                 marginTop: '15px',
                                                 paddingTop: '15px',
@@ -1073,8 +1076,6 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     </div>
                 )}
             </div>
-
-            {/* Remove the old standalone "Group Tutoring Registrations" section entirely */}
 
             <hr />
 
