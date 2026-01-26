@@ -73,15 +73,33 @@ function AboutPage() {
     if (loading) return <p>Loading...</p>;
 
     return (
-        <div style={{
-            backgroundImage: 'url(/logo.jpeg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
-            minHeight: '100vh',
-            padding: '2rem'
-        }}>
-            <h2>About Mu Alpha Theta</h2>
+        <div>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginBottom: '1.5rem'
+            }}>
+                <h2 style={{ margin: 0 }}>About Mu Alpha Theta</h2>
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    border: '2px solid black',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                }}>
+                    <img 
+                        src="/logo.jpeg" 
+                        alt="Logo" 
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                        }}
+                    />
+                </div>
+            </div>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
                 {parseMarkdown(content)}
             </p>
