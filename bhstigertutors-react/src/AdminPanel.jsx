@@ -1020,56 +1020,64 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                         </button>
 
                                         {/* Registrations Table */}
-                                        {isExpanded && (
-                                            <div style={{
-                                                marginTop: '15px',
-                                                paddingTop: '15px',
-                                                borderTop: '1px solid var(--border-color)'
-                                            }}>
-                                                {session.group_tutoring_registrations && session.group_tutoring_registrations.length > 0 ? (
-                                                    <table style={{
-                                                        width: '100%',
-                                                        borderCollapse: 'collapse',
-                                                        fontSize: '0.9em'
-                                                    }}>
-                                                        <thead>
-                                                            <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                                                                <th style={{ textAlign: 'left', padding: '8px 0' }}>Name</th>
-                                                                <th style={{ textAlign: 'left', padding: '8px 0' }}>Email</th>
-                                                                <th style={{ textAlign: 'left', padding: '8px 0' }}>Subject</th>
-                                                                <th style={{ textAlign: 'left', padding: '8px 0' }}>Help Level</th>
-                                                                <th style={{ textAlign: 'left', padding: '8px 0' }}>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {session.group_tutoring_registrations.map(reg => (
-                                                                <tr key={reg.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                                                    <td style={{ padding: '8px 0' }}>{reg.full_name}</td>
-                                                                    <td style={{ padding: '8px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>{reg.school_email}</td>
-                                                                    <td style={{ padding: '8px 0' }}>{reg.subject}</td>
-                                                                    <td style={{ padding: '8px 0', fontSize: '0.8em' }}>
-                                                                        {reg.help_needed === "A lot! I don't understand at all." ? '🔴 A lot' :
-                                                                            reg.help_needed === "Some. I understand some concepts, but I get stuck on lots of problems." ? '🟡 Some' :
-                                                                                '🟢 Not much'}
-                                                                    </td>
-                                                                    <td style={{ padding: '8px 0' }}>
-                                                                        <button
-                                                                            onClick={() => handleDeleteRegistration(reg.id)}
-                                                                            className="delete-button"
-                                                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
-                                                                        >
-                                                                            Remove
-                                                                        </button>
-                                                                    </td>
+                                            {isExpanded && (
+                                                <div style={{
+                                                    marginTop: '15px',
+                                                    paddingTop: '15px',
+                                                    borderTop: '1px solid var(--border-color)'
+                                                }}>
+                                                    {session.group_tutoring_registrations && session.group_tutoring_registrations.length > 0 ? (
+                                                        <table style={{
+                                                            width: '100%',
+                                                            borderCollapse: 'collapse',
+                                                            fontSize: '0.9em'
+                                                        }}>
+                                                            <thead>
+                                                                <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Name</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Email</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Subject</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Help Level</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Actions</th>
                                                                 </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                ) : (
-                                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>No registrations for this session</p>
-                                                )}
-                                            </div>
-                                        )}
+                                                            </thead>
+                                                            <tbody>
+                                                                {[...session.group_tutoring_registrations]
+                                                                    .sort((a, b) => {
+                                                                        // Tutors first, then learners
+                                                                        if (a.subject === 'Tutor' && b.subject !== 'Tutor') return -1;
+                                                                        if (a.subject !== 'Tutor' && b.subject === 'Tutor') return 1;
+                                                                        return 0;
+                                                                    })
+                                                                    .map(reg => (
+                                                                        <tr key={reg.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                                                            <td style={{ padding: '8px 0' }}>{reg.full_name}</td>
+                                                                            <td style={{ padding: '8px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>{reg.school_email}</td>
+                                                                            <td style={{ padding: '8px 0' }}>{reg.subject}</td>
+                                                                            <td style={{ padding: '8px 0', fontSize: '0.8em' }}>
+                                                                                {reg.subject === 'Tutor' ? '👨‍🏫 Tutor' :
+                                                                                    reg.help_needed === "A lot! I don't understand at all." ? '🔴 A lot' :
+                                                                                        reg.help_needed === "Some. I understand some concepts, but I get stuck on lots of problems." ? '🟡 Some' :
+                                                                                            '🟢 Not much'}
+                                                                            </td>
+                                                                            <td style={{ padding: '8px 0' }}>
+                                                                                <button
+                                                                                    onClick={() => handleDeleteRegistration(reg.id)}
+                                                                                    className="delete-button"
+                                                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                            </tbody>
+                                                        </table>
+                                                    ) : (
+                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>No registrations for this session</p>
+                                                    )}
+                                                </div>
+                                            )}
                                     </div>
                                 );
                             })
