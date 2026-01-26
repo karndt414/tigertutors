@@ -344,6 +344,106 @@ function GroupTutoring() {
         }
     };
 
+    // Add this function after handleFormSubmit
+    const handleTutorFormSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!tutorFormData.fullName) {
+            alert('Please enter your full name');
+            return;
+        }
+
+        if (!tutorFormData.rtiAcknowledgement) {
+            alert('Please acknowledge the RTI requirement');
+            return;
+        }
+
+        try {
+            // Check if tutor already registered for this session
+            const { data: existingReg } = await supabase
+                .from('group_tutoring_registrations')
+                .select('id')
+                .eq('session_id', selectedSession.id)
+                .eq('school_email', user.email);
+
+            if (existingReg && existingReg.length > 0) {
+                alert('You\'re already registered for this session');
+                setShowTutorForm(false);
+                return;
+            }
+
+            // Check tutor capacity
+            const { learnerCount: _, tutorCount } = await getSessionCapacity(selectedSession.id);
+
+            if (tutorCount >= 10) {
+                alert('This session is full for tutors (10 tutors max). Please choose another session.');
+                setShowTutorForm(false);
+                return;
+            }
+
+            const { error } = await supabase
+                .from('group_tutoring_registrations')
+                .insert({
+                    session_id: selectedSession.id,
+                    full_name: tutorFormData.fullName,
+                    school_email: user.email,
+                    subject: 'Tutor',
+                    help_needed: 'N/A',
+                    previous_programs: [],
+                    registered_at: new Date().toISOString(),
+                    room_assignment: selectedSession.room_assignment
+                });
+
+            if (error) {
+                if (error.code === '23505') {
+                    alert('You\'re already registered for this session');
+                } else {
+                    window.showError();
+                    console.error('Registration error:', error);
+                }
+                return;
+            }
+
+            // Send confirmation email to tutor
+            try {
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        sessionDetails: {
+                            sessionDate: selectedSession.session_date,
+                            sessionTime: selectedSession.session_time,
+                            roomAssignment: selectedSession.room_assignment,
+                            teacherName: selectedSession.teacher_name
+                        }
+                    })
+                });
+            } catch (emailErr) {
+                console.error('Email send error:', emailErr);
+            }
+
+            // Show tutor confirmation screen
+            setTutorConfirmationData({
+                room: selectedSession.room_assignment,
+                date: new Date(selectedSession.session_date).toLocaleDateString('en-US', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
+                }),
+                time: selectedSession.session_time,
+                email: tutoringLeadEmail,
+                teacher_name: selectedSession.teacher_name
+            });
+            setShowTutorForm(false);
+            setShowTutorConfirmation(true);
+            fetchSessions();
+        } catch (err) {
+            console.error('Error:', err);
+            window.showError();
+        }
+    };
+
     const sendConfirmationEmail = async (email, data) => {
         try {
             // This would call your backend email service
