@@ -80,12 +80,11 @@ function AboutPage() {
                 gap: '1rem',
                 marginBottom: '1.5rem'
             }}>
-                <h2 style={{ margin: 0 }}>About Mu Alpha Theta</h2>
                 <div style={{
                     width: '80px',
                     height: '80px',
                     border: '2px solid black',
-                    borderRadius: '4px',
+                    borderRadius: '50%',
                     overflow: 'hidden',
                     flexShrink: 0
                 }}>
@@ -99,6 +98,7 @@ function AboutPage() {
                         }}
                     />
                 </div>
+                <h2 style={{ margin: 0 }}>About Mu Alpha Theta</h2>
             </div>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
                 {parseMarkdown(content)}
