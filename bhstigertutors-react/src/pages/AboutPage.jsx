@@ -74,7 +74,32 @@ function AboutPage() {
 
     return (
         <div>
-            <h2>About Mu Alpha Theta</h2>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                marginBottom: '1.5rem'
+            }}>
+                <div style={{
+                    width: '80px',
+                    height: '80px',
+                    border: '2px solid black',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    flexShrink: 0
+                }}>
+                    <img 
+                        src="/logo.jpeg" 
+                        alt="Logo" 
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                        }}
+                    />
+                </div>
+                <h2 style={{ margin: 0 }}>About Mu Alpha Theta</h2>
+            </div>
             <p style={{ lineHeight: 1.7, fontSize: '1.1em', whiteSpace: 'pre-wrap' }}>
                 {parseMarkdown(content)}
             </p>

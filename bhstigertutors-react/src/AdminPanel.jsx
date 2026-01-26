@@ -30,11 +30,13 @@ function AdminPanel({ tutors, onTutorAdded }) {
         buttonLabel: ''
     });
     const [groupTutoringRegistrations, setGroupTutoringRegistrations] = useState([]);
+    const [expandedRegistrations, setExpandedRegistrations] = useState({});
     const [homePageContent, setHomePageContent] = useState('');
     const [aboutPageContent, setAboutPageContent] = useState('');
     const [editingPage, setEditingPage] = useState(null);
     const [contactPageContent, setContactPageContent] = useState('');
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
+    const [groupTutoringTutorContent, setGroupTutoringTutorContent] = useState('');
     const [selectedText, setSelectedText] = useState('');
     const [editingPageType, setEditingPageType] = useState(null);
     const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
@@ -53,8 +55,10 @@ function AdminPanel({ tutors, onTutorAdded }) {
         pendingTutors: false,
         userAccounts: false,
         pageContent: false,
-        siteConfig: false
+        siteConfig: false,
+        archivedSessions: false
     });
+    const [archivedSessions, setArchivedSessions] = useState([]);
 
     useEffect(() => {
         // Just fetch data directly
@@ -67,6 +71,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
         fetchStudentPresidentEmail();
         fetchMathSubjects();
         fetchPendingTutorRequests();
+        fetchArchivedSessions();
     }, []);
 
     const handleDelete = async (tutorId) => {
@@ -111,14 +116,19 @@ function AdminPanel({ tutors, onTutorAdded }) {
         const { data, error } = await supabase
             .from('group_tutoring_sessions')
             .select(`
-                *,
-                group_tutoring_registrations (
-                    id,
-                    subject
-                )
-            `)
+            *,
+            group_tutoring_registrations (
+                id,
+                full_name,
+                school_email,
+                subject,
+                help_needed,
+                registered_at
+            )
+        `)
+            .eq('is_archived', false)
             .order('session_date', { ascending: true });
-        
+
         if (error) console.error(error);
         else setGroupSessions(data || []);
     };
@@ -231,10 +241,17 @@ function AdminPanel({ tutors, onTutorAdded }) {
             .eq('page_name', 'contact')
             .single();
 
+        const { data: groupTutorData } = await supabase
+            .from('page_content')
+            .select('content')
+            .eq('page_name', 'group_tutoring_tutor')
+            .single();
+
         if (homeData) setHomePageContent(homeData.content);
         if (aboutData) setAboutPageContent(aboutData.content);
         if (groupData) setGroupTutoringContent(groupData.content);
         if (contactData) setContactPageContent(contactData.content);
+        if (groupTutorData) setGroupTutoringTutorContent(groupTutorData.content);
     };
 
     const handleAddAllowedRole = async (e) => {
@@ -363,135 +380,59 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }
     };
 
-    const handleDeleteUser = async (userId, userEmail) => {
-        if (!window.confirm(`Are you sure you want to delete ${userEmail}? This cannot be undone.`)) {
-            return;
-        }
-
-        try {
-            const { error: userError } = await supabase
-                .from('users')
-                .delete()
-                .eq('id', userId);
-
-            if (userError) {
-                alert('Error deleting user: ' + userError.message);
-                return;
-            }
-
-            const authResponse = await fetch('/api/delete-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            });
-
-            if (authResponse.ok) {
-                alert('User deleted successfully');
-            } else {
-                alert('User deleted from database, but auth deletion failed');
-            }
-
-            fetchAllUsers();
-        } catch (err) {
-            console.error('Delete error:', err);
-            alert('Error deleting user');
-        }
-    };
-
-    const handleDeleteRegistration = async (registrationId) => {
-        if (!window.confirm('Delete this registration?')) return;
+    const handleArchiveSession = async (sessionId) => {
+        if (!window.confirm('Archive this session?')) return;
 
         const { error } = await supabase
-            .from('group_tutoring_registrations')
-            .delete()
-            .eq('id', registrationId);
+            .from('group_tutoring_sessions')
+            .update({ is_archived: true })
+            .eq('id', sessionId);
 
         if (error) {
             alert('Error: ' + error.message);
         } else {
-            alert('Registration deleted');
-            fetchGroupTutoringRegistrations();
+            alert('Session archived');
+            fetchGroupSessions();
+            fetchArchivedSessions();
         }
     };
 
-    const handleSavePageContent = async (pageName, content) => {
+    const handleUnarchiveSession = async (sessionId) => {
+        if (!window.confirm('Restore this session?')) return;
+
         const { error } = await supabase
-            .from('page_content')
-            .upsert({
-                page_name: pageName,
-                content: content,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'page_name' });
+            .from('group_tutoring_sessions')
+            .update({ is_archived: false })
+            .eq('id', sessionId);
 
         if (error) {
-            alert('Error saving content: ' + error.message);
+            alert('Error: ' + error.message);
         } else {
-            alert(`${pageName} page updated!`);
-            setEditingPage(null);
+            alert('Session restored');
+            fetchGroupSessions();
+            fetchArchivedSessions();
         }
     };
 
-    const applyFormatting = (format) => {
-        if (!selectedText) {
-            alert('Please select text to format');
-            return;
-        }
-
-        let formattedText = '';
-        switch(format) {
-            case 'bold':
-                formattedText = `**${selectedText}**`;
-                break;
-            case 'italic':
-                formattedText = `*${selectedText}*`;
-                break;
-            case 'underline':
-                formattedText = `__${selectedText}__`;
-                break;
-            default:
-                return;
-        }
-
-        // Replace selected text with formatted version in the active textarea
-        const currentContent = editingPageType === 'home' ? homePageContent :
-                              editingPageType === 'about' ? aboutPageContent :
-                              editingPageType === 'group_tutoring' ? groupTutoringContent :
-                              editingPageType === 'contact' ? contactPageContent : '';
-
-        const newContent = currentContent.replace(selectedText, formattedText);
-
-        if (editingPageType === 'home') setHomePageContent(newContent);
-        else if (editingPageType === 'about') setAboutPageContent(newContent);
-        else if (editingPageType === 'group_tutoring') setGroupTutoringContent(newContent);
-        else if (editingPageType === 'contact') setContactPageContent(newContent);
-
-        setSelectedText('');
-    };
-
-    const handleTextareaSelect = (e) => {
-        setSelectedText(e.target.value.substring(e.target.selectionStart, e.target.selectionEnd));
-    };
-
-    const parseMarkdown = (text) => {
-        if (!text) return text;
-
-        // Replace email placeholder with actual email
-        let processedText = text.replace('{{tutoring_lead_email}}', tutoringLeadEmail);
-
-        return processedText
-            .split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g)
-            .map((part, i) => {
-                if (part.startsWith('**') && part.endsWith('**')) {
-                    return <strong key={i}>{part.slice(2, -2)}</strong>;
-                } else if (part.startsWith('__') && part.endsWith('__')) {
-                    return <u key={i}>{part.slice(2, -2)}</u>;
-                } else if (part.startsWith('*') && part.endsWith('*')) {
-                    return <em key={i}>{part.slice(1, -1)}</em>;
-                } else if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part)) {
-                    return <a key={i} href={`mailto:${part}`} style={{ color: 'var(--accent-primary)', textDecoration: 'underline', cursor: 'pointer' }}>{part}</a>;
-                }
-                return part;
-            });
+    const fetchArchivedSessions = async () => {
+        const { data, error } = await supabase
+            .from('group_tutoring_sessions')
+            .select(`
+                *,
+                group_tutoring_registrations (
+                    id,
+                    full_name,
+                    school_email,
+                    subject,
+                    help_needed,
+                    registered_at
+                )
+            `)
+            .eq('is_archived', true)
+            .order('session_date', { ascending: false });
+        
+        if (error) console.error(error);
+        else setArchivedSessions(data || []);
     };
 
     const fetchTutoringLeadEmail = async () => {
@@ -747,6 +688,91 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }));
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/__(.*?)__/g, '<u>$1</u>')
+            .replace(/\{\{tutoring_lead_email\}\}/g, tutoringLeadEmail);
+    };
+
+    const handleTextareaSelect = (e) => {
+        setSelectedText(e.target.value.substring(e.target.selectionStart, e.target.selectionEnd));
+    };
+
+    const applyFormatting = (type) => {
+        if (!selectedText) return;
+
+        let formatted = '';
+        if (type === 'bold') formatted = `**${selectedText}**`;
+        else if (type === 'italic') formatted = `*${selectedText}*`;
+        else if (type === 'underline') formatted = `__${selectedText}__`;
+
+        if (editingPageType === 'home') {
+            setHomePageContent(homePageContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'about') {
+            setAboutPageContent(aboutPageContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'group_tutoring') {
+            setGroupTutoringContent(groupTutoringContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'group_tutoring_tutor') {
+            setGroupTutoringTutorContent(groupTutoringTutorContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'contact') {
+            setContactPageContent(contactPageContent.replace(selectedText, formatted));
+        }
+        setSelectedText('');
+    };
+
+    const handleSavePageContent = async (pageName, content) => {
+        const { error } = await supabase
+            .from('page_content')
+            .upsert({
+                page_name: pageName,
+                content: content,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'page_name' });
+
+        if (error) {
+            alert('Error saving content: ' + error.message);
+        } else {
+            alert('Content saved!');
+            setEditingPage(null);
+        }
+    };
+
+    const handleDeleteUser = async (userId, email) => {
+        if (!window.confirm(`Delete user ${email}?`)) return;
+
+        const { error } = await supabase
+            .from('users')
+            .delete()
+            .eq('id', userId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('User deleted');
+            fetchAllUsers();
+        }
+    };
+
+    const handleDeleteRegistration = async (registrationId) => {
+        if (!window.confirm('Remove this registration?')) return;
+
+        const { error } = await supabase
+            .from('group_tutoring_registrations')
+            .delete()
+            .eq('id', registrationId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Registration removed');
+            fetchGroupSessions();
+            fetchGroupTutoringRegistrations();
+        }
+    };
+
     return (
         <div className="admin-panel">
             <div style={{
@@ -944,122 +970,150 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     </span>
                 </h3>
                 {expandedSections.manageSessions && (
-                    <div className="tutor-manage-list">
+                    <div className="sessions-manage-list">
                         {groupSessions.length === 0 ? (
                             <p style={{ color: 'var(--text-secondary)' }}>No group tutoring sessions yet</p>
                         ) : (
-                            groupSessions.map(session => {
-                                const registeredSubjects = session.group_tutoring_registrations
-                                    ? [...new Set(session.group_tutoring_registrations.map(reg => reg.subject))]
-                                    : [];
-                                
-                                // Count learners and tutors based on subject field
-                                const learnerCount = session.group_tutoring_registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
-                                const tutorCount = session.group_tutoring_registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
-                                
-                                return (
-                                    <div key={session.id} className="tutor-manage-item">
-                                        <div>
-                                            <strong>{session.session_time}</strong>
-                                            <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                                                {new Date(session.session_date).toLocaleDateString()} • {session.room_assignment}
-                                            </p>
-                                            <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
-                                                👨‍🏫 Teacher: {session.teacher_name}
-                                            </p>
-                                            <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
-                                                📚 Subjects: {registeredSubjects.length > 0 ? registeredSubjects.join(', ') : 'None'}
-                                            </p>
-                                            <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
-                                                👥 Learners: {learnerCount} | 👨‍🏫 Tutors: {tutorCount}
-                                            </p>
-                                        </div>
+                                groupSessions.map(session => {
+                                    const learnerCount = session.group_tutoring_registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
+                                    const tutorCount = session.group_tutoring_registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
+                                    const isExpanded = expandedRegistrations[session.id];
+
+                                    return (
+                                        <div key={session.id} style={{
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '8px',
+                                            padding: '20px',
+                                            marginBottom: '20px',
+                                            backgroundColor: 'var(--bg-secondary)'
+                                        }}>
+                                            {/* Session Header */}
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'start',
+                                                marginBottom: '15px',
+                                                gap: '10px'
+                                            }}>
+                                                <div>
+                                                    <strong style={{ fontSize: '1.1em' }}>{session.session_time}</strong>
+                                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                                        {new Date(session.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} • {session.room_assignment}
+                                                    </p>
+                                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                                        👨‍🏫 {session.teacher_name}
+                                                    </p>
+                                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                                                        👥 {learnerCount} learners | 👨‍🏫 {tutorCount} tutors
+                                                    </p>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start' }}>
+                                                    <button
+                                                        onClick={() => handleArchiveSession(session.id)}
+                                                        className="edit-button"
+                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                    >
+                                                        Archive
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteGroupSession(session.id)}
+                                                        className="delete-button"
+                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        {/* Registrations Dropdown */}
                                         <button
-                                            onClick={() => handleDeleteGroupSession(session.id)}
-                                            className="delete-button"
+                                            onClick={() => setExpandedRegistrations(prev => ({
+                                                ...prev,
+                                                [session.id]: !prev[session.id]
+                                            }))}
+                                            style={{
+                                                width: '100%',
+                                                padding: '12px',
+                                                marginTop: '15px',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                fontWeight: 600,
+                                                color: 'var(--text-primary)'
+                                            }}
                                         >
-                                            Delete
+                                            <span>Registrations ({learnerCount})</span>
+                                            <span>{isExpanded ? '▼' : '▶'}</span>
                                         </button>
+
+                                        {/* Registrations Table */}
+                                            {isExpanded && (
+                                                <div style={{
+                                                    marginTop: '15px',
+                                                    paddingTop: '15px',
+                                                    borderTop: '1px solid var(--border-color)'
+                                                }}>
+                                                    {session.group_tutoring_registrations && session.group_tutoring_registrations.length > 0 ? (
+                                                        <table style={{
+                                                            width: '100%',
+                                                            borderCollapse: 'collapse',
+                                                            fontSize: '0.9em'
+                                                        }}>
+                                                            <thead>
+                                                                <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Name</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Email</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Subject</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Help Level</th>
+                                                                    <th style={{ textAlign: 'left', padding: '8px 0' }}>Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {[...session.group_tutoring_registrations]
+                                                                    .sort((a, b) => {
+                                                                        // Tutors first, then learners
+                                                                        if (a.subject === 'Tutor' && b.subject !== 'Tutor') return -1;
+                                                                        if (a.subject !== 'Tutor' && b.subject === 'Tutor') return 1;
+                                                                        return 0;
+                                                                    })
+                                                                    .map(reg => (
+                                                                        <tr key={reg.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                                                            <td style={{ padding: '8px 0' }}>{reg.full_name}</td>
+                                                                            <td style={{ padding: '8px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>{reg.school_email}</td>
+                                                                            <td style={{ padding: '8px 0' }}>{reg.subject}</td>
+                                                                            <td style={{ padding: '8px 0', fontSize: '0.8em' }}>
+                                                                                {reg.subject === 'Tutor' ? '👨‍🏫 Tutor' :
+                                                                                    reg.help_needed === "A lot! I don't understand at all." ? '🔴 A lot' :
+                                                                                        reg.help_needed === "Some. I understand some concepts, but I get stuck on lots of problems." ? '🟡 Some' :
+                                                                                            '🟢 Not much'}
+                                                                            </td>
+                                                                            <td style={{ padding: '8px 0' }}>
+                                                                                <button
+                                                                                    onClick={() => handleDeleteRegistration(reg.id)}
+                                                                                    className="delete-button"
+                                                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                            </tbody>
+                                                        </table>
+                                                    ) : (
+                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>No registrations for this session</p>
+                                                    )}
+                                                </div>
+                                            )}
                                     </div>
                                 );
                             })
                         )}
                     </div>
-                )}
-            </div>
-
-            <hr />
-
-            {/* Group Tutoring Registrations */}
-            <div>
-                <h3 
-                    onClick={() => toggleSection('registrations')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
-                >
-                    {expandedSections.registrations ? '▼' : '▶'} Group Tutoring Registrations
-                </h3>
-                {expandedSections.registrations && (
-                    <>
-                        <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                            View all student registrations for group tutoring sessions
-                        </p>
-                        <div className="registrations-list">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Student Name</th>
-                                        <th>Email</th>
-                                        <th>Subject</th>
-                                        <th>Help Level</th>
-                                        <th>Previous Programs</th>
-                                        <th>Flex Period</th>
-                                        <th>Room Assignment</th>
-                                        <th>Registered</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {groupTutoringRegistrations.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                                                No registrations yet
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        groupTutoringRegistrations.map(reg => (
-                                            <tr key={reg.id}>
-                                                <td>{reg.full_name}</td>
-                                                <td>{reg.school_email}</td>
-                                                <td>{reg.subject}</td>
-                                                <td style={{ fontSize: '0.85em' }}>
-                                                    {reg.help_needed === "A lot! I don't understand at all." ? 'A lot' :
-                                                     reg.help_needed === "Some. I understand some concepts, but I get stuck on lots of problems." ? 'Some' :
-                                                     'Not much'}
-                                                </td>
-                                                <td style={{ fontSize: '0.85em' }}>
-                                                    {reg.previous_programs && reg.previous_programs.length > 0 
-                                                        ? reg.previous_programs.join(', ') 
-                                                        : 'None'}
-                                                </td>
-                                                <td><strong>{reg.group_tutoring_sessions?.session_time || reg.session_time}</strong></td>
-                                                <td><strong>{reg.group_tutoring_sessions?.room_assignment || reg.room_assignment}</strong></td>
-                                                <td>{reg.group_tutoring_sessions?.session_date ? new Date(reg.group_tutoring_sessions.session_date).toLocaleDateString() : 'N/A'}</td>
-                                                <td>
-                                                    <button
-                                                        onClick={() => handleDeleteRegistration(reg.id)}
-                                                        className="delete-button"
-                                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85em' }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </>
                 )}
             </div>
 
@@ -1569,7 +1623,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         </div>
 
                         <div>
-                            <h4>Group Tutoring Page</h4>
+                            <h4>Group Tutoring Page - Learner View</h4>
                             {editingPage === 'group_tutoring' ? (
                                 <div>
                                     <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
@@ -1673,6 +1727,116 @@ function AdminPanel({ tutors, onTutorAdded }) {
                                     <button onClick={() => {
                                         setEditingPage('group_tutoring');
                                         setEditingPageType('group_tutoring');
+                                    }}>Edit</button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <h4>Group Tutoring Page - Tutor View</h4>
+                            {editingPage === 'group_tutoring_tutor' ? (
+                                <div>
+                                    <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingPageType('group_tutoring_tutor');
+                                                applyFormatting('bold');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontWeight: 'bold',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <strong>B</strong>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingPageType('group_tutoring_tutor');
+                                                applyFormatting('italic');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                fontStyle: 'italic',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            I
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingPageType('group_tutoring_tutor');
+                                                applyFormatting('underline');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                textDecoration: 'underline',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            U
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setGroupTutoringTutorContent(groupTutoringTutorContent + '{{tutoring_lead_email}}');
+                                            }}
+                                            style={{
+                                                padding: '6px 12px',
+                                                backgroundColor: 'var(--bg-tertiary)',
+                                                color: 'var(--text-primary)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85em'
+                                            }}
+                                        >
+                                            📧 Insert Email
+                                        </button>
+                                    </div>
+                                    <textarea
+                                        value={groupTutoringTutorContent}
+                                        onChange={(e) => setGroupTutoringTutorContent(e.target.value)}
+                                        onSelect={handleTextareaSelect}
+                                        style={{
+                                            width: '100%',
+                                            minHeight: '200px',
+                                            padding: '10px',
+                                            backgroundColor: 'var(--bg-primary)',
+                                            color: 'var(--text-primary)',
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '6px',
+                                            fontFamily: 'monospace'
+                                        }}
+                                    />
+                                    <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+                                        <button onClick={() => handleSavePageContent('group_tutoring_tutor', groupTutoringTutorContent)}>Save</button>
+                                        <button onClick={() => setEditingPage(null)} style={{ backgroundColor: 'var(--bg-tertiary)' }}>Cancel</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', marginBottom: '10px', fontSize: '0.85em' }}>
+                                        {parseMarkdown(groupTutoringTutorContent) || 'No content yet'}
+                                    </p>
+                                    <button onClick={() => {
+                                        setEditingPage('group_tutoring_tutor');
+                                        setEditingPageType('group_tutoring_tutor');
                                     }}>Edit</button>
                                 </div>
                             )}
@@ -1861,6 +2025,90 @@ function AdminPanel({ tutors, onTutorAdded }) {
             </div>
 
             <hr />
+
+            {/* Archived Sessions */}
+            <div>
+                <h3
+                    onClick={() => toggleSection('archivedSessions')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {expandedSections.archivedSessions ? '▼' : '▶'} Archived Info
+                    </span>
+                    <span style={{
+                        backgroundColor: 'var(--accent-primary)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.85em',
+                        fontWeight: 600
+                    }}>
+                        {archivedSessions.length}
+                    </span>
+                </h3>
+                {expandedSections.archivedSessions && (
+                    <div className="sessions-manage-list">
+                        {archivedSessions.length === 0 ? (
+                            <p style={{ color: 'var(--text-secondary)' }}>No archived sessions</p>
+                        ) : (
+                            archivedSessions.map(session => {
+                                const learnerCount = session.group_tutoring_registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
+                                const tutorCount = session.group_tutoring_registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
+
+                                return (
+                                    <div key={session.id} style={{
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '8px',
+                                        padding: '20px',
+                                        marginBottom: '20px',
+                                        backgroundColor: 'var(--bg-secondary)',
+                                        opacity: 0.7
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'start'
+                                        }}>
+                                            <div>
+                                                <strong style={{ fontSize: '1.1em' }}>{session.session_time}</strong>
+                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                                    {new Date(session.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} • {session.room_assignment}
+                                                </p>
+                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                                    👨‍🏫 {session.teacher_name}
+                                                </p>
+                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                                                    👥 {learnerCount} learners | 👨‍🏫 {tutorCount} tutors
+                                                </p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start' }}>
+                                                <button
+                                                    onClick={() => handleUnarchiveSession(session.id)}
+                                                    className="edit-button"
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                >
+                                                    Restore
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteGroupSession(session.id)}
+                                                    className="delete-button"
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8em' }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

@@ -93,6 +93,13 @@ function LoginModal({ isOpen, onClose }) {
 
         try {
             if (isSignUp) {
+                // Check email domain for ALL users
+                if (!email.toLowerCase().endsWith('@bentonvillek12.org')) {
+                    setError('You must use your school email');
+                    setLoading(false);
+                    return;
+                }
+
                 let finalRole = 'learner';
 
                 // Check if email is approved for tutor role
