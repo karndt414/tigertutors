@@ -953,45 +953,46 @@ function AdminPanel({ tutors, onTutorAdded }) {
                         {groupSessions.length === 0 ? (
                             <p style={{ color: 'var(--text-secondary)' }}>No group tutoring sessions yet</p>
                         ) : (
-                            groupSessions.map(session => {
-                                const learnerCount = session.group_tutoring_registrations?.length || 0;
-                                const isExpanded = expandedRegistrations[session.id];
+                                groupSessions.map(session => {
+                                    const learnerCount = session.group_tutoring_registrations?.filter(reg => reg.subject !== 'Tutor').length || 0;
+                                    const tutorCount = session.group_tutoring_registrations?.filter(reg => reg.subject === 'Tutor').length || 0;
+                                    const isExpanded = expandedRegistrations[session.id];
 
-                                return (
-                                    <div key={session.id} style={{
-                                        border: '1px solid var(--border-color)',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        marginBottom: '20px',
-                                        backgroundColor: 'var(--bg-secondary)'
-                                    }}>
-                                        {/* Session Header */}
-                                        <div style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'start',
-                                            marginBottom: '15px'
+                                    return (
+                                        <div key={session.id} style={{
+                                            border: '1px solid var(--border-color)',
+                                            borderRadius: '8px',
+                                            padding: '20px',
+                                            marginBottom: '20px',
+                                            backgroundColor: 'var(--bg-secondary)'
                                         }}>
-                                            <div>
-                                                <strong style={{ fontSize: '1.1em' }}>{session.session_time}</strong>
-                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                                                    {new Date(session.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} • {session.room_assignment}
-                                                </p>
-                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
-                                                    👨‍🏫 {session.teacher_name}
-                                                </p>
-                                                <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
-                                                    👥 {learnerCount} registrations
-                                                </p>
+                                            {/* Session Header */}
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'start',
+                                                marginBottom: '15px'
+                                            }}>
+                                                <div>
+                                                    <strong style={{ fontSize: '1.1em' }}>{session.session_time}</strong>
+                                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                                                        {new Date(session.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} • {session.room_assignment}
+                                                    </p>
+                                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--text-secondary)' }}>
+                                                        👨‍🏫 {session.teacher_name}
+                                                    </p>
+                                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8em', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                                                        👥 {learnerCount} learners | 👨‍🏫 {tutorCount} tutors
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteGroupSession(session.id)}
+                                                    className="delete-button"
+                                                    style={{ alignSelf: 'flex-start' }}
+                                                >
+                                                    Delete Session
+                                                </button>
                                             </div>
-                                            <button
-                                                onClick={() => handleDeleteGroupSession(session.id)}
-                                                className="delete-button"
-                                                style={{ alignSelf: 'flex-start' }}
-                                            >
-                                                Delete Session
-                                            </button>
-                                        </div>
 
                                         {/* Registrations Dropdown */}
                                         <button
