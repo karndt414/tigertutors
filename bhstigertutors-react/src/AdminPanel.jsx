@@ -680,6 +680,89 @@ function AdminPanel({ tutors, onTutorAdded }) {
         }));
     };
 
+    const parseMarkdown = (text) => {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/__(.*?)__/g, '<u>$1</u>')
+            .replace(/\{\{tutoring_lead_email\}\}/g, tutoringLeadEmail);
+    };
+
+    const handleTextareaSelect = (e) => {
+        setSelectedText(e.target.value.substring(e.target.selectionStart, e.target.selectionEnd));
+    };
+
+    const applyFormatting = (type) => {
+        if (!selectedText) return;
+
+        let formatted = '';
+        if (type === 'bold') formatted = `**${selectedText}**`;
+        else if (type === 'italic') formatted = `*${selectedText}*`;
+        else if (type === 'underline') formatted = `__${selectedText}__`;
+
+        if (editingPageType === 'home') {
+            setHomePageContent(homePageContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'about') {
+            setAboutPageContent(aboutPageContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'group_tutoring') {
+            setGroupTutoringContent(groupTutoringContent.replace(selectedText, formatted));
+        } else if (editingPageType === 'contact') {
+            setContactPageContent(contactPageContent.replace(selectedText, formatted));
+        }
+        setSelectedText('');
+    };
+
+    const handleSavePageContent = async (pageName, content) => {
+        const { error } = await supabase
+            .from('page_content')
+            .upsert({
+                page_name: pageName,
+                content: content,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'page_name' });
+
+        if (error) {
+            alert('Error saving content: ' + error.message);
+        } else {
+            alert('Content saved!');
+            setEditingPage(null);
+        }
+    };
+
+    const handleDeleteUser = async (userId, email) => {
+        if (!window.confirm(`Delete user ${email}?`)) return;
+
+        const { error } = await supabase
+            .from('users')
+            .delete()
+            .eq('id', userId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('User deleted');
+            fetchAllUsers();
+        }
+    };
+
+    const handleDeleteRegistration = async (registrationId) => {
+        if (!window.confirm('Remove this registration?')) return;
+
+        const { error } = await supabase
+            .from('group_tutoring_registrations')
+            .delete()
+            .eq('id', registrationId);
+
+        if (error) {
+            alert('Error: ' + error.message);
+        } else {
+            alert('Registration removed');
+            fetchGroupSessions();
+            fetchGroupTutoringRegistrations();
+        }
+    };
+
     return (
         <div className="admin-panel">
             <div style={{
@@ -1830,7 +1913,7 @@ function AdminPanel({ tutors, onTutorAdded }) {
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {expandedSections.archivedSessions ? '▼' : '▶'} Archived Sessions
+                        {expandedSections.archivedSessions ? '▼' : '▶'} Archived Info
                     </span>
                     <span style={{
                         backgroundColor: 'var(--accent-primary)',
