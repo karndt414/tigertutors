@@ -23,6 +23,7 @@ function GroupTutoring() {
     const [user, setUser] = useState(null);
     const [userRole, setUserRole] = useState(null);
     const [groupTutoringContent, setGroupTutoringContent] = useState('');
+    const [groupTutoringTutorContent, setGroupTutoringTutorContent] = useState(''); // Add this state
     const [loading, setLoading] = useState(true);
     const [tutoringLeadEmail, setTutoringLeadEmail] = useState('wolfkame@bentonvillek12.org');
     const [mathSubjects, setMathSubjects] = useState([]);
@@ -135,17 +136,27 @@ function GroupTutoring() {
 
     const fetchGroupTutoringContent = async () => {
         try {
-            const { data, error } = await supabase
+            const { data: learnerData } = await supabase
                 .from('page_content')
                 .select('content')
                 .eq('page_name', 'group_tutoring')
                 .single();
 
-            if (data && data.content) {
-                setGroupTutoringContent(data.content);
+            const { data: tutorData } = await supabase
+                .from('page_content')
+                .select('content')
+                .eq('page_name', 'group_tutoring_tutor')
+                .single();
+
+            if (learnerData && learnerData.content) {
+                setGroupTutoringContent(learnerData.content);
             } else {
                 // Fallback content if nothing in database
                 setGroupTutoringContent('Group tutoring brings students and tutors together in a math classroom during flex. Once they arrive, students are assigned to a tutor who can help them with their current math class. Either one or two students are assigned to each tutor. Throughout the session, tutors explain concepts, work examples, and help with homework questions. Group tutoring is great for students who are struggling with a specific concept or want a convenient way to ask questions as they work on homework. All math students working on the listed subject are welcome, including those needing significant, consistent help or wanting to see if MATh tutoring is a good fit for them.\n\nIf you are seeking long-term individual tutoring, please fill out the form in your math Google Classroom.\n\nHave questions? Email Meg Wolfka, tutoring coordinator, at wolfkame@bentonvillek12.org.\n\nRegister for as many sessions as you would like. Click on a session below to register.');
+            }
+
+            if (tutorData && tutorData.content) {
+                setGroupTutoringTutorContent(tutorData.content);
             }
         } catch (err) {
             console.error('Error fetching content:', err);
@@ -825,8 +836,16 @@ function GroupTutoring() {
     const monthCalendar = (
         <div className="group-tutoring">
             <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Group Tutoring Sessions</h2>
-            <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Click to register for sessions</p>
+            <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Click to register as a tutor</p>
             
+            {groupTutoringTutorContent && (
+                <div className="group-tutoring-description" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                    <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+                        {parseMarkdown(groupTutoringTutorContent)}
+                    </p>
+                </div>
+            )}
+
             <div className="calendar-container">
                 <div className="calendar-header">
                     <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="nav-button">← Previous</button>
