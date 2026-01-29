@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import HomePage from './pages/HomePage';
@@ -24,11 +24,13 @@ function App() {
     const [userRole, setUserRole] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isErrorPopupOpen, setIsErrorPopupOpen] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
     // Fetch tutors from Supabase
     useEffect(() => {
         fetchTutors();
         checkUser();
+        checkAccess();
     }, []);
 
     async function fetchTutors() {
@@ -48,6 +50,31 @@ function App() {
             setAuthLoading(false);
         }
     }
+
+    const checkAccess = async () => {
+        try {
+            // Check if accessed via Google Sites
+            const referrer = document.referrer;
+            const isGoogleSites = referrer.includes('sites.google.com');
+
+            // Check if user is authenticated
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (isGoogleSites && user) {
+                setIsAuthorized(true);
+            } else if (!user) {
+                // Redirect to login if not authenticated
+                window.location.href = '/login';
+            } else if (!isGoogleSites) {
+                // Block direct access (show message or redirect)
+                setIsAuthorized(false);
+            }
+        } catch (err) {
+            console.error('Auth check error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Listen for auth changes
     useEffect(() => {
@@ -105,8 +132,17 @@ function App() {
         window.showError = () => setIsErrorPopupOpen(true);
     }, []);
 
-    if (authLoading) {
+    if (authLoading || loading) {
         return <p style={{ textAlign: 'center', padding: '50px' }}>Loading...</p>;
+    }
+
+    if (!isAuthorized) {
+        return (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <h2>Access Denied</h2>
+                <p>This application must be accessed through Google Sites.</p>
+            </div>
+        );
     }
 
     return (
