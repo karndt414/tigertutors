@@ -56,34 +56,22 @@ function App() {
 
     const checkAccess = async () => {
         try {
-            // Small delay to ensure auth is checked
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
             const referrer = document.referrer;
-            console.log('Referrer:', referrer); // Debug
+            const isInIframe = window.self !== window.top;
             
-            const { data: { user } } = await supabase.auth.getUser();
-
-            // Allow if:
-            // 1. Google Sites (has referrer)
-            // 2. Iframe (no referrer) + authenticated
-            // 3. Localhost for development
-            const isGoogleSites = referrer.includes('sites.google.com');
-            const isLocalhost = referrer.includes('localhost') || !referrer;
-            const isIframe = !referrer; // iframes have empty referrer
-
-            if ((isGoogleSites || isLocalhost || isIframe) && user) {
+            console.log('Referrer:', referrer);
+            console.log('In iframe:', isInIframe);
+            
+            // ONLY allow if in iframe (Google Sites embed)
+            // Block everything else - direct Vercel links, localhost, etc.
+            if (isInIframe) {
                 setIsAuthorized(true);
-            } else if (!user) {
-                // Not authenticated - let auth handle redirect
-                setIsAuthorized(true); // Allow to show login
             } else {
-                // Authenticated but wrong source
                 setIsAuthorized(false);
             }
         } catch (err) {
             console.error('Auth check error:', err);
-            setIsAuthorized(true); // Allow on error
+            setIsAuthorized(false);
         }
     };
 
