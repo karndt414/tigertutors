@@ -124,10 +124,10 @@ function GroupTutoring() {
     };
 
     const fetchSessions = async () => {
+        // Remove the date filter to get ALL sessions
         const { data, error } = await supabase
             .from('group_tutoring_sessions')
             .select('*')
-            .gte('session_date', new Date().toISOString())
             .order('session_date', { ascending: true });
 
         if (error) console.error(error);
