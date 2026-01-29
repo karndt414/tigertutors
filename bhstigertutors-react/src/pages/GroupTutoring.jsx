@@ -868,19 +868,25 @@ function GroupTutoring() {
                             <div key={index} className={`calendar-day ${!day ? 'empty' : ''}`}>
                                 {day && <div className="day-number">{day}</div>}
                                 {daySessions.length > 0 && (
-                                    <div className="sessions-container">
+                                    <div className="sessions-container" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         {daySessions.map(session => {
                                             const capacity = sessionCapacity[session.id] || { learnerCount: 0, tutorCount: 0 };
+                                            const isLearnerFull = capacity.learnerCount >= 20;
                                             const isTutorFull = capacity.tutorCount >= 10;
+                                            
+                                            // Check based on user role
+                                            const isFull = userRole === 'tutor' || userRole === 'admin' ? isTutorFull : isLearnerFull;
 
-                                            // Hide button if full for tutors
-                                            if (isTutorFull) return null;
+                                            // Hide button if full
+                                            if (isFull) return null;
 
                                             return (
                                                 <button
                                                     key={session.id}
                                                     className="session-button"
-                                                    onClick={() => handleTutorSessionClick(session)}
+                                                    onClick={() => userRole === 'tutor' || userRole === 'admin' 
+                                                        ? handleTutorSessionClick(session) 
+                                                        : handleSessionClick(session)}
                                                     style={{
                                                         fontSize: '0.7em',
                                                         padding: '6px 8px',
