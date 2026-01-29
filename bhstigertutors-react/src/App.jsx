@@ -63,15 +63,16 @@ function App() {
             console.log('In iframe:', isInIframe);
             
             // ONLY allow if in iframe (Google Sites embed)
-            // Block everything else - direct Vercel links, localhost, etc.
             if (isInIframe) {
                 setIsAuthorized(true);
             } else {
                 setIsAuthorized(false);
+                setIsErrorPopupOpen(true);
             }
         } catch (err) {
             console.error('Auth check error:', err);
             setIsAuthorized(false);
+            setIsErrorPopupOpen(true);
         }
     };
 
@@ -137,12 +138,7 @@ function App() {
     }
 
     if (isAuthorized === false) {
-        return (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <h2>Access Denied</h2>
-                <p>This application must be accessed through Google Sites.</p>
-            </div>
-        );
+        return null; // Error popup will display instead
     }
 
     return (
