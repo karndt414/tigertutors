@@ -60,12 +60,19 @@ function App() {
             await new Promise(resolve => setTimeout(resolve, 500));
             
             const referrer = document.referrer;
-            const isGoogleSites = referrer.includes('sites.google.com');
+            console.log('Referrer:', referrer); // Debug
             
             const { data: { user } } = await supabase.auth.getUser();
 
-            // Allow if: (Google Sites OR localhost/dev) AND authenticated
-            if ((isGoogleSites || !referrer || referrer.includes('localhost')) && user) {
+            // Allow if:
+            // 1. Google Sites (has referrer)
+            // 2. Iframe (no referrer) + authenticated
+            // 3. Localhost for development
+            const isGoogleSites = referrer.includes('sites.google.com');
+            const isLocalhost = referrer.includes('localhost') || !referrer;
+            const isIframe = !referrer; // iframes have empty referrer
+
+            if ((isGoogleSites || isLocalhost || isIframe) && user) {
                 setIsAuthorized(true);
             } else if (!user) {
                 // Not authenticated - let auth handle redirect
