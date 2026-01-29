@@ -669,7 +669,7 @@ function GroupTutoring() {
                                     type="radio"
                                     name="helpNeeded"
                                     value="Some. I understand some concepts, but I get stuck on lots of problems."
-                                    checked={formData.helpNeeded === "Some. I understand some concepts, but I get stuck on lots of problems."}
+                                    checked={formData.helpNeeded === "Some. I understand some concepts, but I.get stuck on lots of problems."}
                                     onChange={handleFormChange}
                                     required
                                 />
@@ -944,7 +944,7 @@ function GroupTutoring() {
                                             const isLearnerFull = capacity.learnerCount >= 20;
 
                                             // Hide button if archived or full for learners
-                                            if (session.is_archived || isLearnerFull) return null;
+                                            if (session.is_archived || isFull) return
 
                                             return (
                                                 <button
