@@ -943,8 +943,8 @@ function GroupTutoring() {
                                             const capacity = sessionCapacity[session.id] || { learnerCount: 0, tutorCount: 0 };
                                             const isLearnerFull = capacity.learnerCount >= 20;
 
-                                            // Hide button if full for learners
-                                            if (isLearnerFull) return null;
+                                            // Hide button if archived or full for learners
+                                            if (session.is_archived || isLearnerFull) return null;
 
                                             return (
                                                 <button
