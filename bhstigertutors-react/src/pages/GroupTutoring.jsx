@@ -178,27 +178,16 @@ function GroupTutoring() {
     };
 
     const getSessionsForDate = (date) => {
-        console.log('Looking for sessions on:', date.toISOString().split('T')[0]);
-        console.log('All sessions:', sessions.map(s => ({
-            id: s.id,
-            date: s.session_date.split(' ')[0], // Just use the date string directly
-            time: s.session_time
-        })));
-
         // Format the comparison date as YYYY-MM-DD
         const targetDateStr = date.getFullYear() + '-' + 
                          String(date.getMonth() + 1).padStart(2, '0') + '-' + 
                          String(date.getDate()).padStart(2, '0');
 
         return sessions.filter(session => {
-            // Extract just the date portion from the timestamp string
-            const sessionDateStr = session.session_date.split(' ')[0]; // "2026-02-05"
+            // Extract just the date portion - handle both spaces and T separators
+            const sessionDateStr = session.session_date.split('T')[0]; // "2026-01-22"
             
             const dateMatches = sessionDateStr === targetDateStr;
-
-            if (dateMatches) {
-                console.log('✓ Found session:', session.id, 'on', sessionDateStr);
-            }
 
             return dateMatches;
         });
