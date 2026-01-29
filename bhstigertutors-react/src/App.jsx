@@ -24,11 +24,14 @@ function App() {
     const [userRole, setUserRole] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isErrorPopupOpen, setIsErrorPopupOpen] = useState(false);
-    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(null); // null = loading, true/false = checked
 
     // Fetch tutors from Supabase
     useEffect(() => {
         fetchTutors();
+    }, []);
+
+    useEffect(() => {
         checkUser();
         checkAccess();
     }, []);
@@ -53,26 +56,27 @@ function App() {
 
     const checkAccess = async () => {
         try {
-            // Check if accessed via Google Sites
+            // Small delay to ensure auth is checked
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             const referrer = document.referrer;
             const isGoogleSites = referrer.includes('sites.google.com');
-
-            // Check if user is authenticated
+            
             const { data: { user } } = await supabase.auth.getUser();
 
-            if (isGoogleSites && user) {
+            // Allow if: (Google Sites OR localhost/dev) AND authenticated
+            if ((isGoogleSites || !referrer || referrer.includes('localhost')) && user) {
                 setIsAuthorized(true);
             } else if (!user) {
-                // Redirect to login if not authenticated
-                window.location.href = '/login';
-            } else if (!isGoogleSites) {
-                // Block direct access (show message or redirect)
+                // Not authenticated - let auth handle redirect
+                setIsAuthorized(true); // Allow to show login
+            } else {
+                // Authenticated but wrong source
                 setIsAuthorized(false);
             }
         } catch (err) {
             console.error('Auth check error:', err);
-        } finally {
-            setLoading(false);
+            setIsAuthorized(true); // Allow on error
         }
     };
 
@@ -132,11 +136,12 @@ function App() {
         window.showError = () => setIsErrorPopupOpen(true);
     }, []);
 
-    if (authLoading || loading) {
+    // Update the loading/auth check
+    if (authLoading || isAuthorized === null) {
         return <p style={{ textAlign: 'center', padding: '50px' }}>Loading...</p>;
     }
 
-    if (!isAuthorized) {
+    if (isAuthorized === false) {
         return (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
                 <h2>Access Denied</h2>
