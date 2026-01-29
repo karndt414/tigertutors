@@ -180,19 +180,14 @@ function GroupTutoring() {
     const getSessionsForDate = (date) => {
         return sessions.filter(session => {
             const sessionDate = new Date(session.session_date);
-            const dayOfWeek = sessionDate.getDay();
             
-            // Check if date matches
+            // Check if date matches (ignore time)
             const dateMatches = 
-              sessionDate.getDate() === date.getDate() &&
-              sessionDate.getMonth() === date.getMonth() &&
-              sessionDate.getFullYear() === date.getFullYear();
+                sessionDate.getDate() === date.getDate() &&
+                sessionDate.getMonth() === date.getMonth() &&
+                sessionDate.getFullYear() === date.getFullYear();
 
-            if (!dateMatches) return false;
-
-            // Check if flex period is allowed on this day
-            const allowedDay = FLEX_SCHEDULE[session.session_time];
-            return allowedDay === dayOfWeek;
+            return dateMatches;
         });
     };
 
